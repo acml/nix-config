@@ -38,6 +38,7 @@ let
       xdg = {
         dataFile.nixpkgs.source = nixpkgs;
         configFile."nix/nix.conf".text = ''
+          experimental-features = nix-command flakes
           flake-registry = ${config.xdg.configHome}/nix/registry.json
         '';
       };

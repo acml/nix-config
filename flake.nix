@@ -1,5 +1,5 @@
 {
-  description = "lovesegfault's NixOS config";
+  description = "acml's NixOS config";
 
   nixConfig = {
     extra-trusted-substituters = [
