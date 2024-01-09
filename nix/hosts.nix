@@ -107,6 +107,11 @@ in
     hostPlatform = "x86_64-linux";
     homeDirectory = "/home/ahmet";
   };
+  evt02393nb = {
+    type = "home-manager";
+    hostPlatform = "x86_64-linux";
+    homeDirectory = "/home/ahmet";
+  };
   macbookpro = {
     type = "darwin";
     hostPlatform = "x86_64-darwin";
