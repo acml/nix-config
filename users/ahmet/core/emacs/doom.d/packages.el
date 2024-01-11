@@ -63,10 +63,10 @@
 
 (package! evil-colemak-basics)
 
-(package! highlight-parentheses)
+(package! highlight-parentheses :recipe (:host github :repo "emacsmirror/highlight-parentheses"))
 (package! journalctl-mode)
 (package! mixed-pitch)
-(package! modus-themes)
+(package! modus-themes :recipe (:host github :repo "protesilaos/modus-themes"))
 (package! nov)
 (package! obvious :recipe (:host github :repo "alphapapa/obvious.el"))
 
