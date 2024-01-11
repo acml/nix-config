@@ -86,4 +86,4 @@
 (package! visual-ascii-mode)
 (package! vundo)
 (package! windswap)
-(package! ztree)
+(package! ztree :recipe (:host github :repo "emacsmirror/ztree"))
