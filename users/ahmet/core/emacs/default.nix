@@ -84,7 +84,7 @@ lib.mkMerge [
 
         # Nix
         nixfmt
-        nil
+        rnix-lsp
 
         # Markdown exporting
         mdl
@@ -178,6 +178,8 @@ lib.mkMerge [
           (with epkgs.melpaPackages; [
             pdf-tools
             vterm
+          ]) ++ (with epkgs; [
+            treesit-grammars.with-all-grammars
             # ]) ++ (with epkgs.elpaPackages; [
             #   auctex
             # ]) ++ (with epkgs.nongnuPackages; [
