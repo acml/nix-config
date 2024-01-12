@@ -26,7 +26,7 @@
     # spotify
   ];
 
-  programs.alacritty.enable = true;
+  programs.alacritty.enable = false;
 
   stylix.fonts = {
     sansSerif = {
