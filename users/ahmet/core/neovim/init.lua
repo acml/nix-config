@@ -9,12 +9,14 @@ vim.o.background = "dark"
 require("ayu").colorscheme()
 
 -- treesitter
--- require("nvim-treesitter.configs").setup({
---   auto_install = false,
---   highlight = { enable = true },
---   incremental_selection = { enable = true },
---   indent = { enable = true },
--- })
+if jit.os == "Linux" then
+  require("nvim-treesitter.configs").setup({
+    auto_install = false,
+    highlight = { enable = true },
+    incremental_selection = { enable = true },
+    indent = { enable = true },
+  })
+end
 
 -- register nvim-notify
 local notify = require("notify")

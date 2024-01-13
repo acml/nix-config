@@ -77,8 +77,8 @@
         luasnip # snippet engine
 
         # syntax
-        # nvim-treesitter.withAllGrammars
-        # nvim-treesitter-textobjects
+        (lib.mkIf pkgs.stdenv.isLinux nvim-treesitter.withAllGrammars)
+        (lib.mkIf pkgs.stdenv.isLinux nvim-treesitter-textobjects)
       ];
     };
   };
