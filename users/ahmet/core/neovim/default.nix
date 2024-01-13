@@ -77,8 +77,8 @@
         luasnip # snippet engine
 
         # syntax
-        nvim-treesitter.withAllGrammars
-        nvim-treesitter-textobjects
+        # nvim-treesitter.withAllGrammars
+        # nvim-treesitter-textobjects
       ];
     };
   };
