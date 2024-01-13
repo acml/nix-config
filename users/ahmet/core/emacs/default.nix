@@ -84,8 +84,7 @@ lib.mkMerge [
 
         # Nix
         nixfmt
-        #rnix-lsp
-        (lib.mkIf isLinux nil)
+        nil
 
         # Markdown exporting
         mdl
