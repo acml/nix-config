@@ -22,7 +22,7 @@
       max-jobs = "auto";
       experimental-features = [
         "auto-allocate-uids"
-        "configurable-impure-env"
+        (lib.mkIf pkgs.stdenv.isLinux "configurable-impure-env")
         "flakes"
         "nix-command"
         "repl-flake"
