@@ -162,9 +162,15 @@ lib.mkMerge [
         ALTERNATE_EDITOR;
     };
 
-    xdg.configFile."doom" = {
-      source = ./doom.d;
-      force = true;
+    xdg = {
+      configFile."doom" = {
+        source = ./doom.d;
+        force = true;
+      };
+      dataFile = {
+        "doom/etc/lsp/lua-language-server/main.lua".source = "${pkgs.lua-language-server}/share/lua-language-server/bin/main.lua";
+        "doom/etc/lsp/lua-language-server/bin/lua-language-server".source = "${pkgs.lua-language-server}/bin/lua-language-server";
+      };
     };
 
     programs = {
