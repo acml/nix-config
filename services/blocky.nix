@@ -80,11 +80,10 @@ with config.networking;
       ensureUsers = [
         {
           name = "blocky";
-          ensurePermissions."DATABASE blocky" = "ALL PRIVILEGES";
+          ensureDBOwnership = true;
         }
         {
           name = "grafana";
-          ensurePermissions."DATABASE blocky" = "CONNECT";
         }
       ];
     };
