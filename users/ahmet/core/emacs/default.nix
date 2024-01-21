@@ -180,19 +180,11 @@ lib.mkMerge [
           (lib.mkIf isLinux pkgs.emacs29)
           (lib.mkIf isDarwin pkgs.emacs29)
         ];
-        extraPackages = epkgs:
-          (with epkgs.melpaPackages; [
-            pdf-tools
-            vterm
-          ]) ++ (with epkgs; [
-            treesit-grammars.with-all-grammars
-            # ]) ++ (with epkgs.elpaPackages; [
-            #   auctex
-            # ]) ++ (with epkgs.nongnuPackages; [
-            #   org-contrib
-          ]); # ++ [
-        #   pkgs.mu
-        # ];
+        extraPackages = epkgs: (with epkgs; [
+          pdf-tools
+          treesit-grammars.with-all-grammars
+          vterm
+        ]);
       };
 
       jq.enable = true; # cli to extract data out of json input
