@@ -14,8 +14,10 @@
       { name = "bartender"; greedy = true; }
       { name = "daisydisk"; greedy = true; }
       { name = "firefox"; greedy = true; }
+      { name = "geekbench"; greedy = true; }
       { name = "google-chrome"; greedy = true; }
       { name = "ksdiff"; greedy = true; }
+      { name = "languagetool"; greedy = true; }
       { name = "lunar"; greedy = true; }
       { name = "macs-fan-control"; greedy = true; }
       { name = "macupdater"; greedy = true; }
@@ -32,12 +34,10 @@
       { name = "visual-studio-code"; greedy = true; }
       { name = "zoom"; greedy = true; }
       { name = "zulip"; greedy = true; }
-      { name = "geekbench"; greedy = true; }
     ];
     masApps = {
       "Kaleidoscope" = 1575557335;
       "Keynote" = 409183694;
-      "LanguageTool" = 1534275760;
       "Noizio" = 928871589;
       "Numbers" = 409203825;
       "Pages" = 409201541;
