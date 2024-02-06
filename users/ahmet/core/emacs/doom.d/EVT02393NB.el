@@ -1,4 +1,4 @@
-;;; linuxmint.el --- Description -*- lexical-binding: t; -*-
+;;; EVT02393NB.el --- Description -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2022 Ahmet Cemal Özgezer
 ;;
@@ -29,5 +29,5 @@
                                     :compilation-dir "cp1200/cp1243-1/csd"
                                     :compile "make all_targets"))
 
-(provide 'linuxmint)
-;;; linuxmint.el ends here
+(provide 'EVT02393NB)
+;;; EVT02393NB.el ends here

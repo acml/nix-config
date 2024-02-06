@@ -183,7 +183,7 @@
   :hook (after-init . beginend-global-mode))
 
 ;; WSL specific setting
-(when (and (eq system-type 'gnu/linux) (getenv "WSLENV"))
+(when (and (eq system-type 'gnu/linux) (string-match "-[Mm]icrosoft" operating-system-release))
   ;; teach Emacs how to open links with your default browser
   (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
         (cmd-args '("/c" "start")))
