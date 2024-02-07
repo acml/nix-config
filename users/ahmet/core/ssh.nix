@@ -1,6 +1,6 @@
 {
   home.file.".ssh/config".text = ''
-    Include ~/.ssh/config.host
+    Include config.d/*
 
     # Host *
     #   CanonicalizeHostname yes
