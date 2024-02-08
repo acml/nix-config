@@ -222,8 +222,6 @@
     :desc "Up" :n "<left>" #'dired-up-directory
     :desc "Down" :n "<right>" #'dired-find-file)))
 
-(set-popup-rule! "^ \\*Dirvish.*" :ignore t)
-
 (map! :map dired-mode-map :ng "q" #'dirvish-quit)
 (use-package! dirvish
   :after dired
