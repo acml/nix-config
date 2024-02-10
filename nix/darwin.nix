@@ -5,6 +5,7 @@
 , impermanence
 , nix-index-database
 , nixpkgs
+, nixvim
 , stylix
 , ...
 }:
@@ -31,6 +32,7 @@ let
           home-manager
           impermanence
           nix-index-database
+          nixvim
           stylix;
       };
     };

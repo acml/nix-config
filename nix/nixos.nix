@@ -7,6 +7,7 @@
 , nix-index-database
 , nixos-hardware
 , nixpkgs
+, nixvim
 , stylix
 , ...
 }:
@@ -36,6 +37,7 @@ let
           lanzaboote
           nix-index-database
           nixos-hardware
+          nixvim
           stylix;
       };
     };

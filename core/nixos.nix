@@ -1,4 +1,4 @@
-{ agenix, config, lib, pkgs, home-manager, impermanence, lanzaboote, nix-index-database, stylix, ... }:
+{ agenix, config, lib, pkgs, home-manager, impermanence, lanzaboote, nix-index-database, nixvim, stylix, ... }:
 {
   imports = [
     agenix.nixosModules.age
@@ -6,6 +6,7 @@
     impermanence.nixosModules.impermanence
     lanzaboote.nixosModules.lanzaboote
     nix-index-database.nixosModules.nix-index
+    nixvim.nixosModules.nixvim
     stylix.nixosModules.stylix
     ./resolved.nix
     ./tmux.nix

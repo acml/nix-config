@@ -1,4 +1,4 @@
-{ pkgs, base16-schemes, hostType, impermanence, nix-index-database, stylix, ... }: {
+{ pkgs, base16-schemes, hostType, impermanence, nix-index-database, nixvim, stylix, ... }: {
   imports = [
     (
       if hostType == "nixos" then ./nixos.nix
@@ -37,6 +37,7 @@
         hostType
         impermanence
         nix-index-database
+        nixvim
         stylix;
     };
   };

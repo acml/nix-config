@@ -1,7 +1,8 @@
-{ base16-schemes, hostType, impermanence, lib, nix-index-database, pkgs, stylix, ... }: {
+{ base16-schemes, hostType, impermanence, lib, nix-index-database, pkgs, nixvim, stylix, ... }: {
   imports = [
     impermanence.nixosModules.home-manager.impermanence
     nix-index-database.hmModules.nix-index
+    nixvim.homeManagerModules.nixvim
     stylix.homeManagerModules.stylix
 
     ./bash.nix
@@ -10,7 +11,8 @@
     ./git.nix
     ./htop.nix
     ./emacs
-    ./neovim
+    # ./neovim
+    ./nixvim
     ./ssh.nix
     ./starship.nix
     ./tmux.nix
@@ -74,6 +76,7 @@
       gtk.enable = hostType == "nixos";
       kde.enable = lib.mkDefault false;
       xfce.enable = lib.mkDefault false;
+      nixvim.enable = false;
     };
   };
 

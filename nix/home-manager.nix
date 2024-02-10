@@ -4,6 +4,7 @@
 , impermanence
 , nix-index-database
 , nixpkgs
+, nixvim
 , stylix
 , ...
 }:
@@ -54,6 +55,7 @@ let
           base16-schemes
           impermanence
           nix-index-database
+          nixvim
           stylix;
       };
     };
