@@ -135,10 +135,10 @@
       hwRender = true;
     };
     logind = {
-      lidSwitch = "suspend-then-hibernate";
-      lidSwitchDocked = "suspend-then-hibernate";
+      lidSwitch = "suspend";
+      lidSwitchDocked = "suspend";
       lidSwitchExternalPower = "ignore";
-      powerKey = "suspend-then-hibernate";
+      powerKey = "hibernate";
       powerKeyLongPress = "reboot";
     };
     udev.packages = with pkgs; [ logitech-udev-rules ];
@@ -177,8 +177,6 @@
   security.sudo.wheelNeedsPassword = true;
 
   services.pipewire.package = pkgs.pipewire-optimized;
-  # FIXME: Breaks systemd-boot?
-  # systemd.package = pkgs.systemd-optimized;
 
   stylix.fonts.sizes = {
     desktop = 16;
