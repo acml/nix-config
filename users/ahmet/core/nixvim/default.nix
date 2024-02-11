@@ -22,6 +22,7 @@
         vim.o.foldlevelstart = 99
         vim.o.foldenable = true
         vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
+        vim.cmd [[set signcolumn=yes]]
 
         local builtin = require("statuscol.builtin")
         require("statuscol").setup({
@@ -42,28 +43,30 @@
           }
 
           local Terminal  = require('toggleterm.terminal').Terminal
-          local hterm = Terminal:new({
-            direction = "horizontal",
-          })
-          function _hterm_toggle()
+
+          function hterm_toggle()
+            local hterm = Terminal:new({ direction = "horizontal" })
             hterm:toggle()
           end
+          vim.api.nvim_set_keymap("n", "<leader>ot", "<cmd>lua hterm_toggle()<CR>", {noremap = true, silent = true})
 
-          local floaterm = Terminal:new({
-            direction = "float",
-            float_opts = {
-              border = "curved",
-            },
-          })
-          function _floaterm_toggle()
+          function floaterm_toggle()
+            local floaterm = Terminal:new({ direction = "float", float_opts = { border = "curved", }, float_opts = {border = "curved"} })
             floaterm:toggle()
           end
+          vim.api.nvim_set_keymap("n", "<F10>", "<cmd>lua floaterm_toggle()<CR>", {noremap = true, silent = true})
 
-          vim.api.nvim_set_keymap("n", "<leader>ot", "<cmd>lua _hterm_toggle()<CR>", {noremap = true, silent = true})
-          vim.api.nvim_set_keymap("n", "<F10>", "<cmd>lua _floaterm_toggle()<CR>", {noremap = true, silent = true})
+          if vim.fn.executable "lazygit" == 1 then
+            function lazygit_toggle()
+              local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float", float_opts = {border = "curved"} })
+              lazygit:toggle()
+            end
+            vim.api.nvim_set_keymap("n", "<leader>gg", "<cmd>lua lazygit_toggle()<CR>", {noremap = true, silent = true})
+          end
         end
       '';
 
+      extraPackages = [ pkgs.lazygit ];
       extraPlugins = [ pkgs.vimPlugins.statuscol-nvim ];
 
       globals.mapleader = " ";
@@ -84,44 +87,44 @@
         alpha.enable = true;
         alpha.theme = "startify";
         bufferline.enable = true;
-        # cmp-buffer.enable = true;
-        # cmp-calc.enable = true;
-        # cmp-clippy.enable = true;
-        # cmp-cmdline.enable = true;
-        # cmp-cmdline-history.enable = true;
-        # cmp-conventionalcommits.enable = true;
-        # cmp-dap.enable = true;
-        # cmp-dictionary.enable = true;
-        # cmp-digraphs.enable = true;
-        # cmp-emoji.enable = true;
-        # cmp-fish.enable = true;
-        # cmp-fuzzy-buffer.enable = true;
-        # cmp-fuzzy-path.enable = true;
-        # cmp-git.enable = true;
-        # cmp-latex-symbols.enable = true;
-        # cmp-look.enable = true;
-        # cmp-npm.enable = true;
-        # cmp-nvim-lsp.enable = true;
-        # cmp-nvim-lsp-document-symbol.enable = true;
-        # cmp-nvim-lsp-signature-help.enable = true;
-        # cmp-nvim-lua.enable = true;
+        cmp-buffer.enable = true;
+        cmp-calc.enable = true;
+        cmp-clippy.enable = true;
+        cmp-cmdline.enable = true;
+        cmp-cmdline-history.enable = true;
+        cmp-conventionalcommits.enable = true;
+        cmp-dap.enable = true;
+        cmp-dictionary.enable = true;
+        cmp-digraphs.enable = true;
+        cmp-emoji.enable = true;
+        cmp-fish.enable = true;
+        cmp-fuzzy-buffer.enable = true;
+        cmp-fuzzy-path.enable = true;
+        cmp-git.enable = true;
+        cmp-latex-symbols.enable = true;
+        cmp-look.enable = true;
+        cmp-npm.enable = true;
+        cmp-nvim-lsp.enable = true;
+        cmp-nvim-lsp-document-symbol.enable = true;
+        cmp-nvim-lsp-signature-help.enable = true;
+        cmp-nvim-lua.enable = true;
         # cmp-nvim-ultisnips.enable = true;
-        # cmp-omni.enable = true;
-        # cmp-pandoc-nvim.enable = true;
-        # cmp-pandoc-references.enable = true;
-        # cmp-path.enable = true;
-        # cmp-rg.enable = true;
-        # cmp-snippy.enable = true;
-        # cmp-spell.enable = true;
-        # cmp-tabby.enable = true;
-        # cmp-tabnine.enable = true;
-        # cmp-tmux.enable = true;
-        # cmp-treesitter.enable = true;
-        # cmp-vim-lsp.enable = true;
-        # cmp-vimwiki-tags.enable = true;
-        # cmp-vsnip.enable = true;
-        # cmp-zsh.enable = true;
-        # cmp_luasnip.enable = true;
+        cmp-omni.enable = true;
+        cmp-pandoc-nvim.enable = true;
+        cmp-pandoc-references.enable = true;
+        cmp-path.enable = true;
+        cmp-rg.enable = true;
+        cmp-snippy.enable = true;
+        cmp-spell.enable = true;
+        cmp-tabby.enable = true;
+        cmp-tabnine.enable = true;
+        cmp-tmux.enable = true;
+        cmp-treesitter.enable = true;
+        cmp-vim-lsp.enable = true;
+        cmp-vimwiki-tags.enable = true;
+        cmp-vsnip.enable = true;
+        cmp-zsh.enable = true;
+        cmp_luasnip.enable = true;
         comment-nvim.enable = true;
         conform-nvim.enable = true;
         coq-nvim.enable = true;
@@ -172,6 +175,7 @@
         lsp-lines.enable = true;
         lspkind.enable = true;
         lspsaga.enable = true;
+        # lspsaga.lightbulb.sign = false;
 
         # marks.enable = true;
 
