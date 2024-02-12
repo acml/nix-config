@@ -116,46 +116,41 @@
         bufferline.enable = true;
         cmp-buffer.enable = true;
         cmp-calc.enable = true;
-        cmp-clippy.enable = true;
-        cmp-cmdline.enable = true;
-        cmp-cmdline-history.enable = true;
-        cmp-conventionalcommits.enable = true;
-        cmp-dap.enable = true;
-        cmp-dictionary.enable = true;
-        cmp-digraphs.enable = true;
-        cmp-emoji.enable = true;
-        cmp-fish.enable = true;
-        cmp-fuzzy-buffer.enable = true;
-        cmp-fuzzy-path.enable = true;
-        cmp-git.enable = true;
-        cmp-latex-symbols.enable = true;
-        cmp-look.enable = true;
-        cmp-npm.enable = true;
-        cmp-nvim-lsp.enable = true;
-        cmp-nvim-lsp-document-symbol.enable = true;
-        cmp-nvim-lsp-signature-help.enable = true;
-        cmp-nvim-lua.enable = true;
-        # cmp-nvim-ultisnips.enable = false;
-        cmp-omni.enable = true;
-        cmp-pandoc-nvim.enable = true;
-        cmp-pandoc-references.enable = true;
-        cmp-path.enable = true;
-        cmp-rg.enable = true;
-        cmp-snippy.enable = true;
-        cmp-spell.enable = true;
-        cmp-tabby.enable = true;
-        # cmp-tabnine.enable = false;
-        cmp-tmux.enable = true;
-        cmp-treesitter.enable = true;
-        cmp-vim-lsp.enable = true;
-        cmp-vimwiki-tags.enable = true;
-        cmp-vsnip.enable = true;
-        cmp-zsh.enable = true;
-        cmp_luasnip.enable = true;
+        # cmp-clippy.enable = true;
+        # cmp-cmdline.enable = true;
+        # cmp-cmdline-history.enable = true;
+        # cmp-conventionalcommits.enable = true;
+        # cmp-dap.enable = true;
+        # cmp-dictionary.enable = true;
+        # cmp-digraphs.enable = true;
+        # cmp-emoji.enable = true;
+        # cmp-fish.enable = true;
+        # cmp-fuzzy-buffer.enable = true;
+        # cmp-fuzzy-path.enable = true;
+        # cmp-git.enable = true;
+        # cmp-latex-symbols.enable = true;
+        # cmp-look.enable = true;
+        # cmp-npm.enable = true;
+        # cmp-nvim-lsp.enable = true;
+        # cmp-nvim-lsp-document-symbol.enable = true;
+        # cmp-nvim-lsp-signature-help.enable = true;
+        # cmp-nvim-lua.enable = true;
+        # cmp-omni.enable = true;
+        # cmp-pandoc-nvim.enable = true;
+        # cmp-pandoc-references.enable = true;
+        # cmp-path.enable = true;
+        # cmp-rg.enable = true;
+        # cmp-snippy.enable = true;
+        # cmp-spell.enable = true;
+        # cmp-tmux.enable = true;
+        # cmp-treesitter.enable = true;
+        # cmp-vim-lsp.enable = true;
+        # cmp-vimwiki-tags.enable = true;
+        # cmp-vsnip.enable = true;
+        # cmp-zsh.enable = true;
+        # cmp_luasnip.enable = true;
         comment-nvim.enable = true;
         conform-nvim.enable = true;
-        coq-nvim.enable = true;
-        coq-thirdparty.enable = true;
         dap.enable = true;
         diffview.enable = true;
         # fidget.enable = true;
@@ -223,7 +218,41 @@
         notify.enable = true;
 
         nvim-autopairs.enable = true;
-        nvim-cmp.enable = true;
+        nvim-cmp = {
+          enable = true;
+          mapping = {
+            "<C-Space>" = "cmp.mapping.complete()";
+            "<C-d>" = "cmp.mapping.scroll_docs(-4)";
+            "<C-e>" = "cmp.mapping.close()";
+            "<C-f>" = "cmp.mapping.scroll_docs(4)";
+            "<CR>" = "cmp.mapping.confirm({ select = true })";
+            "<S-Tab>" = {
+              action = "cmp.mapping.select_prev_item()";
+              modes = [
+                "i"
+                "s"
+              ];
+            };
+            "<Tab>" = {
+              action = "cmp.mapping.select_next_item()";
+              modes = [
+                "i"
+                "s"
+              ];
+            };
+          };
+          snippet.expand = "luasnip";
+          sources = [
+            { name = "nvim_lsp"; }
+            { name = "luasnip"; }
+            { name = "nvim_lua"; }
+            { name = "treesitter"; }
+            { name = "buffer"; }
+            { name = "tmux"; }
+            { name = "async_path"; }
+            { name = "latex_symbols"; }
+          ];
+        };
         nvim-ufo.enable = true;
         nvim-tree = {
           enable = true;
@@ -243,8 +272,9 @@
           enable = true;
           extensions = {
             file_browser.enable = true;
-            ui-select.enable = true;
+            fzf-native.enable = true;
             project-nvim.enable = true;
+            ui-select.enable = true;
             undo.enable = true;
           };
           # "<leader>/" = "live_grep";
