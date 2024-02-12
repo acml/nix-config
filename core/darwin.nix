@@ -2,7 +2,7 @@
   imports = [
     home-manager.darwinModules.home-manager
     nix-index-database.darwinModules.nix-index
-    nixvim.darwinModules.nixvim
+    nixvim.nixDarwinModules.nixvim
     stylix.darwinModules.stylix
   ];
 

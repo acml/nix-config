@@ -151,7 +151,7 @@
             dockerls.enable = true;
             gopls.enable = true;
             html.enable = true;
-            htmx.enable = true;
+            htmx.enable = false; # fails on darwin
             jsonls.enable = true;
             marksman.enable = true;
             nil_ls.enable = true;
