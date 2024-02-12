@@ -34,6 +34,30 @@
           },
         })
 
+        local telescope = require("telescope")
+        local lga_actions = require("telescope-live-grep-args.actions")
+        
+        telescope.setup {
+          extensions = {
+            live_grep_args = {
+              auto_quoting = true, -- enable/disable auto-quoting
+              -- define mappings, e.g.
+              mappings = { -- extend mappings
+                i = {
+                  ["<C-k>"] = lga_actions.quote_prompt(),
+                  ["<C-i>"] = lga_actions.quote_prompt({ postfix = " --iglob " }),
+                },
+              },
+              -- ... also accepts theme settings, for example:
+              -- theme = "dropdown", -- use dropdown theme
+              -- theme = { }, -- use own theme spec
+              -- layout_config = { mirror=true }, -- mirror preview pane
+            }
+          }
+        }
+        vim.api.nvim_set_keymap("n", "<leader>*", ":lua require('telescope-live-grep-args.shortcuts').grep_word_under_cursor()<CR>", {noremap = true, silent = true})
+        vim.api.nvim_set_keymap("n", "<leader>/", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>", {noremap = true, silent = true})
+
         local present, toggle_term = pcall(require, "toggleterm")
         if present then
           toggle_term.setup{
@@ -67,7 +91,10 @@
       '';
 
       extraPackages = [ pkgs.lazygit ];
-      extraPlugins = [ pkgs.vimPlugins.statuscol-nvim ];
+      extraPlugins = with pkgs.vimPlugins; [
+        statuscol-nvim
+        telescope-live-grep-args-nvim
+      ];
 
       globals.mapleader = " ";
 
@@ -108,7 +135,7 @@
         cmp-nvim-lsp-document-symbol.enable = true;
         cmp-nvim-lsp-signature-help.enable = true;
         cmp-nvim-lua.enable = true;
-        # cmp-nvim-ultisnips.enable = true;
+        # cmp-nvim-ultisnips.enable = false;
         cmp-omni.enable = true;
         cmp-pandoc-nvim.enable = true;
         cmp-pandoc-references.enable = true;
@@ -117,7 +144,7 @@
         cmp-snippy.enable = true;
         cmp-spell.enable = true;
         cmp-tabby.enable = true;
-        cmp-tabnine.enable = true;
+        # cmp-tabnine.enable = false;
         cmp-tmux.enable = true;
         cmp-treesitter.enable = true;
         cmp-vim-lsp.enable = true;
@@ -220,8 +247,8 @@
             project-nvim.enable = true;
             undo.enable = true;
           };
+          # "<leader>/" = "live_grep";
           keymaps = {
-            "<leader>/" = "live_grep";
             "<leader>," = "buffers";
             "<leader>'" = "resume";
             "<leader>ff" = "find_files";
