@@ -35,16 +35,16 @@
       ;; font string. You generally only need these two:
       ;; (setq doom-font (font-spec :family "Iosevka" :size 14)
       ;;       doom-variable-pitch-font (font-spec :family "Ubuntu Nerd Font" :size 14))
-      doom-font (font-spec :family "Iosevka Nerd Font" :size (cond (IS-MAC 13.0)
-                                                                   ((string= (system-name) "EVT02393NB") 11.0)
+      doom-font (font-spec :family "Iosevka Nerd Font" :size (cond ((featurep :system 'macos) 13.0)
+                                                                   ((string= (system-name) "EVT02393NB") 10.8)
                                                                    (t 12.0)))
-      doom-big-font (font-spec :family "Iosevka Nerd Font" :size (if IS-MAC 26.0 20.0))
-      doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size (cond (IS-MAC 13.0)
-                                                                                   ((string= (system-name) "EVT02393NB") 11.0)
+      doom-big-font (font-spec :family "Iosevka Nerd Font" :size (if (featurep :system 'macos) 26.0 20.0))
+      doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size (cond ((featurep :system 'macos) 13.0)
+                                                                                   ((string= (system-name) "EVT02393NB") 10.8)
                                                                                    (t 12.0)))
       ;; doom-unicode-font (font-spec :family "Noto Nerd Font")
       ;; doom-unicode-font (font-spec :family "JuliaMono")
-      doom-serif-font (font-spec :family "BlexMono Nerd Font" :size (if IS-MAC 13.0 12.0) :weight 'light)
+      doom-serif-font (font-spec :family "BlexMono Nerd Font" :size (if (featurep :system 'macos) 13.0 12.0) :weight 'light)
       
       fancy-splash-image (funcall
                           (lambda (choices) (elt
@@ -728,7 +728,7 @@ you're done. This can be called from an external shell script."
                                 (left-fringe . 0)
                                 (right-fringe . 0)
                                 (undecorated . t)
-                                ,(if IS-LINUX '(display . ":0")))))))
+                                ,(if (featurep :system 'linux) '(display . ":0")))))))
     (setq +hlissner--scratch-frame (or frame posframe))
     (select-frame-set-input-focus +hlissner--scratch-frame)
     (when frame
