@@ -117,7 +117,7 @@
         cmp-buffer.enable = true;
         cmp-calc.enable = true;
         # cmp-clippy.enable = true;
-        # cmp-cmdline.enable = true;
+        cmp-cmdline.enable = true;
         # cmp-cmdline-history.enable = true;
         # cmp-conventionalcommits.enable = true;
         # cmp-dap.enable = true;
