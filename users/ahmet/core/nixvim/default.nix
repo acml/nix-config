@@ -24,6 +24,49 @@
         vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
         vim.cmd [[set signcolumn=yes]]
 
+        local function bind(op, outer_opts)
+          outer_opts = vim.tbl_extend("force", { noremap = true, silent = true }, outer_opts or {})
+
+          return function(lhs, rhs, opts)
+            opts = vim.tbl_extend("force", outer_opts, opts or {})
+            vim.keymap.set(op, lhs, rhs, opts)
+          end
+        end
+
+        -- map = bind("")
+        -- nmap = bind("n", { noremap = false })
+        nnoremap = bind("n")
+        -- vnoremap = bind("v")
+        xnoremap = bind("x")
+        -- inoremap = bind("i")
+        -- tnoremap = bind("t")
+
+        -- Center buffer while navigating
+        nnoremap("<C-u>", "<C-u>zz")
+        nnoremap("<C-d>", "<C-d>zz")
+        nnoremap("{", "{zz")
+        nnoremap("}", "}zz")
+        nnoremap("N", "Nzz")
+        nnoremap("n", "nzz")
+        nnoremap("G", "Gzz")
+        nnoremap("gg", "ggzz")
+        nnoremap("<C-i>", "<C-i>zz")
+        nnoremap("<C-o>", "<C-o>zz")
+        nnoremap("%", "%zz")
+        nnoremap("*", "*zz")
+        nnoremap("#", "#zz")
+
+        -- Reselect the last visual selection
+        xnoremap("<<", function()
+          vim.cmd("normal! <<")
+          vim.cmd("normal! gv")
+        end)
+
+        xnoremap(">>", function()
+          vim.cmd("normal! >>")
+          vim.cmd("normal! gv")
+        end)
+
         local builtin = require("statuscol.builtin")
         require("statuscol").setup({
           relculright = true,
@@ -57,6 +100,7 @@
         }
         vim.api.nvim_set_keymap("n", "<leader>*", ":lua require('telescope-live-grep-args.shortcuts').grep_word_under_cursor()<CR>", {noremap = true, silent = true})
         vim.api.nvim_set_keymap("n", "<leader>/", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>", {noremap = true, silent = true})
+        vim.api.nvim_set_keymap("n", "<leader>pp", ":lua require('telescope').extensions.projects.projects()<CR>", {noremap = true, silent = true})
 
         local present, toggle_term = pcall(require, "toggleterm")
         if present then
@@ -99,8 +143,19 @@
       globals.mapleader = " ";
 
       keymaps = [
+        { action = "<cmd>bdelete<CR>"; key = "<leader>bd"; }
+        { action = "<cmd>bnext<CR>"; key = "<leader>bn"; }
+        { action = "<cmd>bnext<CR>"; key = "]b"; }
+        { action = "<cmd>bprevious<CR>"; key = "<leader>bp"; }
+        { action = "<cmd>bprevious<CR>"; key = "[b"; }
+
+        { action = "<cmd>update<CR>"; key = "<leader>fs"; }
+        { action = "<cmd>update<CR>"; key = "<leader>bs"; }
+        { action = "<cmd>wall<CR>"; key = "<leader>bS"; }
+
         { action = "<cmd>Neogit<CR>"; key = "<leader>gs"; }
         { action = "<cmd>NvimTreeToggle<CR>"; key = "<leader>op"; }
+        { action = "<cmd>Oil<CR>"; key = "<leader>o-"; }
       ];
 
       options = {
@@ -114,10 +169,10 @@
         alpha.enable = true;
         alpha.theme = "startify";
         bufferline.enable = true;
-        cmp-buffer.enable = true;
-        cmp-calc.enable = true;
+        # cmp-buffer.enable = true;
+        # cmp-calc.enable = true;
         # cmp-clippy.enable = true;
-        cmp-cmdline.enable = true;
+        # cmp-cmdline.enable = true;
         # cmp-cmdline-history.enable = true;
         # cmp-conventionalcommits.enable = true;
         # cmp-dap.enable = true;
@@ -226,20 +281,8 @@
             "<C-e>" = "cmp.mapping.close()";
             "<C-f>" = "cmp.mapping.scroll_docs(4)";
             "<CR>" = "cmp.mapping.confirm({ select = true })";
-            "<S-Tab>" = {
-              action = "cmp.mapping.select_prev_item()";
-              modes = [
-                "i"
-                "s"
-              ];
-            };
-            "<Tab>" = {
-              action = "cmp.mapping.select_next_item()";
-              modes = [
-                "i"
-                "s"
-              ];
-            };
+            "<S-Tab>" = { action = "cmp.mapping.select_prev_item()"; modes = [ "i" "s" ]; };
+            "<Tab>" = { action = "cmp.mapping.select_next_item()"; modes = [ "i" "s" ]; };
           };
           snippet.expand = "luasnip";
           sources = [
@@ -248,9 +291,9 @@
             { name = "nvim_lua"; }
             { name = "treesitter"; }
             { name = "buffer"; }
-            { name = "tmux"; }
+            { name = "cmdline"; }
+            { name = "path"; }
             { name = "async_path"; }
-            { name = "latex_symbols"; }
           ];
         };
         nvim-ufo.enable = true;
@@ -260,7 +303,12 @@
           updateFocusedFile.enable = true;
           view.side = "right";
         };
-        oil.enable = true;
+
+        oil = {
+          enable = true;
+          deleteToTrash = true;
+          skipConfirmForSimpleEdits = true;
+        };
 
         project-nvim.enable = true;
         rainbow-delimiters.enable = true;
@@ -280,6 +328,7 @@
           # "<leader>/" = "live_grep";
           keymaps = {
             "<leader>," = "buffers";
+            "<leader>." = "find_files";
             "<leader>'" = "resume";
             "<leader>ff" = "find_files";
             "<leader>fr" = "oldfiles";
