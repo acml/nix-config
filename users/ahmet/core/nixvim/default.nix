@@ -57,13 +57,13 @@
         nnoremap("#", "#zz")
 
         -- Reselect the last visual selection
-        xnoremap("<<", function()
-          vim.cmd("normal! <<")
+        xnoremap("<", function()
+          vim.cmd("normal! <")
           vim.cmd("normal! gv")
         end)
 
-        xnoremap(">>", function()
-          vim.cmd("normal! >>")
+        xnoremap(">", function()
+          vim.cmd("normal! >")
           vim.cmd("normal! gv")
         end)
 
