@@ -116,7 +116,7 @@
           local hterm = Terminal:new({ direction = "horizontal" })
           nnoremap("<leader>ot", function() hterm:toggle() end)
 
-          local floaterm = Terminal:new({ direction = "float", float_opts = { border = "curved", }, float_opts = {border = "curved"} })
+          local floaterm = Terminal:new({ direction = "float", float_opts = {border = "curved"} })
           nnoremap("<F10>", function() floaterm:toggle() end)
 
           if vim.fn.executable "lazygit" == 1 then
