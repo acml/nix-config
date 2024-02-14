@@ -98,9 +98,10 @@
             }
           }
         }
-        vim.api.nvim_set_keymap("n", "<leader>*", ":lua require('telescope-live-grep-args.shortcuts').grep_word_under_cursor()<CR>", {noremap = true, silent = true})
-        vim.api.nvim_set_keymap("n", "<leader>/", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>", {noremap = true, silent = true})
-        vim.api.nvim_set_keymap("n", "<leader>pp", ":lua require('telescope').extensions.projects.projects()<CR>", {noremap = true, silent = true})
+
+        nnoremap("<leader>*", function() require('telescope-live-grep-args.shortcuts').grep_word_under_cursor() end)
+        nnoremap("<leader>/", function() require('telescope').extensions.live_grep_args.live_grep_args() end)
+        nnoremap("<leader>pp", function() require('telescope').extensions.projects.projects() end)
 
         local present, toggle_term = pcall(require, "toggleterm")
         if present then
@@ -112,24 +113,15 @@
 
           local Terminal  = require('toggleterm.terminal').Terminal
 
-          function hterm_toggle()
-            local hterm = Terminal:new({ direction = "horizontal" })
-            hterm:toggle()
-          end
-          vim.api.nvim_set_keymap("n", "<leader>ot", "<cmd>lua hterm_toggle()<CR>", {noremap = true, silent = true})
+          local hterm = Terminal:new({ direction = "horizontal" })
+          nnoremap("<leader>ot", function() hterm:toggle() end)
 
-          function floaterm_toggle()
-            local floaterm = Terminal:new({ direction = "float", float_opts = { border = "curved", }, float_opts = {border = "curved"} })
-            floaterm:toggle()
-          end
-          vim.api.nvim_set_keymap("n", "<F10>", "<cmd>lua floaterm_toggle()<CR>", {noremap = true, silent = true})
+          local floaterm = Terminal:new({ direction = "float", float_opts = { border = "curved", }, float_opts = {border = "curved"} })
+          nnoremap("<F10>", function() floaterm:toggle() end)
 
           if vim.fn.executable "lazygit" == 1 then
-            function lazygit_toggle()
-              local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float", float_opts = {border = "curved"} })
-              lazygit:toggle()
-            end
-            vim.api.nvim_set_keymap("n", "<leader>gg", "<cmd>lua lazygit_toggle()<CR>", {noremap = true, silent = true})
+            local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float", float_opts = {border = "curved"} })
+            nnoremap("<leader>gg", function() lazygit:toggle() end)
           end
         end
       '';
