@@ -52,7 +52,11 @@
   programs = {
     atuin = {
       enable = true;
-      settings.auto_sync = false;
+      settings = {
+        auto_sync = false;
+        update_check = false;
+        enter_accept = true;
+      };
       flags = [ "--disable-up-arrow" ];
     };
     bat = {
