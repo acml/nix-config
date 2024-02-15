@@ -99,9 +99,40 @@
           }
         }
 
+        select_dir_for_grep = function(prompt_bufnr)
+          local action_state = require("telescope.actions.state")
+          local fb = require("telescope").extensions.file_browser
+          local lga = require("telescope").extensions.live_grep_args
+          local current_line = action_state.get_current_line()
+
+          fb.file_browser({
+            files = false,
+            depth = false,
+            attach_mappings = function(prompt_bufnr)
+              require("telescope.actions").select_default:replace(function()
+                local entry_path = action_state.get_selected_entry().Path
+                local dir = entry_path:is_dir() and entry_path or entry_path:parent()
+                local relative = dir:make_relative(vim.fn.getcwd())
+                local absolute = dir:absolute()
+
+                lga.live_grep_args({
+                  results_title = relative .. "/",
+                  cwd = absolute,
+                  default_text = current_line,
+                })
+              end)
+
+              return true
+            end,
+          })
+        end
+
+        nnoremap("<leader>.", function() require('telescope.builtin').find_files( { cwd = vim.fn.expand('%:p:h') } ) end)
         nnoremap("<leader>*", function() require('telescope-live-grep-args.shortcuts').grep_word_under_cursor() end)
         nnoremap("<leader>/", function() require('telescope').extensions.live_grep_args.live_grep_args() end)
         nnoremap("<leader>pp", function() require('telescope').extensions.projects.projects() end)
+        nnoremap("<leader>sd", function() require('telescope').extensions.live_grep_args.live_grep_args( { cwd = vim.fn.expand('%:p:h') } ) end)
+        nnoremap("<leader>sD", function() select_dir_for_grep() end)
 
         local present, toggle_term = pcall(require, "toggleterm")
         if present then
@@ -318,14 +349,12 @@
             ui-select.enable = true;
             undo.enable = true;
           };
-          # "<leader>/" = "live_grep";
           keymaps = {
             "<leader>," = "buffers";
-            "<leader>." = "find_files";
-            "<leader>'" = "resume";
             "<leader>ff" = "find_files";
             "<leader>fr" = "oldfiles";
             "<leader>hb" = "keymaps";
+            "<leader>'" = "resume";
             "<leader>si" = "lsp_workspace_symbols";
           };
         };
