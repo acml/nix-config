@@ -54,8 +54,9 @@
       enable = true;
       settings = {
         auto_sync = false;
-        update_check = false;
         enter_accept = true;
+        show_help = false;
+        update_check = false;
       };
       flags = [ "--disable-up-arrow" ];
     };
