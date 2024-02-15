@@ -15,6 +15,11 @@
         if [ -f /etc/bashrc ]; then
         . /etc/bashrc
         fi
+
+        # bind to the up key, which depends on terminal mode
+        bind -x '"\C-p": __atuin_history --shell-up-key-binding'
+        bind -x '"\e[A": __atuin_history --shell-up-key-binding'
+        bind -x '"\eOA": __atuin_history --shell-up-key-binding'
       '';
       profileExtra = ''
         if [ -e ~/.nix-profile/etc/profile.d/nix.sh ]; then
