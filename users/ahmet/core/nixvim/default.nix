@@ -294,6 +294,7 @@
           hijackCursor = true;
           updateFocusedFile.enable = true;
           view.side = "right";
+          view.width = "15%";
         };
 
         oil = {
