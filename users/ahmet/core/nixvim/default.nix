@@ -127,12 +127,16 @@
           })
         end
 
-        nnoremap("<leader>.", function() require('telescope.builtin').find_files( { cwd = vim.fn.expand('%:p:h') } ) end)
+        nnoremap("<leader>ff", function() require('telescope').extensions.file_browser.file_browser() end)
+        nnoremap("<leader>.", function() require('telescope').extensions.file_browser.file_browser( { cwd = vim.fn.expand('%:p:h') } ) end, { desc = 'Browse project' } )
         nnoremap("<leader>*", function() require('telescope-live-grep-args.shortcuts').grep_word_under_cursor() end)
-        nnoremap("<leader>/", function() require('telescope').extensions.live_grep_args.live_grep_args() end)
-        nnoremap("<leader>pp", function() require('telescope').extensions.projects.projects() end)
-        nnoremap("<leader>sd", function() require('telescope').extensions.live_grep_args.live_grep_args( { cwd = vim.fn.expand('%:p:h') } ) end)
-        nnoremap("<leader>sD", function() select_dir_for_grep() end)
+        nnoremap("<leader>/", function() require('telescope').extensions.live_grep_args.live_grep_args() end, { desc = 'Search text' } )
+        nnoremap("<leader>pp", function() require('telescope').extensions.projects.projects() end, { desc = 'Switch to project' } )
+        nnoremap("<leader>sd", function() require('telescope').extensions.live_grep_args.live_grep_args( { cwd = vim.fn.expand('%:p:h') } ) end, { desc = 'Search current folder' } )
+        nnoremap("<leader>sD", function() select_dir_for_grep() end, { desc = 'Search directory' })
+        nnoremap("<leader>ss", function() require('telescope.builtin').current_buffer_fuzzy_find() end, { desc = 'Text search on the current buffer' } )
+        nnoremap("<leader>sb", function() require('telescope.builtin').current_buffer_fuzzy_find() end, { desc = 'Text search on the current buffer' } )
+        nnoremap("<leader>ht", function() require('telescope.builtin').colorscheme( { enable_preview = true } ) end, { desc = 'Change Colorscheme' } )
 
         local present, toggle_term = pcall(require, "toggleterm")
         if present then
@@ -237,6 +241,7 @@
         # fugitive.enable = true;
         gitsigns.enable = true;
         illuminate.enable = true;
+        lastplace.enable = true;
         lint.enable = true;
         lualine.enable = true;
         luasnip.enable = true;
@@ -334,7 +339,6 @@
           skipConfirmForSimpleEdits = true;
         };
 
-        project-nvim.enable = true;
         rainbow-delimiters.enable = true;
         refactoring.enable = true;
         spider.enable = true;
@@ -351,7 +355,7 @@
           };
           keymaps = {
             "<leader>," = "buffers";
-            "<leader>ff" = "find_files";
+            "<leader><leader>" = "find_files";
             "<leader>fr" = "oldfiles";
             "<leader>hb" = "keymaps";
             "<leader>'" = "resume";
