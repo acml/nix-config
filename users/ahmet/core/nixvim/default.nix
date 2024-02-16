@@ -343,6 +343,12 @@
         rainbow-delimiters.enable = true;
         refactoring.enable = true;
         spider.enable = true;
+        spider.keymaps.motions = {
+          b = "b";
+          e = "e";
+          ge = "ge";
+          w = "w";
+        };
         surround.enable = true;
         tagbar.enable = true;
         telescope = {
