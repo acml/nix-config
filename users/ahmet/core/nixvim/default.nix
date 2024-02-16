@@ -339,6 +339,7 @@
           skipConfirmForSimpleEdits = true;
         };
 
+        project-nvim.enable = true;
         rainbow-delimiters.enable = true;
         refactoring.enable = true;
         spider.enable = true;
