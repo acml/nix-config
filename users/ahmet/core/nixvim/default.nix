@@ -23,6 +23,8 @@
         vim.o.foldenable = true
         vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
         vim.cmd [[set signcolumn=yes]]
+        vim.cmd("set ignorecase")
+        vim.cmd("set smartcase")
 
         local function bind(op, outer_opts)
           outer_opts = vim.tbl_extend("force", { noremap = true, silent = true }, outer_opts or {})
@@ -181,7 +183,7 @@
         { action = "<cmd>wall<CR>"; key = "<leader>bS"; }
 
         { action = "<cmd>Neogit<CR>"; key = "<leader>gs"; }
-        { action = "<cmd>NvimTreeToggle<CR>"; key = "<leader>op"; }
+        { action = "<cmd>Neotree toggle<CR>"; key = "<leader>op"; }
         { action = "<cmd>Oil<CR>"; key = "<leader>o-"; }
       ];
 
@@ -284,6 +286,17 @@
 
         # marks.enable = true;
 
+        neo-tree = {
+          enable = true;
+          popupBorderStyle = "rounded";
+          documentSymbols.followCursor = true;
+          filesystem.followCurrentFile.enabled = true;
+          window = {
+            autoExpandWidth = true;
+            mappings = { "<tab>" = { command = "toggle_node"; }; };
+            position = "right";
+          };
+        };
         neogit = {
           enable = true;
           disableHint = true;
@@ -325,13 +338,6 @@
           ];
         };
         nvim-ufo.enable = true;
-        nvim-tree = {
-          enable = true;
-          hijackCursor = true;
-          updateFocusedFile.enable = true;
-          view.side = "right";
-          view.width = "15%";
-        };
 
         oil = {
           enable = true;
