@@ -58,7 +58,6 @@
         show_help = false;
         update_check = false;
       };
-      flags = [ "--disable-up-arrow" ];
     };
     bat = {
       enable = true;
