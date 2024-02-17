@@ -419,6 +419,7 @@
           "<leader>h" = "+help";
           "<leader>hk" = "keymaps";
           "<leader>o" = "+open";
+          "<leader>op" = "Project sidebar";
           "<leader>p" = "+project";
           "<leader>s" = "+search";
           "<leader>si" = "Jump to symbol";
