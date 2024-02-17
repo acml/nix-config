@@ -129,15 +129,15 @@
           })
         end
 
-        nnoremap("<leader>ff", function() require('telescope').extensions.file_browser.file_browser() end)
-        nnoremap("<leader>.", function() require('telescope').extensions.file_browser.file_browser( { cwd = vim.fn.expand('%:p:h') } ) end, { desc = 'Browse project' } )
-        nnoremap("<leader>*", function() require('telescope-live-grep-args.shortcuts').grep_word_under_cursor() end)
-        nnoremap("<leader>/", function() require('telescope').extensions.live_grep_args.live_grep_args() end, { desc = 'Search text' } )
-        nnoremap("<leader>pp", function() require('telescope').extensions.projects.projects() end, { desc = 'Switch to project' } )
-        nnoremap("<leader>sd", function() require('telescope').extensions.live_grep_args.live_grep_args( { cwd = vim.fn.expand('%:p:h') } ) end, { desc = 'Search current folder' } )
-        nnoremap("<leader>sD", function() select_dir_for_grep() end, { desc = 'Search directory' })
-        nnoremap("<leader>ss", function() require('telescope.builtin').current_buffer_fuzzy_find() end, { desc = 'Text search on the current buffer' } )
-        nnoremap("<leader>sb", function() require('telescope.builtin').current_buffer_fuzzy_find() end, { desc = 'Text search on the current buffer' } )
+        nnoremap("<leader>ff", function() require('telescope').extensions.file_browser.file_browser( { cwd = vim.fn.expand('%:p:h') } ) end, { desc = 'Find file' } )
+        nnoremap("<leader>.", function() require('telescope').extensions.file_browser.file_browser( { cwd = vim.fn.expand('%:p:h') } ) end, { desc = 'Find file' } )
+        nnoremap("<leader>*", function() require('telescope-live-grep-args.shortcuts').grep_word_under_cursor() end, { desc = 'Search for symbol in project' } )
+        nnoremap("<leader>/", function() require('telescope').extensions.live_grep_args.live_grep_args() end, { desc = 'Search project' } )
+        nnoremap("<leader>pp", function() require('telescope').extensions.projects.projects() end, { desc = 'Switch project' } )
+        nnoremap("<leader>sd", function() require('telescope').extensions.live_grep_args.live_grep_args( { cwd = vim.fn.expand('%:p:h') } ) end, { desc = 'Search current directory' } )
+        nnoremap("<leader>sD", function() select_dir_for_grep() end, { desc = 'Search other directory' })
+        nnoremap("<leader>ss", function() require('telescope.builtin').current_buffer_fuzzy_find() end, { desc = 'Search buffer' } )
+        nnoremap("<leader>sb", function() require('telescope.builtin').current_buffer_fuzzy_find() end, { desc = 'Search buffer' } )
         nnoremap("<leader>ht", function() require('telescope.builtin').colorscheme( { enable_preview = true } ) end, { desc = 'Change Colorscheme' } )
 
         local present, toggle_term = pcall(require, "toggleterm")
@@ -151,16 +151,24 @@
           local Terminal  = require('toggleterm.terminal').Terminal
 
           local hterm = Terminal:new({ direction = "horizontal" })
-          nnoremap("<leader>ot", function() hterm:toggle() end)
+          nnoremap("<leader>ot", function() hterm:toggle() end, { desc = 'Toggle terminal (horizontal)' } )
 
           local floaterm = Terminal:new({ direction = "float", float_opts = {border = "curved"} })
-          nnoremap("<F10>", function() floaterm:toggle() end)
+          nnoremap("<F10>", function() floaterm:toggle() end, { desc = 'Toggle terminal (floating)' } )
+          nnoremap("<leader>of", function() floaterm:toggle() end, { desc = 'Toggle terminal (floating)' } )
 
           if vim.fn.executable "lazygit" == 1 then
             local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float", float_opts = {border = "curved"} })
-            nnoremap("<leader>gg", function() lazygit:toggle() end)
+            nnoremap("<leader>ol", function() lazygit:toggle() end, { desc = 'lazygit' } )
           end
         end
+
+        nnoremap("<leader>xx", function() require("trouble").toggle() end, { desc = 'toggle' } )
+        nnoremap("<leader>xw", function() require("trouble").toggle("workspace_diagnostics") end, { desc = 'workspace diagnostics' } )
+        nnoremap("<leader>xd", function() require("trouble").toggle("document_diagnostics") end, { desc = 'document diagnostics' } )
+        nnoremap("<leader>xq", function() require("trouble").toggle("quickfix") end, { desc = 'quickfix' } )
+        nnoremap("<leader>xl", function() require("trouble").toggle("loclist") end, { desc = 'loclist' } )
+        nnoremap("gR", function() require("trouble").toggle("lsp_references") end, { desc = 'lsp references' } )
       '';
 
       extraPackages = [ pkgs.lazygit ];
@@ -182,7 +190,7 @@
         { action = "<cmd>update<CR>"; key = "<leader>bs"; }
         { action = "<cmd>wall<CR>"; key = "<leader>bS"; }
 
-        { action = "<cmd>Neogit<CR>"; key = "<leader>gs"; }
+        { action = "<cmd>Neogit<CR>"; key = "<leader>gg"; }
         { action = "<cmd>Neotree toggle<CR>"; key = "<leader>op"; }
         { action = "<cmd>Oil<CR>"; key = "<leader>o-"; }
       ];
@@ -370,7 +378,7 @@
             "<leader>," = "buffers";
             "<leader><leader>" = "find_files";
             "<leader>fr" = "oldfiles";
-            "<leader>hb" = "keymaps";
+            "<leader>hk" = "keymaps";
             "<leader>'" = "resume";
             "<leader>si" = "lsp_workspace_symbols";
           };
@@ -394,6 +402,28 @@
         vim-matchup.enable = true;
 
         which-key.enable = true;
+        which-key.registrations = {
+          "<leader><leader>" = "Find file in project";
+          "<leader>'" = "Resume last search";
+          "<leader>," = "Switch buffer";
+          "<leader>b" = "+buffer";
+          "<leader>bd" = "Kill buffer";
+          "<leader>bn" = "Next buffer";
+          "<leader>bp" = "Previous buffer";
+          "<leader>bS" = "Save all buffers";
+          "<leader>bs" = "Save buffer";
+          "<leader>f" = "+file";
+          "<leader>fr" = "Recent files";
+          "<leader>fs" = "Save file";
+          "<leader>g" = "+git";
+          "<leader>h" = "+help";
+          "<leader>hk" = "keymaps";
+          "<leader>o" = "+open";
+          "<leader>p" = "+project";
+          "<leader>s" = "+search";
+          "<leader>si" = "Jump to symbol";
+          "<leader>x" = "+diagnostics";
+        };
         wtf.enable = true;
       };
     };
