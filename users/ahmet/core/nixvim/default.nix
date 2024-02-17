@@ -1,8 +1,11 @@
-{ lib, pkgs, ... }: {
+{ pkgs, ... }: {
   programs = {
 
     nixvim = {
       enable = true;
+      enableMan = true;
+      viAlias = true;
+      vimAlias = true;
 
       colorschemes = {
         catppuccin = {
@@ -379,6 +382,7 @@
             "<leader><leader>" = "find_files";
             "<leader>fr" = "oldfiles";
             "<leader>hk" = "keymaps";
+            "<leader>hm" = "man_pages";
             "<leader>'" = "resume";
             "<leader>si" = "lsp_workspace_symbols";
           };
@@ -418,6 +422,7 @@
           "<leader>g" = "+git";
           "<leader>h" = "+help";
           "<leader>hk" = "keymaps";
+          "<leader>hm" = "man";
           "<leader>o" = "+open";
           "<leader>op" = "Project sidebar";
           "<leader>p" = "+project";
