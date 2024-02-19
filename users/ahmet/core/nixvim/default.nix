@@ -26,6 +26,7 @@
         vim.o.foldenable = true
         vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
         vim.cmd [[set signcolumn=yes]]
+
         vim.cmd("set ignorecase")
         vim.cmd("set smartcase")
 
@@ -141,6 +142,8 @@
         nnoremap("<leader>sD", function() select_dir_for_grep() end, { desc = 'Search other directory' })
         nnoremap("<leader>ss", function() require('telescope.builtin').current_buffer_fuzzy_find() end, { desc = 'Search buffer' } )
         nnoremap("<leader>sb", function() require('telescope.builtin').current_buffer_fuzzy_find() end, { desc = 'Search buffer' } )
+        nnoremap("<leader>hh", function() require('telescope.builtin').help_tags( ) end, { desc = 'help' } )
+        nnoremap("<leader>hm", function() require('telescope.builtin').man_pages( { sections = { 'ALL' } } ) end, { desc = 'man' } )
         nnoremap("<leader>ht", function() require('telescope.builtin').colorscheme( { enable_preview = true } ) end, { desc = 'Change Colorscheme' } )
 
         local present, toggle_term = pcall(require, "toggleterm")
@@ -382,7 +385,10 @@
             "<leader><leader>" = "find_files";
             "<leader>fr" = "oldfiles";
             "<leader>hk" = "keymaps";
-            "<leader>hm" = "man_pages";
+            # "<leader>hm" = {
+            #   action = "man_pages";
+            #   desc = "man pages";
+            # };
             "<leader>'" = "resume";
             "<leader>si" = "lsp_workspace_symbols";
           };
