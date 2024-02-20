@@ -7,7 +7,7 @@
     stylix.homeManagerModules.stylix
 
     ./bash.nix
-    ./btop.nix
+    # ./btop.nix
     ./fish.nix
     ./git.nix
     ./htop.nix
@@ -63,6 +63,10 @@
     bat = {
       enable = true;
       extraPackages = with pkgs.bat-extras; [ batman ];
+      catppuccin.enable = true;
+    };
+    btop = {
+      enable = true;
       catppuccin.enable = true;
     };
     gpg.enable = true;
