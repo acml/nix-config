@@ -177,7 +177,6 @@
         nnoremap("gR", function() require("trouble").toggle("lsp_references") end, { desc = 'lsp references' } )
       '';
 
-      extraPackages = [ pkgs.lazygit ];
       extraPlugins = with pkgs.vimPlugins; [
         statuscol-nvim
         telescope-live-grep-args-nvim

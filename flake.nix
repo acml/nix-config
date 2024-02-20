@@ -106,6 +106,7 @@
 
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    catppuccin.url = "github:Stonks3141/ctp-nix";
 
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";

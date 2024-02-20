@@ -5,6 +5,7 @@
 , nix-index-database
 , nixpkgs
 , nixvim
+, catppuccin
 , stylix
 , ...
 }:
@@ -60,6 +61,7 @@ let
           impermanence
           nix-index-database
           nixvim
+          catppuccin
           stylix;
       };
     };

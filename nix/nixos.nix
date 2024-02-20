@@ -8,6 +8,7 @@
 , nixos-hardware
 , nixpkgs
 , nixvim
+, catppuccin
 , stylix
 , ...
 }:
@@ -38,6 +39,7 @@ let
           nix-index-database
           nixos-hardware
           nixvim
+          catppuccin
           stylix;
       };
     };

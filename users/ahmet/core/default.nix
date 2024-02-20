@@ -1,8 +1,9 @@
-{ base16-schemes, hostType, impermanence, lib, nix-index-database, pkgs, nixvim, stylix, ... }: {
+{ base16-schemes, hostType, impermanence, lib, nix-index-database, pkgs, nixvim, catppuccin, stylix, ... }: {
   imports = [
     impermanence.nixosModules.home-manager.impermanence
     nix-index-database.hmModules.nix-index
     nixvim.homeManagerModules.nixvim
+    catppuccin.homeManagerModules.catppuccin
     stylix.homeManagerModules.stylix
 
     ./bash.nix
@@ -62,8 +63,13 @@
     bat = {
       enable = true;
       extraPackages = with pkgs.bat-extras; [ batman ];
+      catppuccin.enable = true;
     };
     gpg.enable = true;
+    lazygit = {
+      enable = true;
+      catppuccin.enable = true;
+    };
     nix-index.enable = true;
     zoxide.enable = true;
     zoxide.options = [ "--cmd cd" ];
@@ -84,6 +90,7 @@
       nixvim.enable = lib.mkDefault false;
     };
   };
+  catppuccin.flavour = "mocha";
 
   systemd.user.startServices = "sd-switch";
 
