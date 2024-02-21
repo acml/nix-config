@@ -1,9 +1,8 @@
-{ home-manager, lib, nix-index-database, pkgs, nixvim, catppuccin, stylix, ... }: {
+{ home-manager, lib, nix-index-database, pkgs, nixvim, stylix, ... }: {
   imports = [
     home-manager.darwinModules.home-manager
     nix-index-database.darwinModules.nix-index
     nixvim.nixDarwinModules.nixvim
-    catppuccin.nixDarwinModules.catppuccin
     stylix.darwinModules.stylix
   ];
 
