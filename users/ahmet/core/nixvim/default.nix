@@ -186,6 +186,8 @@
 
       keymaps = [
         { action = "<cmd>bdelete<CR>"; key = "<leader>bd"; }
+        { action = "<cmd>edit #<CR>"; key = "<leader>bl"; }
+        { action = "<cmd>edit #<CR>"; key = "<leader>`"; }
         { action = "<cmd>bnext<CR>"; key = "<leader>bn"; }
         { action = "<cmd>bnext<CR>"; key = "]b"; }
         { action = "<cmd>bprevious<CR>"; key = "<leader>bp"; }
@@ -414,9 +416,11 @@
         which-key.registrations = {
           "<leader><leader>" = "Find file in project";
           "<leader>'" = "Resume last search";
+          "<leader>`" = "Switch to last buffer";
           "<leader>," = "Switch buffer";
           "<leader>b" = "+buffer";
           "<leader>bd" = "Kill buffer";
+          "<leader>bl" = "Switch to last buffer";
           "<leader>bn" = "Next buffer";
           "<leader>bp" = "Previous buffer";
           "<leader>bS" = "Save all buffers";
