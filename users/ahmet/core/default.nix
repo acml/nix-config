@@ -58,6 +58,7 @@
         enter_accept = true;
         show_help = false;
         update_check = false;
+        workspaces = true;
       };
     };
     bat = {
