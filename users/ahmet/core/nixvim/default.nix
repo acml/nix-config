@@ -19,12 +19,15 @@
       };
 
       extraConfigLua = ''
+        vim.opt.cursorline = true
+        vim.opt.cursorlineopt = "number"
+
         local builtin = require("statuscol.builtin")
         require("statuscol").setup({
-          relculright = true,
+          relculright = false,
           segments = {
             { text = { builtin.foldfunc }, click = "v:lua.ScFa" },
-            { text = { "%s" }, click = "v:lua.ScSa" },
+            { text = { " %s" }, click = "v:lua.ScSa" },
             { text = { builtin.lnumfunc, " " }, click = "v:lua.ScLa" },
           },
         })
