@@ -295,11 +295,11 @@
         };
         lsp-format.enable = true;
         lsp-lines.enable = true;
-        lspkind.enable = true;
         lspsaga.enable = true;
         lsp-format.lspServersToEnable = [
           "gopls"
         ];
+        lspkind.enable = true;
         # lspsaga.lightbulb.sign = false;
 
         # marks.enable = true;
