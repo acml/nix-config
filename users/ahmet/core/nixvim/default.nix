@@ -297,6 +297,9 @@
         lsp-lines.enable = true;
         lspkind.enable = true;
         lspsaga.enable = true;
+        lsp-format.lspServersToEnable = [
+          "gopls"
+        ];
         # lspsaga.lightbulb.sign = false;
 
         # marks.enable = true;
