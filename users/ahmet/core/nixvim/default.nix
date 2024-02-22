@@ -176,7 +176,7 @@
           end
         end
 
-        nnoremap("<leader>xx", function() require("trouble").toggle() end, { desc = 'toggle' } )
+        nnoremap("<leader>xx", function() require("trouble").toggle() end, { desc = 'toggle diagnostics' } )
         nnoremap("<leader>xw", function() require("trouble").toggle("workspace_diagnostics") end, { desc = 'workspace diagnostics' } )
         nnoremap("<leader>xd", function() require("trouble").toggle("document_diagnostics") end, { desc = 'document diagnostics' } )
         nnoremap("<leader>xq", function() require("trouble").toggle("quickfix") end, { desc = 'quickfix' } )
