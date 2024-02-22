@@ -16,7 +16,7 @@
       # below configuration breaks magit
       # diff = {
       #   colorMoved = "default";
-      #   age.textconv = "${pkgs.rage}/bin/rage -i ~/.ssh/ahmet --decrypt";
+      #   age.textconv = "${pkgs.rage}/bin/rage -i <(op read op://Personal/ahmet/'private key') --decrypt";
       # };
       difftool.prompt = true;
       github.user = "acml";
