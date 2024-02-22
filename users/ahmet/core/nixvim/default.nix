@@ -19,6 +19,16 @@
       };
 
       extraConfigLua = ''
+        local builtin = require("statuscol.builtin")
+        require("statuscol").setup({
+          relculright = true,
+          segments = {
+            { text = { builtin.foldfunc }, click = "v:lua.ScFa" },
+            { text = { "%s" }, click = "v:lua.ScSa" },
+            { text = { builtin.lnumfunc, " " }, click = "v:lua.ScLa" },
+          },
+        })
+        
         -- UFO folding
         vim.o.foldcolumn = "1" -- '0' is not bad
         vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
@@ -73,14 +83,8 @@
           vim.cmd("normal! gv")
         end)
 
-        local builtin = require("statuscol.builtin")
-        require("statuscol").setup({
-          relculright = true,
-          segments = {
-            { text = { builtin.foldfunc }, click = "v:lua.ScFa" },
-            { text = { "%s" }, click = "v:lua.ScSa" },
-            { text = { builtin.lnumfunc, " " }, click = "v:lua.ScLa" },
-          },
+        vim.diagnostic.config({
+          virtual_text = false
         })
 
         local telescope = require("telescope")
@@ -276,8 +280,8 @@
             htmx.enable = false; # fails on darwin
             jsonls.enable = true;
             marksman.enable = true;
-            nil_ls.enable = true;
-            # nixd.enable = true;
+            # nil_ls.enable = true;
+            nixd.enable = true;
             # rnix-lsp.enable = true;
             taplo.enable = true;
             tsserver.enable = true;
@@ -295,7 +299,6 @@
         };
         lsp-format.enable = true;
         lsp-lines.enable = true;
-        lspsaga.enable = true;
         lsp-format.lspServersToEnable = [
           "gopls"
         ];
