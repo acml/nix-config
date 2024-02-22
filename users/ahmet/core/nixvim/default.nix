@@ -361,6 +361,7 @@
         };
 
         project-nvim.enable = true;
+        project-nvim.patterns = [ "proj.default.ini" ".git" "_darcs" ".hg" ".bzr" ".svn" "Makefile" "package.json" ];
         rainbow-delimiters.enable = true;
         refactoring.enable = true;
         spider.enable = true;
