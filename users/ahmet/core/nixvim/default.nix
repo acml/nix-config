@@ -26,19 +26,19 @@
         require("statuscol").setup({
           relculright = true,
           segments = {
-            { text = { builtin.foldfunc }, click = "v:lua.ScFa" },
-            { text = { " %s" }, click = "v:lua.ScSa" },
+            { text = { builtin.foldfunc },      click = "v:lua.ScFa" },
+            { text = { " %s" },                 click = "v:lua.ScSa" },
             { text = { builtin.lnumfunc, " " }, click = "v:lua.ScLa" },
           },
         })
         
         -- UFO folding
-        vim.o.foldcolumn = "1" -- '0' is not bad
-        vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
-        vim.o.foldlevelstart = 99
-        vim.o.foldenable = true
-        vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
-        vim.cmd [[set signcolumn=yes]]
+        vim.o.foldcolumn         = "1" -- '0' is not bad
+        vim.o.foldlevel          = 99 -- Using ufo provider need a large value, feel free to decrease the value
+        vim.o.foldlevelstart     = 99
+        vim.o.foldenable         = true
+        vim.o.fillchars          = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
+        vim.cmd [[set signcolumn = yes]]
 
         vim.cmd("set ignorecase")
         vim.cmd("set smartcase")
@@ -63,17 +63,17 @@
         -- Center buffer while navigating
         nnoremap("<C-u>", "<C-u>zz")
         nnoremap("<C-d>", "<C-d>zz")
-        nnoremap("{", "{zz")
-        nnoremap("}", "}zz")
-        nnoremap("N", "Nzz")
-        nnoremap("n", "nzz")
-        nnoremap("G", "Gzz")
-        nnoremap("gg", "ggzz")
+        nnoremap("{",     "{zz")
+        nnoremap("}",     "}zz")
+        nnoremap("N",     "Nzz")
+        nnoremap("n",     "nzz")
+        nnoremap("G",     "Gzz")
+        nnoremap("gg",    "ggzz")
         nnoremap("<C-i>", "<C-i>zz")
         nnoremap("<C-o>", "<C-o>zz")
-        nnoremap("%", "%zz")
-        nnoremap("*", "*zz")
-        nnoremap("#", "#zz")
+        nnoremap("%",     "%zz")
+        nnoremap("*",     "*zz")
+        nnoremap("#",     "#zz")
 
         -- Reselect the last visual selection
         xnoremap("<", function()
@@ -140,18 +140,18 @@
           })
         end
 
-        nnoremap("<leader>ff", function() require('telescope').extensions.file_browser.file_browser( { cwd = vim.fn.expand('%:p:h') } ) end, { desc = 'Find file' } )
-        nnoremap("<leader>.", function() require('telescope').extensions.file_browser.file_browser( { cwd = vim.fn.expand('%:p:h') } ) end, { desc = 'Find file' } )
-        nnoremap("<leader>*", function() require('telescope-live-grep-args.shortcuts').grep_word_under_cursor() end, { desc = 'Search for symbol in project' } )
-        nnoremap("<leader>/", function() require('telescope').extensions.live_grep_args.live_grep_args() end, { desc = 'Search project' } )
-        nnoremap("<leader>pp", function() require('telescope').extensions.projects.projects() end, { desc = 'Switch project' } )
+        nnoremap("<leader>ff", function() require('telescope').extensions.file_browser.file_browser( { cwd = vim.fn.expand('%:p:h') } ) end,     { desc = 'Find file' } )
+        nnoremap("<leader>.",  function() require('telescope').extensions.file_browser.file_browser( { cwd = vim.fn.expand('%:p:h') } ) end,     { desc = 'Find file' } )
+        nnoremap("<leader>*",  function() require('telescope-live-grep-args.shortcuts').grep_word_under_cursor() end,                            { desc = 'Search for symbol in project' } )
+        nnoremap("<leader>/",  function() require('telescope').extensions.live_grep_args.live_grep_args() end,                                   { desc = 'Search project' } )
+        nnoremap("<leader>pp", function() require('telescope').extensions.projects.projects() end,                                               { desc = 'Switch project' } )
         nnoremap("<leader>sd", function() require('telescope').extensions.live_grep_args.live_grep_args( { cwd = vim.fn.expand('%:p:h') } ) end, { desc = 'Search current directory' } )
-        nnoremap("<leader>sD", function() select_dir_for_grep() end, { desc = 'Search other directory' })
-        nnoremap("<leader>ss", function() require('telescope.builtin').current_buffer_fuzzy_find() end, { desc = 'Search buffer' } )
-        nnoremap("<leader>sb", function() require('telescope.builtin').current_buffer_fuzzy_find() end, { desc = 'Search buffer' } )
-        nnoremap("<leader>hh", function() require('telescope.builtin').help_tags( ) end, { desc = 'help' } )
-        nnoremap("<leader>hm", function() require('telescope.builtin').man_pages( { sections = { 'ALL' } } ) end, { desc = 'man' } )
-        nnoremap("<leader>ht", function() require('telescope.builtin').colorscheme( { enable_preview = true } ) end, { desc = 'Change Colorscheme' } )
+        nnoremap("<leader>sD", function() select_dir_for_grep() end,                                                                             { desc = 'Search other directory' })
+        nnoremap("<leader>ss", function() require('telescope.builtin').current_buffer_fuzzy_find() end,                                          { desc = 'Search buffer' } )
+        nnoremap("<leader>sb", function() require('telescope.builtin').current_buffer_fuzzy_find() end,                                          { desc = 'Search buffer' } )
+        nnoremap("<leader>hh", function() require('telescope.builtin').help_tags( ) end,                                                         { desc = 'help' } )
+        nnoremap("<leader>hm", function() require('telescope.builtin').man_pages( { sections = { 'ALL' } } ) end,                                { desc = 'man' } )
+        nnoremap("<leader>ht", function() require('telescope.builtin').colorscheme( { enable_preview = true } ) end,                             { desc = 'Change Colorscheme' } )
 
         local present, toggle_term = pcall(require, "toggleterm")
         if present then
