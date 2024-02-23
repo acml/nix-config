@@ -312,6 +312,12 @@
           diagnostic.diagnosticOnlyCurrent = true;
         };
 
+        mini = {
+          enable = true;
+          modules = {
+            align = { };
+          };
+        };
         neo-tree = {
           enable = true;
           popupBorderStyle = "rounded";
