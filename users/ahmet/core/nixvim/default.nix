@@ -182,6 +182,28 @@
         nnoremap("<leader>xq", function() require("trouble").toggle("quickfix") end, { desc = 'quickfix' } )
         nnoremap("<leader>xl", function() require("trouble").toggle("loclist") end, { desc = 'loclist' } )
         nnoremap("gR", function() require("trouble").toggle("lsp_references") end, { desc = 'lsp references' } )
+
+        local status, map = pcall(require, "mini.map")
+        if status then
+          map.setup {
+            integrations = {
+              map.gen_integration.builtin_search(),
+              map.gen_integration.diagnostic(),
+              map.gen_integration.gitsigns(),
+            },
+            symbols = {
+              encode = map.gen_encode_symbols.dot("4x2"),
+            },
+            window = {
+              side = "right",
+              width = 15, -- set to 1 for a pure scrollbar :)
+              winblend = 15,
+              show_integration_count = false,
+            },
+          }
+
+          vim.api.nvim_set_keymap('n', '<leader>om', '<cmd>lua MiniMap.toggle()<CR>', {noremap = true, silent = true})
+        end
       '';
 
       extraPlugins = with pkgs.vimPlugins; [
@@ -315,6 +337,7 @@
             align = { };
             bracketed = { };
             comment = { };
+            map = { };
             operators = { };
             pairs = { };
             splitjoin = { };
