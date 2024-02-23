@@ -301,14 +301,16 @@
           };
         };
         lsp-format.enable = true;
-        lsp-lines.enable = true;
         lsp-format.lspServersToEnable = [
           "gopls"
         ];
+        # lsp-lines.enable = true;
         lspkind.enable = true;
-        # lspsaga.lightbulb.sign = false;
-
-        # marks.enable = true;
+        lspsaga = {
+          enable = true;
+          lightbulb.sign = false;
+          diagnostic.diagnosticOnlyCurrent = true;
+        };
 
         neo-tree = {
           enable = true;
