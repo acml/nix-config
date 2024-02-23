@@ -432,7 +432,9 @@
           "<leader>bd" = "Kill buffer";
           "<leader>bl" = "Switch to last buffer";
           "<leader>bn" = "Next buffer";
+          "]b" = "Next buffer";
           "<leader>bp" = "Previous buffer";
+          "[b" = "Previous buffer";
           "<leader>bS" = "Save all buffers";
           "<leader>bs" = "Save buffer";
           "<leader>f" = "+file";
