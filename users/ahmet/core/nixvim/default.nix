@@ -283,8 +283,8 @@
             htmx.enable = false; # fails on darwin
             jsonls.enable = true;
             marksman.enable = true;
-            # nil_ls.enable = true;
-            nixd.enable = true;
+            nil_ls.enable = true;
+            # nixd.enable = true;
             # rnix-lsp.enable = true;
             taplo.enable = true;
             tsserver.enable = true;
