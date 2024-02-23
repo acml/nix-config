@@ -52,7 +52,7 @@
 
   programs = {
     atuin = {
-      enable = true;
+      enable = pkgs.stdenv.isLinux;
       settings = {
         auto_sync = false;
         enter_accept = true;

@@ -15,7 +15,9 @@
         . /etc/bashrc
         fi
 
-        bind -x '"\C-p": __atuin_history --shell-up-key-binding'
+        if command -v atuin >/dev/null 2>&1; then
+          bind -x '"\c-p": __atuin_history --shell-up-key-binding'
+        fi
       '';
       profileExtra = ''
         if [ -e ~/.nix-profile/etc/profile.d/nix.sh ]; then
