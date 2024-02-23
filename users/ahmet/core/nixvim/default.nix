@@ -253,7 +253,6 @@
         # cmp-vsnip.enable = true;
         # cmp-zsh.enable = true;
         # cmp_luasnip.enable = true;
-        comment-nvim.enable = true;
         conform-nvim.enable = true;
         dap.enable = true;
         diffview.enable = true;
@@ -315,6 +314,10 @@
           modules = {
             align = { };
             bracketed = { };
+            comment = { };
+            operators = { };
+            pairs = { };
+            splitjoin = { };
           };
         };
         neo-tree = {
@@ -344,7 +347,7 @@
         };
         notify.enable = true;
 
-        nvim-autopairs.enable = true;
+        # nvim-autopairs.enable = true;
         nvim-cmp = {
           enable = true;
           mapping = {
