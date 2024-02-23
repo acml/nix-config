@@ -95,7 +95,9 @@
       nixvim.enable = lib.mkDefault false;
     };
   };
-  catppuccin.flavour = "mocha";
+
+  catppuccin.flavour = "mocha"; # "latte" "frappe" "macchiato" "mocha"
+  catppuccin.accent = "teal"; # "blue" "flamingo" "green" "lavender" "maroon" "mauve" "peach" "pink" "red" "rosewater" "sapphire" "sky" "teal" "yellow"
 
   systemd.user.startServices = "sd-switch";
 
