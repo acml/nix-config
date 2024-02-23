@@ -196,9 +196,7 @@
         { action = "<cmd>edit #<CR>"; key = "<leader>bl"; }
         { action = "<cmd>edit #<CR>"; key = "<leader>`"; }
         { action = "<cmd>bnext<CR>"; key = "<leader>bn"; }
-        { action = "<cmd>bnext<CR>"; key = "]b"; }
         { action = "<cmd>bprevious<CR>"; key = "<leader>bp"; }
-        { action = "<cmd>bprevious<CR>"; key = "[b"; }
 
         { action = "<cmd>update<CR>"; key = "<leader>fs"; }
         { action = "<cmd>update<CR>"; key = "<leader>bs"; }
@@ -316,6 +314,7 @@
           enable = true;
           modules = {
             align = { };
+            bracketed = { };
           };
         };
         neo-tree = {
@@ -440,9 +439,7 @@
           "<leader>bd" = "Kill buffer";
           "<leader>bl" = "Switch to last buffer";
           "<leader>bn" = "Next buffer";
-          "]b" = "Next buffer";
           "<leader>bp" = "Previous buffer";
-          "[b" = "Previous buffer";
           "<leader>bS" = "Save all buffers";
           "<leader>bs" = "Save buffer";
           "<leader>f" = "+file";
