@@ -66,10 +66,7 @@
       extraPackages = with pkgs.bat-extras; [ batman ];
       catppuccin.enable = true;
     };
-    btop = {
-      enable = true;
-      catppuccin.enable = true;
-    };
+    btop.enable = true;
     gpg.enable = true;
     lazygit = {
       enable = true;
