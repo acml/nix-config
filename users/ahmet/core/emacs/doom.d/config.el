@@ -21,7 +21,7 @@
       ;;
       ;; Line numbers are pretty slow all around. The performance boost of
       ;; disabling them outweighs the utility of always keeping them on.
-      display-line-numbers-type nil
+      display-line-numbers-type 'relative
 
       ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
       ;; are the three important ones:
