@@ -203,6 +203,10 @@
           }
 
           vim.api.nvim_set_keymap('n', '<leader>om', '<cmd>lua MiniMap.toggle()<CR>', {noremap = true, silent = true})
+          vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
+          vim.keymap.set("n", "<leader>cd", vim.lsp.buf.definition, {})
+          vim.keymap.set("n", "<leader>cD", vim.lsp.buf.references, {})
+          vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, {})
         end
       '';
 
@@ -290,10 +294,8 @@
         luasnip.enable = true;
         lsp = {
           enable = true;
-
           servers = {
             bashls.enable = true;
-            # ccls.enable = true;
             clangd.enable = true;
             cmake.enable = true;
             dockerls.enable = true;
@@ -301,22 +303,20 @@
             html.enable = true;
             htmx.enable = false; # fails on darwin
             jsonls.enable = true;
-            marksman.enable = true;
-            nil_ls.enable = true;
-            # nixd.enable = true;
-            # rnix-lsp.enable = true;
-            taplo.enable = true;
-            tsserver.enable = true;
-
             lua-ls = {
               enable = true;
               settings.telemetry.enable = false;
             };
+            marksman.enable = true;
+            nil_ls.enable = true;
+            # nixd.enable = true;
             rust-analyzer = {
               enable = true;
               installCargo = true;
               installRustc = true;
             };
+            taplo.enable = true;
+            tsserver.enable = true;
           };
         };
         lsp-format.enable = true;
@@ -343,6 +343,7 @@
             splitjoin = { };
           };
         };
+
         neo-tree = {
           enable = true;
           popupBorderStyle = "rounded";
@@ -354,12 +355,14 @@
             position = "right";
           };
         };
+
         neogit = {
           enable = true;
           disableHint = true;
           graphStyle = "unicode";
           integrations.diffview = true;
         };
+
         nix.enable = true;
         nix-develop.enable = true;
         noice.enable = true;
@@ -370,7 +373,6 @@
         };
         notify.enable = true;
 
-        # nvim-autopairs.enable = true;
         nvim-cmp = {
           enable = true;
           mapping = {
