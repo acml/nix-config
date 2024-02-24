@@ -444,6 +444,7 @@
         treesitter = {
           enable = true;
           folding = true;
+          indent = true;
           nixvimInjections = true;
         };
         treesitter-context.enable = true;
