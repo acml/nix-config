@@ -50,6 +50,10 @@
       bindkey "^[[1;5D" backward-word
       bindkey "^[[1;3D" backward-word
       bindkey -s "^O" 'fzf | xargs -r $EDITOR^M'
+
+      if type __atuin_history >/dev/null 2>&1; then
+        bindkey "^p" '__atuin_history --shell-up-key-binding'
+      fi
     '';
     sessionVariables = {
       RPROMPT = "";
