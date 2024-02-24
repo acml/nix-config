@@ -12,6 +12,13 @@
           enable = true;
           dimInactive.enabled = true;
           terminalColors = true;
+          integrations = {
+            dap.enabled = true;
+            illuminate.enabled = true;
+            mini.enabled = true;
+            native_lsp.enabled = true;
+            telescope.enabled = true;
+          };
         };
         # gruvbox.enable = true;
         # nord.enable = true;
@@ -31,7 +38,7 @@
             { text = { builtin.lnumfunc, " " }, click = "v:lua.ScLa" },
           },
         })
-        
+
         -- UFO folding
         vim.o.foldcolumn         = "1" -- '0' is not bad
         vim.o.foldlevel          = 99 -- Using ufo provider need a large value, feel free to decrease the value
@@ -92,7 +99,7 @@
 
         local telescope = require("telescope")
         local lga_actions = require("telescope-live-grep-args.actions")
-        
+
         telescope.setup {
           extensions = {
             live_grep_args = {
@@ -206,7 +213,8 @@
           vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
           vim.keymap.set("n", "<leader>cd", vim.lsp.buf.definition, {})
           vim.keymap.set("n", "<leader>cD", vim.lsp.buf.references, {})
-          vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, {})
+          -- vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, {})
+          vim.keymap.set("n", "<leader>ca", '<cmd>Lspsaga code_action<cr>', {})
         end
       '';
 
@@ -291,6 +299,7 @@
         lastplace.enable = true;
         lint.enable = true;
         lualine.enable = true;
+        lualine.globalstatus = true;
         luasnip.enable = true;
         lsp = {
           enable = true;
@@ -320,9 +329,7 @@
           };
         };
         lsp-format.enable = true;
-        lsp-format.lspServersToEnable = [
-          "gopls"
-        ];
+        lsp-format.lspServersToEnable = [ "gopls" "rust-analyzer" ];
         # lsp-lines.enable = true;
         lspkind.enable = true;
         lspsaga = {
@@ -371,6 +378,28 @@
           "vim.lsp.util.stylize_markdown" = true;
           "cmp.entry.get_documentation" = true;
         };
+        none-ls = {
+          enable = true;
+          enableLspFormat = true;
+          sources = {
+            diagnostics = {
+              deadnix.enable = true;
+              gitlint.enable = true;
+              golangci_lint.enable = true;
+              ltrs.enable = true;
+              luacheck.enable = true;
+              shellcheck.enable = true;
+              statix.enable = true;
+              vale.enable = true;
+              write_good.enable = true;
+            };
+            formatting = {
+              cbfmt.enable = true;
+              nixpkgs_fmt.enable = true;
+              stylua.enable = true;
+            };
+          };
+        };
         notify.enable = true;
 
         nvim-cmp = {
@@ -381,8 +410,14 @@
             "<C-e>" = "cmp.mapping.close()";
             "<C-f>" = "cmp.mapping.scroll_docs(4)";
             "<CR>" = "cmp.mapping.confirm({ select = true })";
-            "<S-Tab>" = { action = "cmp.mapping.select_prev_item()"; modes = [ "i" "s" ]; };
-            "<Tab>" = { action = "cmp.mapping.select_next_item()"; modes = [ "i" "s" ]; };
+            "<S-Tab>" = {
+              action = "cmp.mapping.select_prev_item()";
+              modes = [ "i" "s" ];
+            };
+            "<Tab>" = {
+              action = "cmp.mapping.select_next_item()";
+              modes = [ "i" "s" ];
+            };
           };
           snippet.expand = "luasnip";
           sources = [
@@ -405,7 +440,16 @@
         };
 
         project-nvim.enable = true;
-        project-nvim.patterns = [ "proj.default.ini" ".git" "_darcs" ".hg" ".bzr" ".svn" "Makefile" "package.json" ];
+        project-nvim.patterns = [
+          "proj.default.ini"
+          ".git"
+          "_darcs"
+          ".hg"
+          ".bzr"
+          ".svn"
+          "Makefile"
+          "package.json"
+        ];
         rainbow-delimiters.enable = true;
         refactoring.enable = true;
         spider.enable = true;
@@ -456,34 +500,41 @@
         trouble.enable = true;
         ts-context-commentstring.enable = true;
 
-        vim-matchup.enable = true;
-
-        which-key.enable = true;
-        which-key.registrations = {
-          "<leader><leader>" = "Find file in project";
-          "<leader>'" = "Resume last search";
-          "<leader>`" = "Switch to last buffer";
-          "<leader>," = "Switch buffer";
-          "<leader>b" = "+buffer";
-          "<leader>bd" = "Kill buffer";
-          "<leader>bl" = "Switch to last buffer";
-          "<leader>bn" = "Next buffer";
-          "<leader>bp" = "Previous buffer";
-          "<leader>bS" = "Save all buffers";
-          "<leader>bs" = "Save buffer";
-          "<leader>f" = "+file";
-          "<leader>fr" = "Recent files";
-          "<leader>fs" = "Save file";
-          "<leader>g" = "+git";
-          "<leader>h" = "+help";
-          "<leader>hk" = "keymaps";
-          "<leader>hm" = "man";
-          "<leader>o" = "+open";
-          "<leader>op" = "Project sidebar";
-          "<leader>p" = "+project";
-          "<leader>s" = "+search";
-          "<leader>si" = "Jump to symbol";
-          "<leader>x" = "+diagnostics";
+        vim-matchup = {
+          enable = true;
+          enableSurround = true;
+          treesitterIntegration.enable = true;
+          treesitterIntegration.includeMatchWords = true;
+        };
+        which-key = {
+          enable = true;
+          registrations = {
+            "<leader><leader>" = "Find file in project";
+            "<leader>'" = "Resume last search";
+            "<leader>`" = "Switch to last buffer";
+            "<leader>," = "Switch buffer";
+            "<leader>b" = "+buffer";
+            "<leader>bd" = "Kill buffer";
+            "<leader>bl" = "Switch to last buffer";
+            "<leader>bn" = "Next buffer";
+            "<leader>bp" = "Previous buffer";
+            "<leader>bS" = "Save all buffers";
+            "<leader>bs" = "Save buffer";
+            "<leader>f" = "+file";
+            "<leader>fr" = "Recent files";
+            "<leader>fs" = "Save file";
+            "<leader>g" = "+git";
+            "<leader>h" = "+help";
+            "<leader>hk" = "keymaps";
+            "<leader>hm" = "man";
+            "<leader>o" = "+open";
+            "<leader>op" = "Project sidebar";
+            "<leader>p" = "+project";
+            "<leader>s" = "+search";
+            "<leader>si" = "Jump to symbol";
+            "<leader>x" = "+diagnostics";
+          };
+          window.border = "rounded";
         };
         wtf.enable = true;
       };
