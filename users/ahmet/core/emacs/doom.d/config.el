@@ -297,14 +297,14 @@
    evil-vsplit-window-right t  ; Switch to the new window after splitting
    evil-split-window-below t))
 
-(use-package! evil-colemak-basics
-  :after evil evil-snipe
-  ;; :hook (ediff-keymap-setup-hook . evil-colemak-basics-mode)
-  :init
-  (setq evil-colemak-basics-rotate-t-f-j nil
-        evil-colemak-basics-char-jump-commands 'evil-snipe)
-  :config
-  (global-evil-colemak-basics-mode))
+; (use-package! evil-colemak-basics
+;   :after evil evil-snipe
+;   ;; :hook (ediff-keymap-setup-hook . evil-colemak-basics-mode)
+;   :init
+;   (setq evil-colemak-basics-rotate-t-f-j nil
+;         evil-colemak-basics-char-jump-commands 'evil-snipe)
+;   :config
+;   (global-evil-colemak-basics-mode))
 
 (setq avy-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)
       lispy-avy-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y))

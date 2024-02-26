@@ -61,7 +61,7 @@
 (package! org-view-mode)                                                          ;; dired-auto-readme dependency
 (unpin! dirvish)
 
-(package! evil-colemak-basics)
+; (package! evil-colemak-basics)
 
 (package! highlight-parentheses :recipe (:host github :repo "emacsmirror/highlight-parentheses"))
 (package! journalctl-mode)
