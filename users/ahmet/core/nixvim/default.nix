@@ -287,7 +287,7 @@
         # cmp-vsnip.enable = true;
         # cmp-zsh.enable = true;
         # cmp_luasnip.enable = true;
-        conform-nvim.enable = true;
+        # conform-nvim.enable = true;
         dap.enable = true;
         diffview.enable = true;
         # fidget.enable = true;
@@ -297,7 +297,7 @@
         gitsigns.enable = true;
         illuminate.enable = true;
         lastplace.enable = true;
-        lint.enable = true;
+        # lint.enable = true;
         lualine.enable = true;
         lualine.globalstatus = true;
         luasnip.enable = true;
@@ -451,7 +451,7 @@
           "package.json"
         ];
         rainbow-delimiters.enable = true;
-        refactoring.enable = true;
+        # refactoring.enable = true;
         spider.enable = true;
         spider.keymaps.motions = {
           b = "b";
@@ -493,7 +493,7 @@
           indent = true;
           nixvimInjections = true;
         };
-        treesitter-context.enable = true;
+        # treesitter-context.enable = true;
         treesitter-refactor.enable = true;
         treesitter-textobjects.enable = true;
 
