@@ -50,6 +50,8 @@
         vim.cmd("set ignorecase")
         vim.cmd("set smartcase")
 
+        vim.cmd("set title")
+
         local function bind(op, outer_opts)
           outer_opts = vim.tbl_extend("force", { noremap = true, silent = true }, outer_opts or {})
 
