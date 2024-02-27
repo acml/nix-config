@@ -355,9 +355,19 @@
 
         neo-tree = {
           enable = true;
-          popupBorderStyle = "rounded";
+          buffers = {
+            bindToCwd = false;
+            followCurrentFile.enabled = true;
+            followCurrentFile.leaveDirsOpen = true;
+          };
           documentSymbols.followCursor = true;
-          filesystem.followCurrentFile.enabled = true;
+          filesystem = {
+            bindToCwd = false;
+            followCurrentFile.enabled = true;
+            followCurrentFile.leaveDirsOpen = true;
+            useLibuvFileWatcher = true;
+          };
+          popupBorderStyle = "rounded";
           window = {
             autoExpandWidth = true;
             mappings = { "<tab>" = { command = "toggle_node"; }; };
