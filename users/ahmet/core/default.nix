@@ -69,10 +69,6 @@
     };
     btop.enable = true;
     gpg.enable = true;
-    lazygit = {
-      enable = true;
-      catppuccin.enable = true;
-    };
     nix-index.enable = true;
     zoxide.enable = true;
     zoxide.options = [ "--cmd cd" ];
