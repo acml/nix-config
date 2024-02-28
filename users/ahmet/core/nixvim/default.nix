@@ -162,28 +162,9 @@
         nnoremap("<leader>hm", function() require('telescope.builtin').man_pages( { sections = { 'ALL' } } ) end,                                { desc = 'man' } )
         nnoremap("<leader>ht", function() require('telescope.builtin').colorscheme( { enable_preview = true } ) end,                             { desc = 'Change Colorscheme' } )
 
-        local present, toggle_term = pcall(require, "toggleterm")
-        if present then
-          toggle_term.setup{
-            open_mapping = "<F10>",
-            start_in_insert = true,
-            insert_mappings = true, -- whether or not the open mapping applies in insert mode
-          }
-
-          local Terminal  = require('toggleterm.terminal').Terminal
-
-          local hterm = Terminal:new({ direction = "horizontal" })
-          nnoremap("<leader>ot", function() hterm:toggle() end, { desc = 'Toggle terminal (horizontal)' } )
-
-          local floaterm = Terminal:new({ direction = "float", float_opts = {border = "curved"} })
-          nnoremap("<F10>", function() floaterm:toggle() end, { desc = 'Toggle terminal (floating)' } )
-          nnoremap("<leader>of", function() floaterm:toggle() end, { desc = 'Toggle terminal (floating)' } )
-
-          if vim.fn.executable "lazygit" == 1 then
-            local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float", float_opts = {border = "curved"} })
-            nnoremap("<leader>ol", function() lazygit:toggle() end, { desc = 'lazygit' } )
-          end
-        end
+        nnoremap("<leader>ot", "<cmd>ToggleTerm direction=horizontal<cr>", { desc = 'Toggle terminal (horizontal)' } )
+        nnoremap("<leader>of", "<cmd>ToggleTerm direction=float<cr>", { desc = 'Toggle terminal (floating)' } )
+        nnoremap("<leader>oT", "<cmd>ToggleTerm direction=vertical<cr>", { desc = 'Toggle terminal (vertical)' } )
 
         nnoremap("<leader>xx", function() require("trouble").toggle() end, { desc = 'toggle diagnostics' } )
         nnoremap("<leader>xw", function() require("trouble").toggle("workspace_diagnostics") end, { desc = 'workspace diagnostics' } )
@@ -498,7 +479,19 @@
         };
 
         todo-comments.enable = true;
-        toggleterm.enable = true;
+        toggleterm = {
+          enable = true;
+          openMapping = "<F10>";
+          size = ''
+            function(term)
+              if term.direction == "horizontal" then
+                return 12
+              elseif term.direction == "vertical" then
+                return vim.o.columns * 0.4
+              end
+            end
+          '';
+        };
 
         treesitter = {
           enable = true;
