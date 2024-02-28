@@ -292,6 +292,7 @@
         # conform-nvim.enable = true;
         dap.enable = true;
         diffview.enable = true;
+        direnv.enable = true;
         # fidget.enable = true;
         flash.enable = true;
         friendly-snippets.enable = true;
