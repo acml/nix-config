@@ -318,7 +318,7 @@
               enable = true;
               settings.telemetry.enable = false;
             };
-            marksman.enable = true;
+            marksman.enable = false;
             nil_ls.enable = true;
             # nixd.enable = true;
             rust-analyzer = {
@@ -398,12 +398,12 @@
               deadnix.enable = true;
               gitlint.enable = true;
               golangci_lint.enable = true;
-              ltrs.enable = true;
+              # ltrs.enable = true;
               luacheck.enable = true;
               shellcheck.enable = true;
               statix.enable = true;
-              vale.enable = true;
-              write_good.enable = true;
+              # vale.enable = true;
+              # write_good.enable = true;
             };
             formatting = {
               cbfmt.enable = true;
