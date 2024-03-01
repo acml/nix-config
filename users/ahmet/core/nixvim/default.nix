@@ -539,9 +539,11 @@
 
         neogit = {
           enable = true;
-          disableHint = true;
-          graphStyle = "unicode";
-          integrations.diffview = true;
+          settings = {
+            disable_hint = true;
+            graph_style = "unicode";
+            integrations.diffview = true;
+          };
         };
 
         nix.enable = true;
