@@ -661,6 +661,7 @@
         todo-comments.enable = true;
         toggleterm = {
           enable = true;
+          floatOpts.border = "curved";
           openMapping = "<F10>";
           size = ''
             function(term)
