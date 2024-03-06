@@ -553,8 +553,8 @@
               gitlint.enable = true;
               golangci_lint.enable = true;
               # ltrs.enable = true;
-              luacheck.enable = true;
-              shellcheck.enable = true;
+              # luacheck.enable = true;
+              # shellcheck.enable = true;
               statix.enable = true;
               # vale.enable = true;
               # write_good.enable = true;
