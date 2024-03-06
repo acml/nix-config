@@ -536,17 +536,14 @@
             disable_hint = true;
             graph_style = "unicode";
             integrations.diffview = true;
+            integrations.telescope = true;
+            telescope_sorter = ''require("telescope").extensions.fzf.native_fzf_sorter'';
           };
         };
 
         nix.enable = true;
         nix-develop.enable = true;
         noice.enable = true;
-        noice.lsp.override = {
-          "vim.lsp.util.convert_input_to_markdown_lines" = true;
-          "vim.lsp.util.stylize_markdown" = true;
-          "cmp.entry.get_documentation" = true;
-        };
         none-ls = {
           enable = true;
           enableLspFormat = true;
