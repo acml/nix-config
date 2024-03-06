@@ -445,6 +445,7 @@
         # cmp_luasnip.enable = true;
         # conform-nvim.enable = true;
         dap.enable = true;
+        debugprint.enable = true;
         diffview.enable = true;
         direnv.enable = true;
         # fidget.enable = true;
