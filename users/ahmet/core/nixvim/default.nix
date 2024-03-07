@@ -619,7 +619,7 @@
             #   desc = "man pages";
             # };
             "<leader>'" = "resume";
-            "<leader>si" = "lsp_workspace_symbols";
+            "<leader>si" = "lsp_document_symbols";
           };
         };
 
