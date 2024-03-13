@@ -577,18 +577,20 @@
           deleteToTrash = true;
           skipConfirmForSimpleEdits = true;
         };
-
-        project-nvim.enable = true;
-        project-nvim.patterns = [
-          "proj.default.ini"
-          ".git"
-          "_darcs"
-          ".hg"
-          ".bzr"
-          ".svn"
-          "Makefile"
-          "package.json"
-        ];
+        project-nvim = {
+          enable = true;
+          enableTelescope = true;
+          patterns = [
+            "proj.default.ini"
+            ".git"
+            "_darcs"
+            ".hg"
+            ".bzr"
+            ".svn"
+            "Makefile"
+            "package.json"
+          ];
+        };
         rainbow-delimiters.enable = true;
         # refactoring.enable = true;
         spider.enable = true;
@@ -605,7 +607,6 @@
           extensions = {
             file_browser.enable = true;
             fzf-native.enable = true;
-            project-nvim.enable = true;
             ui-select.enable = true;
             undo.enable = true;
           };
