@@ -204,6 +204,7 @@
       extraPlugins = with pkgs.vimPlugins; [
         statuscol-nvim
         telescope-live-grep-args-nvim
+        vim-tmux-navigator
       ];
 
       globals.mapleader = " ";
