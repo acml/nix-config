@@ -547,8 +547,8 @@
         nix-develop.enable = true;
         noice.enable = true;
         none-ls = {
-          enable = false;
-          enableLspFormat = false;
+          enable = true;
+          enableLspFormat = true;
           sources = {
             diagnostics = {
               deadnix.enable = true;
