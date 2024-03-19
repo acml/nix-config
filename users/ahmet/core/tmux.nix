@@ -62,6 +62,7 @@
       set -g visual-activity off
 
       set -g status-right '%a | %Y-%m-%d | %H:%M'
+      set-option -g status-position top
     '';
   };
 }
