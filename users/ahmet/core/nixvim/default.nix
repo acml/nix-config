@@ -204,7 +204,6 @@
       extraPlugins = with pkgs.vimPlugins; [
         statuscol-nvim
         telescope-live-grep-args-nvim
-        vim-tmux-navigator
       ];
 
       globals.mapleader = " ";
@@ -624,7 +623,7 @@
             "<leader>si" = "lsp_document_symbols";
           };
         };
-
+        tmux-navigator.enable = true;
         todo-comments.enable = true;
         toggleterm = {
           enable = true;
