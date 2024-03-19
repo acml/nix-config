@@ -1,19 +1,17 @@
 { pkgs, ... }: {
   programs.tmux = {
     enable = true;
-    sensibleOnTop = true;
     aggressiveResize = true;
     clock24 = true;
-    escapeTime = 0;
-    newSession = true;
+    historyLimit = 30000;
+    keyMode = "vi";
+    mouse = true;
     plugins = with pkgs.tmuxPlugins; [
+      catppuccin
       vim-tmux-navigator
     ];
     secureSocket = false;
-    terminal = "tmux-256color";
-    historyLimit = 30000;
-    keyMode = "vi";
-    prefix = "C-a";
+    terminal = "xterm-24bit";
     extraConfig = ''
       # update the env when attaching to an existing session
       set -g update-environment -r
