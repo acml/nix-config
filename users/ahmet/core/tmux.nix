@@ -11,7 +11,7 @@
       vim-tmux-navigator
     ];
     secureSocket = false;
-    terminal = "xterm-24bit";
+    terminal = "xterm-256color";
     extraConfig = ''
       # update the env when attaching to an existing session
       set -g update-environment -r
