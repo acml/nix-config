@@ -22,6 +22,7 @@
     ];
     systemPath = lib.mkBefore [
       "/opt/homebrew/bin"
+      "/opt/homebrew/sbin"
     ];
     variables = {
       SHELL = lib.getExe pkgs.zsh;
