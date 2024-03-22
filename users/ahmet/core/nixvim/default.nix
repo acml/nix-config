@@ -516,6 +516,7 @@
             followCurrentFile.enabled = true;
             followCurrentFile.leaveDirsOpen = true;
           };
+          closeIfLastWindow = true;
           documentSymbols.followCursor = true;
           filesystem = {
             bindToCwd = false;
