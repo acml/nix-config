@@ -1,10 +1,10 @@
 { config, pkgs, ... }: {
   programs.zsh = {
     enable = true;
-    autosuggestion.enable = true;
     enableCompletion = true;
     enableVteIntegration = pkgs.stdenv.isLinux;
     autocd = true;
+    autosuggestion.enable = true;
     dotDir = ".config/zsh";
     history = {
       expireDuplicatesFirst = true;
@@ -40,7 +40,7 @@
       bindkey "''${terminfo[kcud1]}" history-substring-search-down
       bindkey '^[[B' history-substring-search-down
 
-      ${pkgs.nix-your-shell}/bin/nix-your-shell zsh | source /dev/stdin
+      ${pkgs.nix-your-shell}/bin/nix-your-shell --nom zsh | source /dev/stdin
 
       bindkey "''${terminfo[khome]}" beginning-of-line
       bindkey "''${terminfo[kend]}" end-of-line

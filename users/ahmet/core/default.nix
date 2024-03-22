@@ -36,6 +36,7 @@
       mosh
       neofetch
       nix-closure-size
+      nix-output-monitor
       ripgrep
       rsync
       truecolor-check
