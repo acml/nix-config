@@ -15,16 +15,14 @@
         if [ -f /etc/bashrc ]; then
         . /etc/bashrc
         fi
+
+        if command -v tmux &> /dev/null && [[ $- == *i* ]] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
+          exec tmux new-session -A -s main >/dev/null 2>&1
+        fi
       '';
       profileExtra = ''
         if [ -e ~/.nix-profile/etc/profile.d/nix.sh ]; then
           source ~/.nix-profile/etc/profile.d/nix.sh
-        fi
-        if [ -n "''${WSLENV}" ] ; then
-          export WAYLAND_DISPLAY='wayland-1'
-          if command -v setxkbmap >/dev/null; then
-            setxkbmap us -variant colemak
-          fi
         fi
 
         if [ -f /etc/bashrc ]; then
