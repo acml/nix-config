@@ -575,8 +575,10 @@
 
         oil = {
           enable = true;
-          deleteToTrash = true;
-          skipConfirmForSimpleEdits = true;
+          settings = {
+            delete_to_trash = true;
+            skip_confirm_for_simple_edits = true;
+          };
         };
         project-nvim = {
           enable = true;
