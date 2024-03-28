@@ -50,6 +50,9 @@
       bindkey "^[[1;5D" backward-word
       bindkey "^[[1;3D" backward-word
       bindkey -s "^O" 'fzf | xargs -r $EDITOR^M'
+      if command -v tmux &> /dev/null && [[ $- == *i* ]] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$INSIDE_EMACS" ] && [ -z "$TMUX" ]; then
+        exec tmux new-session -A -s main >/dev/null 2>&1
+      fi
     '';
     sessionVariables = {
       RPROMPT = "";
