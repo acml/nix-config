@@ -4,23 +4,10 @@
     catppuccin.enable = true;
     settings = {
       add_newline = false;
-      format = lib.concatStrings [
-        "$username"
-        "$hostname"
-        "$directory"
-        "$git_branch"
-        "$git_commit"
-        "$git_state"
-        "$git_status"
-        "$package"
-        "$haskell"
-        "$python"
-        "$rust"
-        "$nix_shell"
-        "$line_break"
-        "$jobs"
-        "$character"
-      ];
+      character = {
+        success_symbol = "[➤](bold green)";
+        error_symbol = "[➤](bold red)";
+      };
     };
   };
 }
