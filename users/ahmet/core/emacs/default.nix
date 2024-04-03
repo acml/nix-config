@@ -83,7 +83,7 @@ lib.mkMerge [
         cmake-language-server
 
         # Nix
-        nixfmt
+        nixfmt-classic
         nil
 
         # Markdown exporting
