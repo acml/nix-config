@@ -1,6 +1,6 @@
 { lib, pkgs, ... }: {
   programs.fish = {
-    enable = true;
+    enable = false;
     interactiveShellInit = lib.mkMerge [
       (lib.mkBefore ''
         set -g fish_escape_delay_ms 300
