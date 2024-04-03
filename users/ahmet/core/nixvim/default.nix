@@ -224,7 +224,7 @@
         { action = "<cmd>Oil<CR>"; key = "<leader>o-"; }
       ];
 
-      options = {
+      opts = {
         number = true; # Show line numbers
         relativenumber = true; # Show relative line numbers
 
