@@ -10,14 +10,16 @@
       colorschemes = {
         catppuccin = {
           enable = true;
-          dimInactive.enabled = true;
-          terminalColors = true;
-          integrations = {
-            dap.enabled = true;
-            illuminate.enabled = true;
-            mini.enabled = true;
-            native_lsp.enabled = true;
-            telescope.enabled = true;
+          settings = {
+            dim_inactive.enabled = true;
+            term_colors = true;
+            integrations = {
+              dap.enabled = true;
+              illuminate.enabled = true;
+              mini.enabled = true;
+              native_lsp.enabled = true;
+              telescope.enabled = true;
+            };
           };
         };
         # gruvbox.enable = true;
@@ -630,17 +632,19 @@
         todo-comments.enable = true;
         toggleterm = {
           enable = true;
-          floatOpts.border = "rounded";
-          settings.open_mapping = "<F10>";
-          size = ''
-            function(term)
-              if term.direction == "horizontal" then
-                return 12
-              elseif term.direction == "vertical" then
-                return vim.o.columns * 0.4
+          settings = {
+            float_opts.border = "rounded";
+            open_mapping = "[[<F10>]]";
+            size = ''
+              function(term)
+                if term.direction == "horizontal" then
+                  return 12
+                elseif term.direction == "vertical" then
+                  return vim.o.columns * 0.4
+                end
               end
-            end
-          '';
+            '';
+          };
         };
 
         treesitter = {
