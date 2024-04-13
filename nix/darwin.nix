@@ -1,43 +1,33 @@
-{ self
-, base16-schemes
-, darwin
-, home-manager
-, impermanence
-, nix-index-database
-, nixpkgs
-, nixvim
-, catppuccin
-, stylix
-, ...
-}:
+{ withSystem, inputs, ... }:
 let
+  inherit (inputs) self darwin nixpkgs;
   inherit (nixpkgs) lib;
 
   genConfiguration = hostname: { hostPlatform, type, ... }:
-    darwin.lib.darwinSystem {
-      system = hostPlatform;
-      pkgs = self.pkgs.${hostPlatform};
-      modules = [
-        (../hosts + "/${hostname}")
-        {
-          nix.registry = {
-            nixpkgs.flake = nixpkgs;
-            p.flake = nixpkgs;
-          };
-        }
-      ];
-      specialArgs = {
-        hostType = type;
-        inherit
-          base16-schemes
-          home-manager
-          impermanence
-          nix-index-database
-          nixvim
-          catppuccin
-          stylix;
-      };
-    };
+    withSystem hostPlatform ({ pkgs, system, ... }:
+      darwin.lib.darwinSystem {
+        inherit pkgs system;
+        modules = [
+          (../hosts + "/${hostname}")
+          {
+            nix.registry = {
+              nixpkgs.flake = nixpkgs;
+              p.flake = nixpkgs;
+            };
+          }
+        ];
+        specialArgs = {
+          hostType = type;
+          inherit (inputs)
+            base16-schemes
+            home-manager
+            impermanence
+            nix-index-database
+            nixvim
+            catppuccin
+            stylix;
+        };
+      });
 in
 lib.mapAttrs
   genConfiguration

@@ -608,7 +608,7 @@
         telescope = {
           enable = true;
           extensions = {
-            file_browser.enable = true;
+            file-browser.enable = true;
             fzf-native.enable = true;
             ui-select.enable = true;
             undo.enable = true;
@@ -631,7 +631,7 @@
         toggleterm = {
           enable = true;
           floatOpts.border = "rounded";
-          openMapping = "<F10>";
+          settings.open_mapping = "<F10>";
           size = ''
             function(term)
               if term.direction == "horizontal" then

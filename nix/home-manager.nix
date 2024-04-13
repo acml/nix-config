@@ -1,15 +1,6 @@
-{ self
-, base16-schemes
-, home-manager
-, impermanence
-, nix-index-database
-, nixpkgs
-, nixvim
-, catppuccin
-, stylix
-, ...
-}:
+{ withSystem, inputs, ... }:
 let
+  inherit (inputs) self home-manager nixpkgs;
   inherit (nixpkgs) lib;
 
   genModules = hostName: { homeDirectory, ... }:
@@ -44,27 +35,27 @@ let
       xdg = {
         dataFile.nixpkgs.source = nixpkgs;
         configFile."nix/nix.conf".text = ''
-          experimental-features = auto-allocate-uids configurable-impure-env flakes nix-command repl-flake
           flake-registry = ${config.xdg.configHome}/nix/registry.json
         '';
       };
     };
 
   genConfiguration = hostName: { hostPlatform, type, ... }@attrs:
-    home-manager.lib.homeManagerConfiguration {
-      pkgs = self.pkgs.${hostPlatform};
-      modules = [ (genModules hostName attrs) ];
-      extraSpecialArgs = {
-        hostType = type;
-        inherit
-          base16-schemes
-          impermanence
-          nix-index-database
-          nixvim
-          catppuccin
-          stylix;
-      };
-    };
+    withSystem hostPlatform ({ pkgs, ... }:
+      home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        modules = [ (genModules hostName attrs) ];
+        extraSpecialArgs = {
+          hostType = type;
+          inherit (inputs)
+            base16-schemes
+            impermanence
+            nix-index-database
+            nixvim
+            catppuccin
+            stylix;
+        };
+      });
 in
 lib.mapAttrs
   genConfiguration
