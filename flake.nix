@@ -141,7 +141,7 @@
           inputs.git-hooks.flakeModule
           inputs.treefmt.flakeModule
         ];
-        systems = [ "aarch64-darwin" "aarch64-linux" "x86_64-linux" ];
+        systems = [ "aarch64-darwin" "aarch64-linux" "x86_64-darwin" "x86_64-linux" ];
         perSystem = ctx@{ config, self', inputs', pkgs, system, ... }: {
           _module.args.pkgs = import inputs.nixpkgs {
             localSystem = system;
