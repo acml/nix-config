@@ -40,9 +40,6 @@ lib.mkMerge [
         (lib.mkIf isDarwin coreutils-prefixed)
         (lib.mkIf isDarwin pngpaste)
 
-        man-pages
-        posix_man_pages
-
         exercism
 
         ## Doom dependencies
@@ -146,7 +143,7 @@ lib.mkMerge [
         (lib.mkIf isLinux xdotool)
 
         trash-cli
-      ];
+      ] ++ lib.optionals stdenv.hostPlatform.isLinux [ man-pages posix_man_pages ];
 
       sessionPath = [ "${EMACSDIR}/bin" ];
       sessionVariables = {
