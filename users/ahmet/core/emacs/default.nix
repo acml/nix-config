@@ -143,7 +143,7 @@ lib.mkMerge [
         (lib.mkIf isLinux xdotool)
 
         trash-cli
-      ] ++ lib.optionals stdenv.hostPlatform.isLinux [ man-pages posix_man_pages ];
+      ] ++ lib.optionals stdenv.hostPlatform.isLinux [ man-pages man-pages-posix ];
 
       sessionPath = [ "${EMACSDIR}/bin" ];
       sessionVariables = {
@@ -185,6 +185,8 @@ lib.mkMerge [
       };
 
       jq.enable = true; # cli to extract data out of json input
+      man.enable = true;
+      man.generateCaches = true;
     };
   }
 
