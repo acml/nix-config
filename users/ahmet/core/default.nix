@@ -65,7 +65,6 @@
     bat = {
       enable = true;
       extraPackages = with pkgs.bat-extras; [ batman ];
-      catppuccin.enable = true;
     };
     btop.enable = true;
     gpg.enable = true;
@@ -90,8 +89,11 @@
     };
   };
 
-  catppuccin.flavour = "mocha"; # "latte" "frappe" "macchiato" "mocha"
-  catppuccin.accent = "teal"; # "blue" "flamingo" "green" "lavender" "maroon" "mauve" "peach" "pink" "red" "rosewater" "sapphire" "sky" "teal" "yellow"
+  catppuccin = {
+    enable = true;
+    flavour = "mocha"; # "latte" "frappe" "macchiato" "mocha"
+    accent = "teal"; # "blue" "flamingo" "green" "lavender" "maroon" "mauve" "peach" "pink" "red" "rosewater" "sapphire" "sky" "teal" "yellow"
+  };
 
   systemd.user.startServices = "sd-switch";
 
