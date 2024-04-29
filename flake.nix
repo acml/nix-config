@@ -1,5 +1,5 @@
 {
-  description = "acml's NixOS config";
+  description = "lovesegfault's NixOS config";
 
   nixConfig = {
     extra-trusted-substituters = [
@@ -54,6 +54,11 @@
       inputs.systems.follows = "systems";
     };
 
+    gemoji = {
+      url = "github:github/gemoji";
+      flake = false;
+    };
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -89,15 +94,6 @@
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    nixvim = {
-      url = "github:nix-community/nixvim";
-      # If you are not running an unstable channel of nixpkgs, select the corresponding branch of nixvim.
-      # url = "github:nix-community/nixvim/nixos-23.05";
-
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    catppuccin.url = "github:catppuccin/nix";
-
     git-hooks = {
       url = "github:cachix/git-hooks.nix";
       inputs = {
@@ -122,72 +118,70 @@
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    truecolor-check = {
+      url = "git+https://gist.github.com/fdeaf79e921c2f413f44b6f613f6ad53.git";
+      flake = false;
+    };
   };
 
   outputs = inputs@{ self, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; }
-      (toplevel@{ lib, withSystem, ... }:
-        let
-          localModules = import ./flake-modules toplevel;
-        in
-        {
-          imports = [
-            inputs.git-hooks.flakeModule
-            inputs.treefmt.flakeModule
-          ] ++ (lib.attrValues localModules);
-          systems = [ "aarch64-darwin" "aarch64-linux" "x86_64-darwin" "x86_64-linux" ];
-          perSystem = ctx@{ config, self', inputs', pkgs, system, ... }: {
-            _module.args.pkgs = import inputs.nixpkgs {
-              localSystem = system;
-              overlays = [ self.overlays.default ];
-              config = {
-                allowUnfree = true;
-                allowAliases = true;
-              };
-            };
-
-            devShells = import ./nix/dev-shell.nix ctx;
-
-            packages = {
-              inherit (pkgs) cachix jq nix-fast-build;
-            };
-
-            pre-commit = {
-              check.enable = true;
-              settings.hooks = {
-                actionlint.enable = true;
-                luacheck.enable = true;
-                nil.enable = true;
-                shellcheck.enable = true;
-                statix.enable = true;
-                stylua.enable = true;
-                treefmt.enable = true;
-              };
-            };
-
-            treefmt = {
-              projectRootFile = "flake.nix";
-              programs = {
-                nixpkgs-fmt.enable = true;
-                shfmt = {
-                  enable = true;
-                  indent_size = 0;
-                };
-                stylua.enable = true;
-              };
+      (toplevel@{ withSystem, ... }: {
+        imports = [
+          inputs.git-hooks.flakeModule
+          inputs.treefmt.flakeModule
+        ];
+        systems = [ "aarch64-darwin" "aarch64-linux" "x86_64-linux" ];
+        perSystem = ctx@{ config, self', inputs', pkgs, system, ... }: {
+          _module.args.pkgs = import inputs.nixpkgs {
+            localSystem = system;
+            overlays = [ self.overlays.default ];
+            config = {
+              allowUnfree = true;
+              allowAliases = true;
             };
           };
 
-          flake = {
-            flakeModules = localModules;
+          devShells = import ./nix/dev-shell.nix ctx;
 
-            hosts = import ./nix/hosts.nix;
+          packages = import ./nix/packages.nix toplevel ctx;
 
-            darwinConfigurations = import ./nix/darwin.nix toplevel;
-            homeConfigurations = import ./nix/home-manager.nix toplevel;
-            nixosConfigurations = import ./nix/nixos.nix toplevel;
-
-            deploy = import ./nix/deploy.nix toplevel;
+          pre-commit = {
+            check.enable = true;
+            settings.hooks = {
+              actionlint.enable = true;
+              luacheck.enable = true;
+              nil.enable = true;
+              shellcheck.enable = true;
+              statix.enable = true;
+              stylua.enable = true;
+              treefmt.enable = true;
+            };
           };
-        });
+
+          treefmt = {
+            projectRootFile = "flake.nix";
+            programs = {
+              nixpkgs-fmt.enable = true;
+              shfmt = {
+                enable = true;
+                indent_size = 0;
+              };
+            };
+          };
+        };
+
+        flake = {
+          hosts = import ./nix/hosts.nix;
+
+          darwinConfigurations = import ./nix/darwin.nix toplevel;
+          homeConfigurations = import ./nix/home-manager.nix toplevel;
+          nixosConfigurations = import ./nix/nixos.nix toplevel;
+
+          deploy = import ./nix/deploy.nix toplevel;
+
+          overlays = import ./nix/overlay.nix toplevel;
+        };
+      });
 }
