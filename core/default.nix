@@ -49,7 +49,7 @@
   };
 
   stylix = {
-    base16Scheme = "${base16-schemes}/ayu-dark.yaml";
+    base16Scheme = "${base16-schemes}/catppuccin-mocha.yaml";
     # We need this otherwise the autoimport clashes with our manual import.
     homeManagerIntegration.autoImport = false;
     # XXX: We fetchurl from the repo because flakes don't support git-lfs assets
