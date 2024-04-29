@@ -819,7 +819,7 @@
         "nixpkgs": "nixpkgs",
         "nixvim": "nixvim",
         "stylix": "stylix",
-        "systems": "systems",
+        "systems": "systems_3",
         "treefmt": "treefmt",
         "truecolor-check": "truecolor-check"
       }
