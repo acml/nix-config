@@ -1,5 +1,5 @@
 {
-  description = "lovesegfault's NixOS config";
+  description = "acml's NixOS config";
 
   nixConfig = {
     extra-trusted-substituters = [
@@ -94,6 +94,15 @@
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      # If you are not running an unstable channel of nixpkgs, select the corresponding branch of nixvim.
+      # url = "github:nix-community/nixvim/nixos-23.05";
+
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    catppuccin.url = "github:catppuccin/nix";
+
     git-hooks = {
       url = "github:cachix/git-hooks.nix";
       inputs = {
@@ -132,7 +141,7 @@
           inputs.git-hooks.flakeModule
           inputs.treefmt.flakeModule
         ];
-        systems = [ "aarch64-darwin" "aarch64-linux" "x86_64-linux" ];
+        systems = [ "aarch64-darwin" "aarch64-linux" "x86_64-darwin" "x86_64-linux" ];
         perSystem = ctx@{ config, self', inputs', pkgs, system, ... }: {
           _module.args.pkgs = import inputs.nixpkgs {
             localSystem = system;
