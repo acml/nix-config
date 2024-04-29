@@ -86,6 +86,7 @@
       kde.enable = lib.mkDefault false;
       xfce.enable = lib.mkDefault false;
       nixvim.enable = lib.mkDefault false;
+      btop.enable = lib.mkDefault false;
     };
   };
 
