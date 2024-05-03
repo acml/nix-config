@@ -35,7 +35,7 @@ let
       xdg = {
         dataFile.nixpkgs.source = nixpkgs;
         configFile."nix/nix.conf".text = ''
-          experimental-features = auto-allocate-uids configurable-impure-env flakes nix-command repl-flake
+          experimental-features = auto-allocate-uids configurable-impure-env flakes nix-command
           flake-registry = ${config.xdg.configHome}/nix/registry.json
         '';
       };
