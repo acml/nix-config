@@ -13,7 +13,7 @@
       ;; There are two ways to load a theme. Both assume the theme is installed and
       ;; available. You can either set `doom-theme' or manually load a theme with the
       ;; `load-theme' function. This is the default:
-      doom-theme (if (display-graphic-p) 'modus-operandi 'modus-vivendi)
+      doom-theme (if (display-graphic-p) 'modus-operandi-tinted 'modus-vivendi)
       ;; modus-operandi modus-vivendi doom-one doom-gruvbox doom-tomorrow-night
 
       ;; This determines the style of line numbers in effect. If set to `nil', line
