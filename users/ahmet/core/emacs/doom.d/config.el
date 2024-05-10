@@ -135,7 +135,7 @@
                 ;; (load-theme 'doom-one t)
                 (if (not (display-graphic-p))
                     (load-theme 'modus-vivendi)
-                  (load-theme 'modus-operandi)
+                  (load-theme 'modus-operandi-tinted)
                   (set-frame-parameter (selected-frame) 'fullscreen 'maximized))))))
 
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
