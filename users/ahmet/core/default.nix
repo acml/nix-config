@@ -88,6 +88,7 @@
       nixvim.enable = lib.mkDefault false;
       bat.enable = lib.mkDefault false;
       btop.enable = lib.mkDefault false;
+      emacs.enable = lib.mkDefault false;
     };
   };
 
