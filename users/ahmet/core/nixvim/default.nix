@@ -538,6 +538,7 @@
           enable = true;
           settings = {
             disable_hint = true;
+            disable_signs = true;
             graph_style = "unicode";
             integrations.diffview = true;
             integrations.telescope = true;
