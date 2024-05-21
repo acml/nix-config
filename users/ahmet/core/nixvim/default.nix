@@ -537,7 +537,7 @@
         neogit = {
           enable = true;
           settings = {
-            auto_show_console = false;
+            console_timeout = 5000;
             disable_hint = true;
             disable_signs = true;
             graph_style = "unicode";
