@@ -541,8 +541,13 @@
             disable_hint = true;
             disable_signs = true;
             graph_style = "unicode";
-            integrations.diffview = true;
-            integrations.telescope = true;
+            integrations = {
+              diffview = true;
+              telescope = true;
+            };
+            # kind = "floating";
+            # log_view.kind = "floating";
+            # popup.kind = "floating";
             telescope_sorter = ''require("telescope").extensions.fzf.native_fzf_sorter'';
           };
         };
