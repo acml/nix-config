@@ -5,6 +5,8 @@ nvim_lsp.util.default_config = vim.tbl_deep_extend("force", nvim_lsp.util.defaul
   flags = { debounce_text_changes = 150 },
 })
 
+require("inlay-hints").setup()
+
 -- navic
 require("nvim-navic").setup({ lsp = { auto_attach = true } })
 
@@ -56,21 +58,28 @@ local on_attach = function(_, bufnr)
   end, opts)
   vim.keymap.set("n", "[d", vim.lsp.diagnostic.goto_prev, opts)
   vim.keymap.set("n", "]d", vim.lsp.diagnostic.goto_next, opts)
-
-  require("nvim-lightbulb").setup({
-    autocmd = { enabled = true },
-  })
-  require("lsp_signature").on_attach({
-    bind = true,
-    handler_opts = { border = "rounded" },
-  }, bufnr)
 end
 
 -- Enable the following language servers
-local servers = { "bufls", "clangd", "pyright", "ruff_lsp", "texlab" }
+local servers = { "bufls", "pyright", "ruff_lsp", "texlab" }
 for _, lsp in ipairs(servers) do
   nvim_lsp[lsp].setup({ on_attach = on_attach })
 end
+
+nvim_lsp["clangd"].setup({
+  on_attach = on_attach,
+  settings = {
+    clangd = {
+      InlayHints = {
+        Designators = true,
+        Enabled = true,
+        ParameterNames = true,
+        DeducedTypes = true,
+      },
+      fallbackFlags = { "-std=c++20" },
+    },
+  },
+})
 
 nvim_lsp["ltex"].setup({
   on_attach = function(client, bufnr)
@@ -99,6 +108,9 @@ nvim_lsp["lua_ls"].setup({
         -- Get the language server to recognize the `vim` global
         globals = { "vim" },
       },
+      hint = {
+        enable = true, -- necessary
+      },
       workspace = {
         -- Make the server aware of Neovim runtime files
         library = vim.api.nvim_get_runtime_file("", true),
@@ -122,9 +134,47 @@ nvim_lsp["nil_ls"].setup({
   },
 })
 
-require("rust-tools").setup({
-  server = { on_attach = on_attach },
-})
+vim.g.rustaceanvim = {
+  server = {
+    on_attach = on_attach,
+    settings = {
+      ["rust-analyzer"] = {
+        inlayHints = {
+          bindingModeHints = {
+            enable = false,
+          },
+          chainingHints = {
+            enable = true,
+          },
+          closingBraceHints = {
+            enable = true,
+            minLines = 25,
+          },
+          closureReturnTypeHints = {
+            enable = "never",
+          },
+          lifetimeElisionHints = {
+            enable = "never",
+            useParameterNames = false,
+          },
+          maxLength = 25,
+          parameterHints = {
+            enable = true,
+          },
+          reborrowHints = {
+            enable = "never",
+          },
+          renderColons = true,
+          typeHints = {
+            enable = true,
+            hideClosureInitialization = false,
+            hideNamedConstructor = false,
+          },
+        },
+      },
+    },
+  },
+}
 
 -- Map :Format to vim.lsp.buf.formatting()
 vim.cmd([[ command! Format execute "lua vim.lsp.buf.format({ async = true })" ]])

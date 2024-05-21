@@ -37,19 +37,17 @@
         which-key-nvim # popups for keybindings for commands
 
         # lsp
-        ltex_extra-nvim # ltex LSP configuration
-        nvim-lightbulb # lightbulb sign when LSP actions are available
         nvim-lspconfig # LSP
+        ltex_extra-nvim # ltex LSP configuration
         lsp-progress-nvim # Progress indicator for statusbar
-        lsp_signature-nvim # Show function signature when you type
+        rustaceanvim # nonstandard LSP features for rust-analyzer
+        inlay-hints-nvim # inlay hint easy config
 
         # tooling
         bufdelete-nvim # delete buffers without losing window layout
         guess-indent-nvim # automatic indentation style detection
         nvim-surround # add/change/delete surrounding delimiter pairs with ease
-        rust-tools-nvim
-        # FIXME: Re-add this as vim-suda after https://github.com/NixOS/nixpkgs/pull/312245
-        # suda-vim # sudo write
+        vim-suda # sudo write
         telescope-frecency-nvim
         telescope-nvim
         telescope-file-browser-nvim
