@@ -31,16 +31,6 @@
         vim.opt.cursorline = true
         vim.opt.cursorlineopt = "number"
 
-        local builtin = require("statuscol.builtin")
-        require("statuscol").setup({
-          relculright = true,
-          segments = {
-            { text = { builtin.foldfunc },      click = "v:lua.ScFa" },
-            { text = { " %s" },                 click = "v:lua.ScSa" },
-            { text = { builtin.lnumfunc, " " }, click = "v:lua.ScLa" },
-          },
-        })
-
         -- UFO folding
         vim.o.foldcolumn         = "1" -- '0' is not bad
         vim.o.foldlevel          = 99 -- Using ufo provider need a large value, feel free to decrease the value
@@ -100,6 +90,26 @@
         vim.diagnostic.config({
           virtual_text = false
         })
+
+        -- recommended mappings
+        -- resizing splits
+        -- these keymaps will also accept a range,
+        -- for example `10<A-h>` will `resize_left` by `(10 * config.default_amount)`
+        vim.keymap.set('n', '<A-h>', require('smart-splits').resize_left)
+        vim.keymap.set('n', '<A-j>', require('smart-splits').resize_down)
+        vim.keymap.set('n', '<A-k>', require('smart-splits').resize_up)
+        vim.keymap.set('n', '<A-l>', require('smart-splits').resize_right)
+        -- moving between splits
+        vim.keymap.set('n', '<C-h>', require('smart-splits').move_cursor_left)
+        vim.keymap.set('n', '<C-j>', require('smart-splits').move_cursor_down)
+        vim.keymap.set('n', '<C-k>', require('smart-splits').move_cursor_up)
+        vim.keymap.set('n', '<C-l>', require('smart-splits').move_cursor_right)
+        vim.keymap.set('n', '<C-\\>', require('smart-splits').move_cursor_previous)
+        -- swapping buffers between windows
+        vim.keymap.set('n', '<leader><leader>h', require('smart-splits').swap_buf_left)
+        vim.keymap.set('n', '<leader><leader>j', require('smart-splits').swap_buf_down)
+        vim.keymap.set('n', '<leader><leader>k', require('smart-splits').swap_buf_up)
+        vim.keymap.set('n', '<leader><leader>l', require('smart-splits').swap_buf_right)
 
         local telescope = require("telescope")
         local lga_actions = require("telescope-live-grep-args.actions")
@@ -203,8 +213,8 @@
         end
       '';
 
+      extraPackages = with pkgs; [ universal-ctags ];
       extraPlugins = with pkgs.vimPlugins; [
-        statuscol-nvim
         telescope-live-grep-args-nvim
       ];
 
@@ -410,57 +420,67 @@
             ];
         };
         bufferline.enable = true;
-        # cmp-buffer.enable = true;
-        # cmp-calc.enable = true;
-        # cmp-clippy.enable = true;
-        # cmp-cmdline.enable = true;
-        # cmp-cmdline-history.enable = true;
-        # cmp-conventionalcommits.enable = true;
-        # cmp-dap.enable = true;
-        # cmp-dictionary.enable = true;
-        # cmp-digraphs.enable = true;
-        # cmp-emoji.enable = true;
-        # cmp-fish.enable = true;
-        # cmp-fuzzy-buffer.enable = true;
-        # cmp-fuzzy-path.enable = true;
-        # cmp-git.enable = true;
-        # cmp-latex-symbols.enable = true;
-        # cmp-look.enable = true;
-        # cmp-npm.enable = true;
-        # cmp-nvim-lsp.enable = true;
-        # cmp-nvim-lsp-document-symbol.enable = true;
-        # cmp-nvim-lsp-signature-help.enable = true;
-        # cmp-nvim-lua.enable = true;
-        # cmp-omni.enable = true;
-        # cmp-pandoc-nvim.enable = true;
-        # cmp-pandoc-references.enable = true;
-        # cmp-path.enable = true;
-        # cmp-rg.enable = true;
-        # cmp-snippy.enable = true;
-        # cmp-spell.enable = true;
-        # cmp-tmux.enable = true;
-        # cmp-treesitter.enable = true;
-        # cmp-vim-lsp.enable = true;
-        # cmp-vimwiki-tags.enable = true;
-        # cmp-vsnip.enable = true;
-        # cmp-zsh.enable = true;
-        # cmp_luasnip.enable = true;
-        # conform-nvim.enable = true;
+        clangd-extensions.enable = true;
+        cmp.enable = true;
         dap.enable = true;
         debugprint.enable = true;
         diffview.enable = true;
         direnv.enable = true;
-        # fidget.enable = true;
         flash.enable = true;
         friendly-snippets.enable = true;
-        # fugitive.enable = true;
+        gitblame.enable = true;
+        gitblame.virtualTextColumn = 121;
         gitsigns.enable = true;
+        gitsigns.settings.on_attach = ''
+          function(bufnr)
+            local gitsigns = require('gitsigns')
+
+            local function map(mode, l, r, opts)
+              opts = opts or {}
+              opts.buffer = bufnr
+              vim.keymap.set(mode, l, r, opts)
+            end
+
+            -- Navigation
+            map('n', ']h', function()
+              if vim.wo.diff then
+                vim.cmd.normal({']h', bang = true})
+              else
+                gitsigns.nav_hunk('next')
+              end
+            end)
+
+            map('n', '[h', function()
+              if vim.wo.diff then
+                vim.cmd.normal({'[h', bang = true})
+              else
+                gitsigns.nav_hunk('prev')
+              end
+            end)
+
+            -- Actions
+            map('n', '<leader>ghs', gitsigns.stage_hunk, { desc = 'stage hunk' })
+            map('n', '<leader>ghr', gitsigns.reset_hunk, { desc = 'reset hunk' })
+            map('v', '<leader>ghs', function() gitsigns.stage_hunk {vim.fn.line('.'), vim.fn.line('v')} end, { desc = 'stage hunk' })
+            map('v', '<leader>ghr', function() gitsigns.reset_hunk {vim.fn.line('.'), vim.fn.line('v')} end, { desc = 'reset hunk' })
+            map('n', '<leader>ghS', gitsigns.stage_buffer, { desc = 'stage buffer' })
+            map('n', '<leader>ghu', gitsigns.undo_stage_hunk, { desc = 'undo stage hunk' })
+            map('n', '<leader>ghR', gitsigns.reset_buffer, { desc = 'reset buffer' })
+            map('n', '<leader>ghp', gitsigns.preview_hunk, { desc = 'preview hunk' })
+            map('n', '<leader>ghb', function() gitsigns.blame_line{full=true} end, { desc = 'blame line' })
+            map('n', '<leader>gtb', gitsigns.toggle_current_line_blame, { desc = 'toggle current line blame' })
+            map('n', '<leader>ghd', gitsigns.diffthis, { desc = 'diff this' })
+            map('n', '<leader>ghD', function() gitsigns.diffthis('~') end, { desc = 'diff ~' })
+            map('n', '<leader>gtd', gitsigns.toggle_deleted, { desc = 'toggle deleted' })
+
+            -- Text object
+            map({'o', 'x'}, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
+          end
+        '';
+        hmts.enable = true;
         illuminate.enable = true;
         lastplace.enable = true;
         # lint.enable = true;
-        lualine.enable = true;
-        lualine.globalstatus = true;
-        luasnip.enable = true;
         lsp = {
           enable = true;
           servers = {
@@ -494,10 +514,13 @@
         lspkind.enable = true;
         lspsaga = {
           enable = true;
+          codeAction.extendGitSigns = true;
           lightbulb.sign = false;
           diagnostic.diagnosticOnlyCurrent = true;
         };
-
+        lualine.enable = true;
+        lualine.globalstatus = true;
+        luasnip.enable = true;
         mini = {
           enable = true;
           modules = {
@@ -510,7 +533,6 @@
             splitjoin = { };
           };
         };
-
         neo-tree = {
           enable = true;
           buffers = {
@@ -533,7 +555,6 @@
             position = "right";
           };
         };
-
         neogit = {
           enable = true;
           settings = {
@@ -545,13 +566,10 @@
               diffview = true;
               telescope = true;
             };
-            # kind = "floating";
-            # log_view.kind = "floating";
-            # popup.kind = "floating";
             telescope_sorter = ''require("telescope").extensions.fzf.native_fzf_sorter'';
           };
         };
-
+        neotest.enable = true;
         nix.enable = true;
         nix-develop.enable = true;
         noice.enable = true;
@@ -578,10 +596,9 @@
           };
         };
         notify.enable = true;
-
-        cmp.enable = true;
+        nvim-bqf.enable = true;
+        nvim-colorizer.enable = true;
         nvim-ufo.enable = true;
-
         oil = {
           enable = true;
           settings = {
@@ -604,7 +621,10 @@
           ];
         };
         rainbow-delimiters.enable = true;
-        # refactoring.enable = true;
+        rust-tools.enable = true;
+        rustaceanvim.enable = true;
+        smart-splits.enable = true;
+        sniprun.enable = true;
         spider.enable = true;
         spider.keymaps.motions = {
           b = "b";
@@ -612,12 +632,22 @@
           ge = "ge";
           w = "w";
         };
+        statuscol.enable = true;
+        statuscol.settings = {
+          relculright = true;
+          segments = [
+            { click = "v:lua.ScFa"; text = [{ __raw = "require('statuscol.builtin').foldfunc"; }]; }
+            { click = "v:lua.ScSa"; text = [ " %s" ]; }
+            { click = "v:lua.ScLa"; text = [{ __raw = "require('statuscol.builtin').lnumfunc"; } " "]; }
+          ];
+        };
         surround.enable = true;
         tagbar.enable = true;
         telescope = {
           enable = true;
           extensions = {
             file-browser.enable = true;
+            frecency.enable = true;
             fzf-native.enable = true;
             ui-select.enable = true;
             undo.enable = true;
@@ -635,7 +665,7 @@
             "<leader>si" = "lsp_document_symbols";
           };
         };
-        tmux-navigator.enable = true;
+        # tmux-navigator.enable = true;
         todo-comments.enable = true;
         toggleterm = {
           enable = true;
