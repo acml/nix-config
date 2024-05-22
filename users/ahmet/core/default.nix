@@ -94,7 +94,7 @@
 
   catppuccin = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
-    flavour = "mocha"; # "latte" "frappe" "macchiato" "mocha"
+    flavor = "mocha"; # "latte" "frappe" "macchiato" "mocha"
     accent = "teal"; # "blue" "flamingo" "green" "lavender" "maroon" "mauve" "peach" "pink" "red" "rosewater" "sapphire" "sky" "teal" "yellow"
   };
 
