@@ -16,7 +16,7 @@
         . /etc/bashrc
         fi
 
-        if command -v tmux &> /dev/null && [[ $- == *i* ]] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$INSIDE_EMACS" ] && [ -z "$TMUX" ]; then
+        if command -v tmux &> /dev/null && [[ $- == *i* ]] && [[ ! "$TERM" =~ xterm-kitty ]] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$INSIDE_EMACS" ] && [ -z "$TMUX" ]; then
           exec tmux new-session -A -s main >/dev/null 2>&1
         fi
       '';
