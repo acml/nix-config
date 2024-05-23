@@ -1,4 +1,4 @@
-{ lib, hostType, pkgs, ... }: {
+{ lib, hostType, ... }: {
   xdg = {
     configFile."kitty/relative_resize.py" = {
       source = ./relative_resize.py;
