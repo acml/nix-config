@@ -69,8 +69,14 @@
     btop.enable = true;
     gpg.enable = true;
     nix-index.enable = true;
-    yazi.enable = true;
-    yazi.catppuccin.enable = false;
+    yazi = {
+      enable = true;
+      catppuccin.enable = false;
+      enableBashIntegration = true;
+      enableFishIntegration = true;
+      enableNushellIntegration = true;
+      enableZshIntegration = true;
+    };
     zoxide.enable = true;
     zoxide.options = [ "--cmd cd" ];
   };
