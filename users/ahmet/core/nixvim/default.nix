@@ -621,6 +621,8 @@
           ];
         };
         rainbow-delimiters.enable = true;
+        refactoring.enable = true;
+        refactoring.enableTelescope = true;
         rust-tools.enable = true;
         rustaceanvim.enable = true;
         smart-splits.enable = true;
@@ -691,7 +693,6 @@
           nixvimInjections = true;
         };
         # treesitter-context.enable = true;
-        treesitter-refactor.enable = true;
         treesitter-textobjects.enable = true;
 
         trouble.enable = true;
