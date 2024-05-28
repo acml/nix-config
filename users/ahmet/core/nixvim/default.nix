@@ -428,6 +428,7 @@
         direnv.enable = true;
         flash.enable = true;
         friendly-snippets.enable = true;
+        git-conflict.enable = true;
         gitblame.enable = true;
         gitblame.virtualTextColumn = 121;
         gitsigns.enable = true;
@@ -694,7 +695,8 @@
         };
         # treesitter-context.enable = true;
         treesitter-textobjects.enable = true;
-
+        trim.enable = true;
+        trim.settings.trim_on_write = false;
         trouble.enable = true;
         ts-context-commentstring.enable = true;
 
