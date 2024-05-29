@@ -47,6 +47,7 @@ lib.mkMerge [
         # ripgrep-all
 
         ## Optional dependencies
+        dtach
         fd # faster projectile indexing
         imagemagick # for image-dired
         unzip

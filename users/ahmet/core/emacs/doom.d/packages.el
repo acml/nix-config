@@ -51,6 +51,7 @@
 
 (package! beginend)
 (package! daemons)
+(package! detached)
 (package! disk-usage)
 (package! dts-mode)
 (package! exercism)
