@@ -175,7 +175,7 @@ lib.mkMerge [
       emacs = {
         enable = true;
         package = lib.mkMerge [
-          (lib.mkIf isLinux pkgs.emacs29-pgtk)
+          (lib.mkIf isLinux pkgs.emacs29)
           (lib.mkIf isDarwin pkgs.emacs29)
         ];
         extraPackages = epkgs: (with epkgs; [
