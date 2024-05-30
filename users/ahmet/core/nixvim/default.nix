@@ -260,11 +260,12 @@
         let g:asyncrun_open = 6
         let g:asyncrun_rootmarks = ['proj.default.ini', '.git', '.svn', '.root', '.project', '.hg']
 
+        noremap <silent><leader>oa :Telescope asynctasks all<cr>
         noremap <silent><f5> :AsyncTask file-run<cr>
         noremap <silent><f6> :AsyncTask project-run<cr>
         noremap <silent><f7> :AsyncTask project-build<cr>
-        noremap <silent><f8> :cnext<cr>
-        noremap <silent><s-f8> :cprevious<cr>
+        noremap <silent><f8> :cnext<cr>zz
+        noremap <silent><s-f8> :cprevious<cr>zz
         noremap <silent><f9> :AsyncTask file-build<cr>
       '';
 
