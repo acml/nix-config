@@ -176,8 +176,10 @@
 (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t)
                     ("^\\*\\(?:Wo\\)?Man " :size 82 :side right :select t :quit t)))
 
-(after! avy
-  (setq avy-all-windows 'all-frames))
+(use-package! avy
+  :config
+  (setq avy-all-windows 'all-frames)
+  (setq avy-all-windows-alt nil))
 
 (use-package! beginend
   :hook (after-init . beginend-global-mode))
