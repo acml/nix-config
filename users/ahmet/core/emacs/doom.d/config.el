@@ -577,6 +577,11 @@ the sequences will be lost."
 
 (setq +workspaces-switch-project-function #'dired)
 
+(map! :when (modulep! :ui workspaces)
+      :map doom-leader-workspace-map
+      :desc "Swap Left"  "<" #'+workspace/swap-left
+      :desc "Swap Right" ">" #'+workspace/swap-right)
+
 (use-package! proced
   :defer t
   :init
