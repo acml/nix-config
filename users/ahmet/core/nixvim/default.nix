@@ -1,4 +1,40 @@
 { pkgs, ... }: {
+  xdg.configFile."nvim/tasks.ini".enable = true;
+  xdg.configFile."nvim/tasks.ini".text = ''
+    [file-build]
+    command:c,cpp=gcc -O2 -Wall "$(VIM_FILEPATH)" -o "$(VIM_PATHNOEXT)" -lstdc++ -lm -msse3
+    command:go=go build -o "$(VIM_PATHNOEXT)" "$(VIM_FILEPATH)"
+    command:make=make -f "$(VIM_FILEPATH)"
+    output=quickfix
+    cwd=$(VIM_FILEDIR)
+    save=2
+
+    [file-run]
+    command="$(VIM_FILEPATH)"
+    command:c,cpp="$(VIM_PATHNOEXT)"
+    command:go="$(VIM_PATHNOEXT)"
+    command:python=python "$(VIM_FILENAME)"
+    command:javascript=node "$(VIM_FILENAME)"
+    command:sh=sh "$(VIM_FILENAME)"
+    command:lua=lua "$(VIM_FILENAME)"
+    command:perl=perl "$(VIM_FILENAME)"
+    command:ruby=ruby "$(VIM_FILENAME)"
+    output=terminal
+    cwd=$(VIM_FILEDIR)
+    save=2
+
+    [project-build]
+    command=./setenv_docker.sh make -j$(nproc) -s
+    # set the working directory to the project root.
+    cwd=$(VIM_ROOT)/cp1200/cp1243-1/csd
+
+    [project-run]
+    command=./setenv_docker.sh make run
+    # <root> is an alias to `$(VIM_ROOT)`, a little easier to type.
+    cwd=<root>/cp1200/cp1243-1/csd
+    output=terminal
+  '';
+
   programs = {
 
     nixvim = {
@@ -28,6 +64,7 @@
       };
 
       extraConfigLua = ''
+
         vim.opt.cursorline = true
         vim.opt.cursorlineopt = "number"
 
@@ -110,6 +147,12 @@
         vim.keymap.set('n', '<leader><leader>j', require('smart-splits').swap_buf_down)
         vim.keymap.set('n', '<leader><leader>k', require('smart-splits').swap_buf_up)
         vim.keymap.set('n', '<leader><leader>l', require('smart-splits').swap_buf_right)
+
+        vim.keymap.set('n', '[e', "<cmd>cprevious<cr>zv", { silent = true, desc = "previous qf item" })
+        vim.keymap.set('n', ']e', "<cmd>cnext<cr>zv", { silent = true, desc = "next qf item" })
+
+        vim.keymap.set('n', '[E', "<cmd>cfirst<cr>zv", { silent = true, desc = "first qf item" })
+        vim.keymap.set('n', ']E', "<cmd>clast<cr>zv", { silent = true, desc = "last qf item" })
 
         local telescope = require("telescope")
         local lga_actions = require("telescope-live-grep-args.actions")
@@ -213,8 +256,23 @@
         end
       '';
 
+      extraConfigVim = ''
+        let g:asyncrun_open = 6
+        let g:asyncrun_rootmarks = ['proj.default.ini', '.git', '.svn', '.root', '.project', '.hg']
+
+        noremap <silent><f5> :AsyncTask file-run<cr>
+        noremap <silent><f6> :AsyncTask project-run<cr>
+        noremap <silent><f7> :AsyncTask project-build<cr>
+        noremap <silent><f8> :cnext<cr>
+        noremap <silent><s-f8> :cprevious<cr>
+        noremap <silent><f9> :AsyncTask file-build<cr>
+      '';
+
       extraPackages = with pkgs; [ universal-ctags ];
       extraPlugins = with pkgs.vimPlugins; [
+        asyncrun-vim
+        asynctasks-vim
+        telescope-asynctasks-nvim
         telescope-live-grep-args-nvim
       ];
 
@@ -512,6 +570,7 @@
         lsp-format.enable = true;
         lsp-format.lspServersToEnable = [ "gopls" "rust-analyzer" ];
         # lsp-lines.enable = true;
+        lsp-status.enable = true;
         lspkind.enable = true;
         lspsaga = {
           enable = true;
@@ -610,6 +669,7 @@
         project-nvim = {
           enable = true;
           enableTelescope = true;
+          manualMode = true;
           patterns = [
             "proj.default.ini"
             ".git"
