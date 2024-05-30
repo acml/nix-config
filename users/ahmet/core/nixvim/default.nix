@@ -570,7 +570,6 @@
         lsp-format.enable = true;
         lsp-format.lspServersToEnable = [ "gopls" "rust-analyzer" ];
         # lsp-lines.enable = true;
-        lsp-status.enable = true;
         lspkind.enable = true;
         lspsaga = {
           enable = true;
