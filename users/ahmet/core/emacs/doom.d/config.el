@@ -166,9 +166,6 @@
   :desc "Switch to window 8" :n "8" #'winum-select-window-8
   :desc "Switch to window 9" :n "9" #'winum-select-window-9))
 
-;; (add-to-list 'term-file-aliases
-;;              '("alacritty" . "xterm-256color"))
-
 (map! "M-c" #'capitalize-dwim
       "M-l" #'downcase-dwim
       "M-u" #'upcase-dwim)
@@ -178,8 +175,9 @@
 
 (use-package! avy
   :config
-  (setq avy-all-windows 'all-frames)
-  (setq avy-all-windows-alt nil))
+  (setq avy-all-windows 'all-frames
+        avy-all-windows-alt nil
+        avy-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)))
 
 (use-package! beginend
   :hook (after-init . beginend-global-mode))
@@ -320,15 +318,10 @@
 ;   :config
 ;   (global-evil-colemak-basics-mode))
 
-(setq avy-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)
-      lispy-avy-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y))
-
 ;; :ui window-select settings, ignoring +numbers flag for now
-(after! ace-window
+(use-package! ace-window
+  :config
   (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)))
-(after! switch-window
-  (setq switch-window-shortcut-style 'qwerty
-        switch-window-qwerty-shortcuts '("a" "r" "s" "t" "d" "h" "n" "e" "i" "o" "w" "f" "p" "l" "u" "y")))
 
 (after! expand-region
   (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
@@ -593,6 +586,11 @@ the sequences will be lost."
 
 (after! projectile
   (setq ;; projectile-switch-project-action 'projectile-dired
+   projectile-project-root-functions '(projectile-root-local
+                                       projectile-root-marked
+                                       projectile-root-top-down
+                                       projectile-root-bottom-up
+                                       projectile-root-top-down-recurring)
    projectile-enable-caching t
    projectile-project-search-path '(("~/git_pa" . 2) ("~/Projects" . 3))))
 
