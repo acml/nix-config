@@ -299,7 +299,7 @@
         { action = "<cmd>update<CR>"; key = "<leader>bs"; }
         { action = "<cmd>wall<CR>"; key = "<leader>bS"; }
 
-        { action = "<cmd>Neogit<CR>"; key = "<leader>gg"; }
+        { action = "<cmd>Neogit cwd=%:p:h<CR>"; key = "<leader>gg"; }
         { action = "<cmd>Neotree toggle<CR>"; key = "<leader>op"; }
         { action = "<cmd>Oil<CR>"; key = "<leader>o-"; }
       ];
