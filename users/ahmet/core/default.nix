@@ -52,7 +52,7 @@
 
   programs = {
     atuin = {
-      enable = pkgs.stdenv.isLinux;
+      enable = true;
       flags = [ "--disable-up-arrow" ];
       settings = {
         auto_sync = false;
