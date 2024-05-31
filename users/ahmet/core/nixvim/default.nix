@@ -69,6 +69,12 @@
         vim.o.fillchars          = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
         vim.cmd [[set signcolumn=yes]]
 
+        local signs = { Error = "", Warn = "", Hint = "", Info = "" }
+        for type, icon in pairs(signs) do
+          local hl = "DiagnosticSign" .. type
+          vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+        end
+
         vim.api.nvim_create_autocmd('FileType', {
           group = augroup,
           pattern = 'NeogitLogView',
@@ -604,6 +610,12 @@
             followCurrentFile.leaveDirsOpen = true;
           };
           closeIfLastWindow = true;
+          defaultComponentConfigs.diagnostics.symbols = {
+            error = "";
+            hint = "";
+            info = "";
+            warn = "";
+          };
           documentSymbols.followCursor = true;
           filesystem = {
             bindToCwd = false;
