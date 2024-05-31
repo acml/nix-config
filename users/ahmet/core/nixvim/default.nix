@@ -49,13 +49,6 @@
           settings = {
             dim_inactive.enabled = true;
             term_colors = true;
-            integrations = {
-              dap.enabled = true;
-              illuminate.enabled = true;
-              mini.enabled = true;
-              native_lsp.enabled = true;
-              telescope.enabled = true;
-            };
           };
         };
         # gruvbox.enable = true;
@@ -75,6 +68,16 @@
         vim.o.foldenable         = true
         vim.o.fillchars          = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
         vim.cmd [[set signcolumn=yes]]
+
+        vim.api.nvim_create_autocmd('FileType', {
+          group = augroup,
+          pattern = 'NeogitLogView',
+          callback = function()
+            vim.defer_fn(function()
+              vim.cmd [[set signcolumn=yes]]
+            end, 0)
+          end,
+        })
 
         vim.cmd("set ignorecase")
         vim.cmd("set smartcase")
