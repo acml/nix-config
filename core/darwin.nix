@@ -26,6 +26,7 @@
     ];
     variables = {
       SHELL = lib.getExe pkgs.zsh;
+      EDITOR = "nvim";
     };
     postBuild = ''
       ln -sv ${pkgs.path} $out/nixpkgs
