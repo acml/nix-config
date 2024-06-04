@@ -263,6 +263,11 @@
           -- vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, {})
           vim.keymap.set("n", "<leader>ca", '<cmd>Lspsaga code_action<cr>', {})
         end
+
+        require('orgmode').setup({
+          org_agenda_files = {'~/Documents/org/*', '~/my-orgs/**/*'},
+          org_default_notes_file = '~/Documents/org/refile.org',
+        })
       '';
 
       extraConfigVim = ''
@@ -282,6 +287,7 @@
       extraPlugins = with pkgs.vimPlugins; [
         asyncrun-vim
         asynctasks-vim
+        orgmode
         telescope-asynctasks-nvim
         telescope-live-grep-args-nvim
       ];
