@@ -572,7 +572,7 @@
               settings.telemetry.enable = false;
             };
             marksman.enable = false;
-            nil_ls.enable = true;
+            nil-ls.enable = true;
             # nixd.enable = true;
             rust-analyzer = {
               enable = true;
