@@ -71,7 +71,6 @@
     nix-index.enable = true;
     yazi = {
       enable = true;
-      catppuccin.enable = false;
       enableBashIntegration = true;
       enableFishIntegration = true;
       enableNushellIntegration = true;
