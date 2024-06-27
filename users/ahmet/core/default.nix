@@ -84,8 +84,6 @@
   stylix = {
     enable = true;
     base16Scheme = "${base16-schemes}/catppuccin-mocha.yaml";
-    cursor.package = pkgs.catppuccin;
-    cursor.name = "mochaTeal";
     # XXX: We fetchurl from the repo because flakes don't support git-lfs assets
     image = pkgs.fetchurl {
       url = "https://media.githubusercontent.com/media/lovesegfault/nix-config/bda48ceaf8112a8b3a50da782bf2e65a2b5c4708/users/bemeurer/assets/walls/plants-00.jpg";
