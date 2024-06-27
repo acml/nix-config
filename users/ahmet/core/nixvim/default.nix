@@ -56,7 +56,7 @@
         # tokyonight.enable = true;
       };
 
-      extraConfigLua = ''
+      extraConfigLua = /* lua */ ''
 
         vim.opt.cursorline = true
         vim.opt.cursorlineopt = "number"
@@ -270,7 +270,7 @@
         })
       '';
 
-      extraConfigVim = ''
+      extraConfigVim = /* vim */ ''
         let g:asyncrun_open = 6
         let g:asyncrun_rootmarks = ['proj.default.ini', '.git', '.svn', '.root', '.project', '.hg']
 
@@ -506,7 +506,7 @@
         gitblame.enable = true;
         gitblame.virtualTextColumn = 121;
         gitsigns.enable = true;
-        gitsigns.settings.on_attach = ''
+        gitsigns.settings.on_attach = /* lua */ ''
           function(bufnr)
             local gitsigns = require('gitsigns')
 
@@ -756,7 +756,7 @@
           settings = {
             float_opts.border = "rounded";
             open_mapping = "[[<F10>]]";
-            size = ''
+            size = /* lua */ ''
               function(term)
                 if term.direction == "horizontal" then
                   return 12
