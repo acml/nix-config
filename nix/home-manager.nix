@@ -38,6 +38,9 @@ let
           experimental-features = auto-allocate-uids configurable-impure-env flakes nix-command
           flake-registry = ${config.xdg.configHome}/nix/registry.json
         '';
+        # Workaround for HM passing a nonexistent units dir to sd-switch
+        # FIXME: https://github.com/nix-community/home-manager/issues/5552
+        configFile."systemd/user/.hm-keep".text = "";
       };
     };
 

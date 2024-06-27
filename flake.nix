@@ -42,6 +42,11 @@
       };
     };
 
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -112,7 +117,8 @@
     };
 
     stylix = {
-      url = "github:danth/stylix";
+      # FIXME: Rollback to danth/stylix once merged
+      url = "github:lovesegfault/stylix/fix-darwin";
       inputs = {
         flake-compat.follows = "flake-compat";
         home-manager.follows = "home-manager";
