@@ -234,7 +234,6 @@
     :desc "Up" :n "<left>" #'dired-up-directory
     :desc "Down" :n "<right>" #'dired-find-file)))
 
-(map! :map dired-mode-map :ng "q" #'dirvish-quit)
 (use-package! dirvish
   :after dired
   :config
@@ -251,31 +250,14 @@
         dirvish-attributes '(subtree-state nerd-icons collapse git-msg vc-state file-size file-time)
         dirvish-header-line-format '(:left (path) :right (free-space)))
 
-  ;; (map! :map dired-mode-map :ng "q" #'quit-window)
-  (map! :map dirvish-mode-map
-        :n "b" #'dirvish-quick-access
-        :n "z" #'dirvish-show-history
-        ;; :n "f" #'dirvish-file-info-menu
-        :n "F" #'dirvish-layout-toggle
-        ;; :n "l" #'dired-find-file
-        ;; :n "h" #'dired-up-directory
-        :n "TAB" #'dirvish-subtree-toggle
-        :n "?" #'dirvish-dispatch
-        ;; :n "q" #'dirvish-quit
-        ;; :localleader
-        ;; "h" #'dired-omit-mode
-        )
+  (map! :map dirvish-mode-map :n "?" #'dirvish-dispatch)
 
   (dirvish-define-preview exa (file)
     "Use `exa' to generate directory preview."
     (when (file-directory-p file) ; we only interest in directories here
       `(shell . ("exa" "--color=always" "-al" ,file)))) ; use the output of `exa' command as preview
 
-  (add-to-list 'dirvish-preview-dispatchers 'exa)
-  ;; :bind
-  ;; (:map dired-mode-map ; Dirvish respects all the keybindings in this map
-  ;;  ("TAB" . dirvish-subtree-toggle))
-  )
+  (add-to-list 'dirvish-preview-dispatchers 'exa))
 
 ;; Easier to match with a bspwm rule:
 ;;   bspc rule -a 'Emacs:emacs-everywhere' state=floating sticky=on
