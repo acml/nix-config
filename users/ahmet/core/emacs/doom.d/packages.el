@@ -77,7 +77,7 @@
 ;; conflicting. list-load-path-shadows will show you if you have a package
 ;; defined in multiple locations. This will use pdf-tools installed by nix
 (package! pdf-tools :built-in 'prefer)
-
+(package! rainbow-mode)
 (package! scopeline)
 ;; (package! shrface :recipe (:host github :repo "chenyanming/shrface"))
 (package! turkish)
