@@ -426,21 +426,21 @@ the sequences will be lost."
                   (add-to-list 'magit-repository-directories (cons (expand-file-name (concat project-root folder)) 0))))))))))
 
   (setq magit-repolist-columns
-        '(("Name" 72 magit-repolist-column-ident nil)
+        '(("Name" 24 magit-repolist-column-ident nil)
           ("Version" 58 magit-repolist-column-version
            ((:sort magit-repolist-version<)))
-          ("Status" 7 magit-repolist-column-flag
+          ("Status" 6 magit-repolist-column-flag
            ((:right-align t)))
-          ("B<U" 7 magit-repolist-column-unpulled-from-upstream
+          ("B<U" 4 magit-repolist-column-unpulled-from-upstream
            ((:right-align t)
             (:sort <)
             (:help-echo "Upstream changes not in branch")))
-          ("B>U" 7 magit-repolist-column-unpushed-to-upstream
+          ("B>U" 4 magit-repolist-column-unpushed-to-upstream
            ((:right-align t)
-            (:pad-right 3)
+            (:pad-right 2)
             (:sort <)
             (:help-echo "Local changes not in upstream")))
-          ("Path" 99 magit-repolist-column-path nil))))
+          ("Path" 0 magit-repolist-column-path nil))))
 
 (setq magit-repository-directories '(("~/.nix-config" . 0)
                                      ("~/.nixpkgs" . 0)
