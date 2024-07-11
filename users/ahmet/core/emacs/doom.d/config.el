@@ -730,6 +730,12 @@ the sequences will be lost."
 (after! vterm
   (setq vterm-max-scrollback 100000))
 
+;; Map [kp-delete] to send <C-d>. Otherwise, the delete key does not work in
+;; terminal.
+(map! :after vterm
+      :map vterm-mode-map
+      "<deletechar>" #'vterm-send-delete)
+
 (use-package! vundo
   :bind ("C-x u" . vundo)
   :config
