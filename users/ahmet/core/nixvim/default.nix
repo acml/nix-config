@@ -773,6 +773,7 @@
           folding = true;
           nixvimInjections = true;
           settings.indent.enable = true;
+          settings.ensure_installed = "all";
         };
         # treesitter-context.enable = true;
         treesitter-textobjects.enable = true;
