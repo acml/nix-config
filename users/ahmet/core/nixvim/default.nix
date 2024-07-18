@@ -274,6 +274,9 @@
         let g:asyncrun_open = 6
         let g:asyncrun_rootmarks = ['proj.default.ini', '.git', '.svn', '.root', '.project', '.hg']
 
+        set expandtab
+        autocmd FileType make set noexpandtab
+
         noremap <silent><leader>oa :Telescope asynctasks all<cr>
         noremap <silent><f5> :AsyncTask file-run<cr>
         noremap <silent><f6> :AsyncTask project-run<cr>
@@ -493,7 +496,6 @@
               # }
             ];
         };
-        bufferline.enable = true;
         clangd-extensions.enable = true;
         cmp.enable = true;
         dap.enable = true;
@@ -593,8 +595,11 @@
           lightbulb.sign = false;
           diagnostic.diagnosticOnlyCurrent = true;
         };
-        lualine.enable = true;
-        lualine.globalstatus = true;
+        lualine = {
+          enable = true;
+          globalstatus = true;
+          ignoreFocus = [ "neo-tree" ];
+        };
         luasnip.enable = true;
         mini = {
           enable = true;
