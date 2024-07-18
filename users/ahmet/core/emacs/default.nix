@@ -141,6 +141,7 @@ lib.mkMerge [
 
         # :app everywhere
         xclip
+        wl-clipboard
         (lib.mkIf isLinux xdotool)
 
         trash-cli
