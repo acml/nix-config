@@ -682,6 +682,10 @@
           };
         };
         notify.enable = true;
+        notify.onOpen = "
+          function(win)
+            vim.api.nvim_win_set_config(win, { focusable = false })
+          end";
         nvim-bqf.enable = true;
         nvim-colorizer.enable = true;
         nvim-ufo.enable = true;
