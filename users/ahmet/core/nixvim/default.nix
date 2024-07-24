@@ -271,6 +271,9 @@
         shiftwidth = 2; # Tab width should be 2
       };
 
+      performance.combinePlugins.enable = true;
+      performance.combinePlugins.standalonePlugins = [ "nvim-treesitter-textobjects" "hmts.nvim" "vimplugin-orgmode" "vimplugin-treesitter-grammar-org" "mini.nvim" ];
+
       plugins = {
         alpha = {
           enable = true;
