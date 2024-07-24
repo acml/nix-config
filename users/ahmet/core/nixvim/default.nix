@@ -661,7 +661,6 @@
         rainbow-delimiters.enable = true;
         refactoring.enable = true;
         refactoring.enableTelescope = true;
-        rust-tools.enable = true;
         rustaceanvim.enable = true;
         smart-splits.enable = true;
         sniprun.enable = true;
