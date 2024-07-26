@@ -654,6 +654,8 @@ the sequences will be lost."
       treemacs-follow-after-init t)
 
 (after! treemacs
+  (treemacs-define-RET-action 'file-node-open   #'treemacs-visit-node-in-most-recently-used-window)
+  (treemacs-define-RET-action 'file-node-closed #'treemacs-visit-node-in-most-recently-used-window)
   ;; Quite often there are superfluous files I'm not that interested in. There's no
   ;; good reason for them to take up space. Let's add a mechanism to ignore them.
   (defvar treemacs-file-ignore-extensions '()
