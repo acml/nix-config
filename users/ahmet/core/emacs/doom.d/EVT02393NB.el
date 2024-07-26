@@ -27,7 +27,7 @@
   (projectile-register-project-type 'cp1200dt '("proj.default.ini")
                                     :project-file "proj.default.ini"
                                     :compilation-dir "cp1200/cp1243-1/csd"
-                                    :compile "./setenv_docker.sh make -j$(nproc) -s"))
+                                    :compile "./setenv_docker.sh make -j$(nproc) -s all_targets"))
 
 (provide 'EVT02393NB)
 ;;; EVT02393NB.el ends here
