@@ -530,17 +530,12 @@
             marksman.enable = false;
             nil-ls.enable = true;
             # nixd.enable = true;
-            rust-analyzer = {
-              enable = true;
-              installCargo = true;
-              installRustc = true;
-            };
             taplo.enable = true;
             tsserver.enable = true;
           };
         };
         lsp-format.enable = true;
-        lsp-format.lspServersToEnable = [ "gopls" "rust-analyzer" ];
+        lsp-format.lspServersToEnable = [ "gopls" ];
         # lsp-lines.enable = true;
         lspkind.enable = true;
         lspsaga = {
