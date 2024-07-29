@@ -203,6 +203,10 @@
                                       :completion (:detailedLabel t)
                                       :cache (:directory ,(file-truename "~/.cache/ccls")))))
 
+(use-package compile ; built-in
+  :config
+  (setq compilation-scroll-output t))
+
 (use-package! daemons :defer t)
 
 ;;
