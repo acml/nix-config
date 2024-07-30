@@ -106,10 +106,10 @@
         -- resizing splits
         -- these keymaps will also accept a range,
         -- for example `10<A-h>` will `resize_left` by `(10 * config.default_amount)`
-        vim.keymap.set('n', '<A-h>', require('smart-splits').resize_left)
-        vim.keymap.set('n', '<A-j>', require('smart-splits').resize_down)
-        vim.keymap.set('n', '<A-k>', require('smart-splits').resize_up)
-        vim.keymap.set('n', '<A-l>', require('smart-splits').resize_right)
+        vim.keymap.set('n', '<M-h>', require('smart-splits').resize_left)
+        vim.keymap.set('n', '<M-j>', require('smart-splits').resize_down)
+        vim.keymap.set('n', '<M-k>', require('smart-splits').resize_up)
+        vim.keymap.set('n', '<M-l>', require('smart-splits').resize_right)
         -- moving between splits
         vim.keymap.set('n', '<C-h>', require('smart-splits').move_cursor_left)
         vim.keymap.set('n', '<C-j>', require('smart-splits').move_cursor_down)
@@ -117,10 +117,10 @@
         vim.keymap.set('n', '<C-l>', require('smart-splits').move_cursor_right)
         vim.keymap.set('n', '<C-\\>', require('smart-splits').move_cursor_previous)
         -- swapping buffers between windows
-        vim.keymap.set('n', '<leader><leader>h', require('smart-splits').swap_buf_left)
-        vim.keymap.set('n', '<leader><leader>j', require('smart-splits').swap_buf_down)
-        vim.keymap.set('n', '<leader><leader>k', require('smart-splits').swap_buf_up)
-        vim.keymap.set('n', '<leader><leader>l', require('smart-splits').swap_buf_right)
+        -- vim.keymap.set('n', '<C-Left>', require('smart-splits').swap_buf_left)
+        -- vim.keymap.set('n', '<C-Down>', require('smart-splits').swap_buf_down)
+        -- vim.keymap.set('n', '<C-Up>', require('smart-splits').swap_buf_up)
+        -- vim.keymap.set('n', '<C-Right>', require('smart-splits').swap_buf_right)
 
         vim.keymap.set('n', '[e', "<cmd>cprevious<cr>zv", { silent = true, desc = "previous qf item" })
         vim.keymap.set('n', ']e', "<cmd>cnext<cr>zv", { silent = true, desc = "next qf item" })
@@ -221,12 +221,12 @@
             },
           }
 
-          vim.api.nvim_set_keymap('n', '<leader>om', '<cmd>lua MiniMap.toggle()<CR>', {noremap = true, silent = true})
+          vim.api.nvim_set_keymap('n', '<leader>om', '<cmd>lua MiniMap.toggle()<CR>', {noremap = true, silent = true, desc = "Toggle minimap"})
           vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
-          vim.keymap.set("n", "<leader>cd", vim.lsp.buf.definition, {})
-          vim.keymap.set("n", "<leader>cD", vim.lsp.buf.references, {})
+          vim.keymap.set("n", "<leader>cd", vim.lsp.buf.definition, { desc = "Jump to definition" })
+          vim.keymap.set("n", "<leader>cD", vim.lsp.buf.references, { desc = "Jump to references" })
           -- vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, {})
-          vim.keymap.set("n", "<leader>ca", '<cmd>Lspsaga code_action<cr>', {})
+          vim.keymap.set("n", "<leader>ca", '<cmd>Lspsaga code_action<cr>', { desc = "LSP Execute code action" })
         end
 
         require('orgmode').setup({
@@ -739,33 +739,16 @@
         which-key = {
           enable = true;
           settings.spec = [
-            { "<leader><leader>" = "Find file in project"; }
-            { "<leader>'" = "Resume last search"; }
-            { "<leader>`" = "Switch to last buffer"; }
-            { "<leader>," = "Switch buffer"; }
             { __unkeyed-1 = "<leader>b"; desc = "+buffer"; }
-            { "<leader>bd" = "Kill buffer"; }
-            { "<leader>bl" = "Switch to last buffer"; }
-            { "<leader>bn" = "Next buffer"; }
-            { "<leader>bp" = "Previous buffer"; }
-            { "<leader>bS" = "Save all buffers"; }
-            { "<leader>bs" = "Save buffer"; }
             { __unkeyed-1 = "<leader>c"; desc = "+code"; }
             { __unkeyed-1 = "<leader>f"; desc = "+file"; }
-            { "<leader>fr" = "Recent files"; }
-            { "<leader>fs" = "Save file"; }
             { __unkeyed-1 = "<leader>g"; desc = "+git"; }
-            { __unkeyed-1 = "<leader>h"; desc = "+help"; }
-            { "<leader>hk" = "keymaps"; }
-            { "<leader>hm" = "man"; }
-            { __unkeyed-1 = "<leader>o"; desc = "+open"; }
-            { "<leader>op" = "Project sidebar"; }
+            { __unkeyed-1 = "<leader>h"; desc = "+help"; icon = "󰋖"; }
+            { __unkeyed-1 = "<leader>o"; desc = "+open"; icon = "󰌧"; }
             { __unkeyed-1 = "<leader>p"; desc = "+project"; icon = "💼"; }
             { __unkeyed-1 = "<leader>s"; desc = "+search"; }
-            { "<leader>si" = "Jump to symbol"; }
             { __unkeyed-1 = "<leader>x"; desc = "+diagnostics"; }
           ];
-          window.border = "rounded";
         };
         wtf.enable = true;
       };
