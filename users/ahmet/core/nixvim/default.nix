@@ -249,19 +249,19 @@
       globals.mapleader = " ";
 
       keymaps = [
-        { action = "<cmd>bdelete<CR>"; key = "<leader>bd"; }
-        { action = "<cmd>edit #<CR>"; key = "<leader>bl"; }
-        { action = "<cmd>edit #<CR>"; key = "<leader>`"; }
-        { action = "<cmd>bnext<CR>"; key = "<leader>bn"; }
-        { action = "<cmd>bprevious<CR>"; key = "<leader>bp"; }
+        { action = "<cmd>bdelete<CR>"; key = "<leader>bd"; options = { desc = "Kill buffer"; }; }
+        { action = "<cmd>edit #<CR>"; key = "<leader>bl"; options = { desc = "Switch to last buffer"; }; }
+        { action = "<cmd>edit #<CR>"; key = "<leader>`"; options = { desc = "Switch to last buffer"; }; }
+        { action = "<cmd>bnext<CR>"; key = "<leader>bn"; options = { desc = "Next buffer"; }; }
+        { action = "<cmd>bprevious<CR>"; key = "<leader>bp"; options = { desc = "Previous buffer"; }; }
 
-        { action = "<cmd>update<CR>"; key = "<leader>fs"; }
-        { action = "<cmd>update<CR>"; key = "<leader>bs"; }
-        { action = "<cmd>wall<CR>"; key = "<leader>bS"; }
+        { action = "<cmd>update<CR>"; key = "<leader>fs"; options = { desc = "Save buffer"; }; }
+        { action = "<cmd>update<CR>"; key = "<leader>bs"; options = { desc = "Save buffer"; }; }
+        { action = "<cmd>wall<CR>"; key = "<leader>bS"; options = { desc = "Save all buffers"; }; }
 
-        { action = "<cmd>Neogit cwd=%:p:h<CR>"; key = "<leader>gg"; }
-        { action = "<cmd>Neotree toggle<CR>"; key = "<leader>op"; }
-        { action = "<cmd>Oil<CR>"; key = "<leader>o-"; }
+        { action = "<cmd>Neogit cwd=%:p:h<CR>"; key = "<leader>gg"; options = { desc = "Neogit status"; }; }
+        { action = "<cmd>Neotree toggle<CR>"; key = "<leader>op"; options = { desc = "Project sidebar"; }; }
+        { action = "<cmd>Oil<CR>"; key = "<leader>o-"; options = { desc = "Directory editor"; }; }
       ];
 
       opts = {
@@ -690,16 +690,12 @@
             undo.enable = true;
           };
           keymaps = {
-            "<leader>," = "buffers";
-            "<leader><leader>" = "find_files";
-            "<leader>fr" = "oldfiles";
-            "<leader>hk" = "keymaps";
-            # "<leader>hm" = {
-            #   action = "man_pages";
-            #   desc = "man pages";
-            # };
-            "<leader>'" = "resume";
-            "<leader>si" = "lsp_document_symbols";
+            "<leader>," = { action = "buffers"; options = { desc = "Switch buffer"; }; };
+            "<leader><leader>" = { action = "find_files"; options = { desc = "Find file in project"; }; };
+            "<leader>fr" = { action = "oldfiles"; options = { desc = "Recent files"; }; };
+            "<leader>hk" = { action = "keymaps"; options = { desc = "key-bindings"; }; };
+            "<leader>'" = { action = "resume"; options = { desc = "Resume last search"; }; };
+            "<leader>si" = { action = "lsp_document_symbols"; options = { desc = "Jump to symbol"; }; };
           };
         };
         # tmux-navigator.enable = true;
@@ -742,32 +738,33 @@
         };
         which-key = {
           enable = true;
-          registrations = {
-            "<leader><leader>" = "Find file in project";
-            "<leader>'" = "Resume last search";
-            "<leader>`" = "Switch to last buffer";
-            "<leader>," = "Switch buffer";
-            "<leader>b" = "+buffer";
-            "<leader>bd" = "Kill buffer";
-            "<leader>bl" = "Switch to last buffer";
-            "<leader>bn" = "Next buffer";
-            "<leader>bp" = "Previous buffer";
-            "<leader>bS" = "Save all buffers";
-            "<leader>bs" = "Save buffer";
-            "<leader>f" = "+file";
-            "<leader>fr" = "Recent files";
-            "<leader>fs" = "Save file";
-            "<leader>g" = "+git";
-            "<leader>h" = "+help";
-            "<leader>hk" = "keymaps";
-            "<leader>hm" = "man";
-            "<leader>o" = "+open";
-            "<leader>op" = "Project sidebar";
-            "<leader>p" = "+project";
-            "<leader>s" = "+search";
-            "<leader>si" = "Jump to symbol";
-            "<leader>x" = "+diagnostics";
-          };
+          settings.spec = [
+            { "<leader><leader>" = "Find file in project"; }
+            { "<leader>'" = "Resume last search"; }
+            { "<leader>`" = "Switch to last buffer"; }
+            { "<leader>," = "Switch buffer"; }
+            { __unkeyed-1 = "<leader>b"; desc = "+buffer"; }
+            { "<leader>bd" = "Kill buffer"; }
+            { "<leader>bl" = "Switch to last buffer"; }
+            { "<leader>bn" = "Next buffer"; }
+            { "<leader>bp" = "Previous buffer"; }
+            { "<leader>bS" = "Save all buffers"; }
+            { "<leader>bs" = "Save buffer"; }
+            { __unkeyed-1 = "<leader>c"; desc = "+code"; }
+            { __unkeyed-1 = "<leader>f"; desc = "+file"; }
+            { "<leader>fr" = "Recent files"; }
+            { "<leader>fs" = "Save file"; }
+            { __unkeyed-1 = "<leader>g"; desc = "+git"; }
+            { __unkeyed-1 = "<leader>h"; desc = "+help"; }
+            { "<leader>hk" = "keymaps"; }
+            { "<leader>hm" = "man"; }
+            { __unkeyed-1 = "<leader>o"; desc = "+open"; }
+            { "<leader>op" = "Project sidebar"; }
+            { __unkeyed-1 = "<leader>p"; desc = "+project"; icon = "💼"; }
+            { __unkeyed-1 = "<leader>s"; desc = "+search"; }
+            { "<leader>si" = "Jump to symbol"; }
+            { __unkeyed-1 = "<leader>x"; desc = "+diagnostics"; }
+          ];
           window.border = "rounded";
         };
         wtf.enable = true;
