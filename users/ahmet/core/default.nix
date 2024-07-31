@@ -76,6 +76,11 @@
       enableFishIntegration = true;
       enableNushellIntegration = true;
       enableZshIntegration = true;
+      settings = {
+        manager = {
+          ratio = [ 1 2 5 ];
+        };
+      };
     };
     zoxide.enable = true;
     zoxide.options = [ "--cmd cd" ];
