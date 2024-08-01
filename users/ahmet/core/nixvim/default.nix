@@ -1,5 +1,10 @@
 { pkgs, ... }: {
 
+  imports = [
+    ./keymaps.nix
+    ./options.nix
+  ];
+
   programs = {
 
     nixvim = {
@@ -23,14 +28,7 @@
 
       extraConfigLua = /* lua */ ''
 
-        vim.opt.cursorline = true
-        vim.opt.cursorlineopt = "number"
-
         -- UFO folding
-        vim.o.foldcolumn         = "1" -- '0' is not bad
-        vim.o.foldlevel          = 99 -- Using ufo provider need a large value, feel free to decrease the value
-        vim.o.foldlevelstart     = 99
-        vim.o.foldenable         = true
         vim.o.fillchars          = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
         vim.cmd [[set signcolumn=yes]]
 
@@ -236,7 +234,6 @@
       '';
 
       extraConfigVim = /* vim */ ''
-        set expandtab
         autocmd FileType make set noexpandtab
       '';
 
@@ -247,29 +244,6 @@
       ];
 
       globals.mapleader = " ";
-
-      keymaps = [
-        { action = "<cmd>bdelete<CR>"; key = "<leader>bd"; options = { desc = "Kill buffer"; }; }
-        { action = "<cmd>edit #<CR>"; key = "<leader>bl"; options = { desc = "Switch to last buffer"; }; }
-        { action = "<cmd>edit #<CR>"; key = "<leader>`"; options = { desc = "Switch to last buffer"; }; }
-        { action = "<cmd>bnext<CR>"; key = "<leader>bn"; options = { desc = "Next buffer"; }; }
-        { action = "<cmd>bprevious<CR>"; key = "<leader>bp"; options = { desc = "Previous buffer"; }; }
-
-        { action = "<cmd>update<CR>"; key = "<leader>fs"; options = { desc = "Save buffer"; }; }
-        { action = "<cmd>update<CR>"; key = "<leader>bs"; options = { desc = "Save buffer"; }; }
-        { action = "<cmd>wall<CR>"; key = "<leader>bS"; options = { desc = "Save all buffers"; }; }
-
-        { action = "<cmd>Neogit cwd=%:p:h<CR>"; key = "<leader>gg"; options = { desc = "Neogit status"; }; }
-        { action = "<cmd>Neotree toggle<CR>"; key = "<leader>op"; options = { desc = "Project sidebar"; }; }
-        { action = "<cmd>Oil<CR>"; key = "<leader>o-"; options = { desc = "Directory editor"; }; }
-      ];
-
-      opts = {
-        number = true; # Show line numbers
-        relativenumber = true; # Show relative line numbers
-
-        shiftwidth = 2; # Tab width should be 2
-      };
 
       performance = {
         byteCompileLua = {
