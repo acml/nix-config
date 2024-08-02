@@ -34,7 +34,7 @@
         wrap = false;
         scrolloff = 8;
         cursorline = true;
-        cursorlineopt = "number";
+        # cursorlineopt = "number";
       };
     };
   };
