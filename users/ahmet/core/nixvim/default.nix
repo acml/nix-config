@@ -441,7 +441,7 @@
         friendly-snippets.enable = true;
         git-conflict.enable = true;
         gitblame.enable = true;
-        gitblame.virtualTextColumn = 121;
+        gitblame.settings.virtual_text_column = 121;
         gitsigns.enable = true;
         gitsigns.settings.on_attach = /* lua */ ''
           function(bufnr)
