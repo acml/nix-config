@@ -67,7 +67,6 @@
   };
 
   systemd = {
-    enableUnifiedCgroupHierarchy = true;
     network.wait-online.anyInterface = true;
     services.tailscaled = {
       after = [ "network-online.target" "systemd-resolved.service" ];
