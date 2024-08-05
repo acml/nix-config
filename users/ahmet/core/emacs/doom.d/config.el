@@ -13,7 +13,7 @@
       ;; There are two ways to load a theme. Both assume the theme is installed and
       ;; available. You can either set `doom-theme' or manually load a theme with the
       ;; `load-theme' function. This is the default:
-      doom-theme (if (display-graphic-p) 'modus-operandi 'doom-tomorrow-night)
+      doom-theme (if (display-graphic-p) 'modus-operandi 'modus-vivendi)
       ;; modus-operandi modus-vivendi doom-one doom-gruvbox doom-tomorrow-night
 
       ;; This determines the style of line numbers in effect. If set to `nil', line
@@ -135,10 +135,13 @@
                 ;; (load-theme 'doom-one t)
                 (if (not (display-graphic-p))
                     (load-theme 'modus-vivendi)
-                  (load-theme 'modus-operandi-tinted)
+                  (load-theme 'modus-operandi)
                   (set-frame-parameter (selected-frame) 'fullscreen 'maximized))))))
 
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
+
+(unless (display-graphic-p)
+  (remove-hook 'doom-first-buffer-hook #'global-hl-line-mode))
 
 ;; Directional window-selection routines
 (use-package! windmove
