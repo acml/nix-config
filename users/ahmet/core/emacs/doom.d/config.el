@@ -212,6 +212,11 @@
 
 (use-package! daemons :defer t)
 
+(use-package! diff-hl
+  :config
+  (unless (display-graphic-p)
+    (diff-hl-margin-mode)))
+
 ;;
 ;; Dired
 ;;
