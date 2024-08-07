@@ -39,6 +39,9 @@
           wsl.exe -d $WSL_DISTRO_NAME --system ''${GWSL_SYSTEM_CONFIG_COMMANDS} >/dev/null 2>&1 || wsl.exe -d $WSL_DISTRO_NAME --system ''${GWSL_SYSTEM_CONFIG_COMMANDS}
         fi
       '';
+      sessionVariables = {
+        COLORTERM = "truecolor";
+      };
     };
     git.userEmail = lib.mkForce "ozgezer@gmail.com";
     zsh = {
