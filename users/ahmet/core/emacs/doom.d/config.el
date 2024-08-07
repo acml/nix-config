@@ -628,7 +628,11 @@ the sequences will be lost."
                                        projectile-root-bottom-up
                                        projectile-root-top-down-recurring)
    projectile-enable-caching t
-   projectile-project-search-path '(("~/git_pa" . 2) ("~/Projects" . 3))))
+   projectile-project-search-path '(("~/git_pa" . 2) ("~/Projects" . 3)))
+  (projectile-register-project-type 'acml/exercism-lua '(".exercism" ".busted" "HELP.md" "README.md")
+                                    :project-file '("?*.lua")
+                                    :test "busted"
+                                    :test-suffix "_spec"))
 
 (use-package! rainbow-mode
   :hook
