@@ -134,8 +134,8 @@
                 ;; (set-fontset-font t 'symbol (font-spec :family "Noto Emoji") frame 'append)
                 ;; (load-theme 'doom-one t)
                 (if (not (display-graphic-p))
-                    (load-theme 'modus-vivendi)
-                  (load-theme 'modus-operandi)
+                    (load-theme 'catppuccin t)
+                  (load-theme 'modus-operandi t)
                   (set-frame-parameter (selected-frame) 'fullscreen 'maximized))))))
 
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
