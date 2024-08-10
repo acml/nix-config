@@ -615,13 +615,6 @@
         nvim-bqf.enable = true;
         nvim-colorizer.enable = true;
         nvim-ufo.enable = true;
-        oil = {
-          enable = true;
-          settings = {
-            delete_to_trash = true;
-            skip_confirm_for_simple_edits = true;
-          };
-        };
         project-nvim = {
           enable = true;
           enableTelescope = true;
@@ -732,6 +725,19 @@
           ];
         };
         wtf.enable = true;
+        yazi.enable = true;
+        yazi.settings = {
+          open_for_directories = true;
+          enable_mouse_support = true;
+          # use_ya_for_events_reading = true;
+          # use_yazi_client_id_flag = true;
+          #
+          # highlight_groups = {
+          #   hovered_buffer = null;
+          # };
+
+          floating_window_scaling_factor = 0.8;
+        };
       };
     };
   };

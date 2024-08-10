@@ -16,7 +16,7 @@
 
         { action = "<cmd>Neogit cwd=%:p:h<CR>"; key = "<leader>gg"; options = { desc = "Neogit status"; }; }
         { action = "<cmd>Neotree toggle<CR>"; key = "<leader>op"; options = { desc = "Project sidebar"; }; }
-        { action = "<cmd>Oil<CR>"; key = "<leader>o-"; options = { desc = "Directory editor"; }; }
+        { action.__raw = "function() require('yazi').yazi() end"; key = "<leader>o-"; options = { desc = "Directory editor"; }; }
       ];
     };
   };
