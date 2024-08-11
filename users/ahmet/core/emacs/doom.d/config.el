@@ -282,6 +282,7 @@
 
 (use-package! exercism
   :config
+  (map! (:leader :desc "Exercism" :n "oe" #'exercism))
   (setq exercism-directory "~/Projects/exercism"))
 
 (after! evil
@@ -631,7 +632,7 @@ the sequences will be lost."
    projectile-project-search-path '(("~/git_pa" . 2) ("~/Projects" . 3)))
   (projectile-register-project-type 'acml/exercism-lua '(".exercism" ".busted" "HELP.md" "README.md")
                                     :project-file '("?*.lua")
-                                    :test "busted"
+                                    :test "busted -v"
                                     :test-suffix "_spec"))
 
 (use-package! rainbow-mode
