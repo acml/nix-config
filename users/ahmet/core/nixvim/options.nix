@@ -43,6 +43,17 @@
         # misc
         wrap = false;
         scrolloff = 8;
+
+        # Sets how neovim will display certain whitespace characters in the editor.
+        # See `:help 'list'`
+        # and `:help 'listchars'`
+        list = true;
+        listchars = {
+          tab = "» ";
+          trail = "·";
+          nbsp = "␣";
+        };
+
         cursorline = true;
         # cursorlineopt = "number";
       };
