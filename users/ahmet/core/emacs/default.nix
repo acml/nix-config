@@ -27,7 +27,7 @@ lib.mkMerge [
         julia-mono
         noto-fonts-emoji
         symbola
-        (pkgs.nerdfonts.override {
+        (nerdfonts.override {
           fonts = [
             "FiraCode"
             "IBMPlexMono"
@@ -139,13 +139,16 @@ lib.mkMerge [
         # gore
         # gotools
 
-        # :app everywhere
-        xclip
-        wl-clipboard
-        (lib.mkIf isLinux xdotool)
-
         trash-cli
-      ] ++ lib.optionals stdenv.hostPlatform.isLinux [ man-pages man-pages-posix ];
+      ] ++ lib.optionals stdenv.hostPlatform.isLinux [
+        man-pages
+        man-pages-posix
+
+        # :app everywhere
+        wl-clipboard
+        wl-clipboard-x11
+        xdotool
+      ];
 
       sessionPath = [ "${EMACSDIR}/bin" ];
       sessionVariables = {

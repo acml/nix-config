@@ -237,12 +237,19 @@
         autocmd FileType make set noexpandtab
       '';
 
-      extraPackages = with pkgs; [ universal-ctags ];
+      extraPackages = with pkgs; [
+        universal-ctags
+      ] ++ lib.optionals stdenv.hostPlatform.isLinux [
+        wl-clipboard
+        wl-clipboard-x11
+      ];
+
       extraPlugins = with pkgs.vimPlugins; [
         orgmode
         telescope-live-grep-args-nvim
       ];
 
+      globals.clipboard = [ "unnamedplus" ];
       globals.mapleader = " ";
 
       performance = {
