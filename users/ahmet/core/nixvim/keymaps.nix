@@ -4,6 +4,8 @@
 
     nixvim = {
       keymaps = [
+        { action = "<cmd>nohlsearch<CR>"; key = "<Esc>"; }
+        { action = "<C-\\><C-n>"; key = "<Esc><Esc>"; mode = "t"; options.desc = "Exit terminal mode"; }
         { action = "<cmd>bdelete<CR>"; key = "<leader>bd"; options = { desc = "Kill buffer"; }; }
         { action = "<cmd>edit #<CR>"; key = "<leader>bl"; options = { desc = "Switch to last buffer"; }; }
         { action = "<cmd>edit #<CR>"; key = "<leader>`"; options = { desc = "Switch to last buffer"; }; }
