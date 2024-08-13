@@ -23,11 +23,12 @@
 (after! projectile
   (projectile-register-project-type 'cp1200 '("audis_linux" "audis_tools" "audis_utils" "cp1200" "cp1500" "le_nbg2")
                                     :compilation-dir "cp1200/cp1243-1/csd"
-                                    :compile "make all_targets")
+                                    :compile "make -j$(nproc) -s all_targets 2>&1 | tee build-$(date -Iseconds).log")
   (projectile-register-project-type 'cp1200dt '("proj.default.ini")
                                     :project-file "proj.default.ini"
                                     :compilation-dir "cp1200/cp1243-1/csd"
-                                    :compile "./setenv_docker.sh make -j$(nproc) -s all_targets 2>&1 | tee build-$(date -Iseconds).log"))
+                                    :compile "./setenv_docker.sh make -j$(nproc) -s all_targets 2>&1 | tee build-$(date -Iseconds).log"
+                                    :configure "/usr/bin/git dt checkout -f"))
 
 (provide 'EVT02393NB)
 ;;; EVT02393NB.el ends here
