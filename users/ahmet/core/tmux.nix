@@ -29,7 +29,9 @@
       }
       cpu
     ];
+    prefix = "C-\\\\";
     secureSocket = false;
+    terminal = "tmux-256color";
     extraConfig = ''
       set-option -g status-interval 1
       set-option -g status-position top
@@ -69,8 +71,6 @@
       bind-key -n M-j if -F "#{@pane-is-vim}" 'send-keys M-j' 'resize-pane -D 3'
       bind-key -n M-k if -F "#{@pane-is-vim}" 'send-keys M-k' 'resize-pane -U 3'
       bind-key -n M-l if -F "#{@pane-is-vim}" 'send-keys M-l' 'resize-pane -R 3'
-
-      bind-key -n 'C-\' if -F "#{@pane-is-vim}" 'send-keys C-\\'  'select-pane -l'
 
       bind-key -T copy-mode-vi 'C-h' select-pane -L
       bind-key -T copy-mode-vi 'C-j' select-pane -D
