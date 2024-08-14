@@ -1,4 +1,11 @@
 { pkgs, ... }: {
+
+  home = {
+    packages = with pkgs; [
+      sysstat
+    ];
+  };
+
   programs.tmux = {
     enable = true;
     clock24 = true;
@@ -8,24 +15,23 @@
       {
         plugin = catppuccin;
         extraConfig = ''
-          set -g @catppuccin_window_status_enable "yes"
-          set -g @catppuccin_window_right_separator "█"
-
-          set -g @catppuccin_icon_window_last "󰖰 "
-          set -g @catppuccin_icon_window_current "󰖯 "
-          set -g @catppuccin_icon_window_zoom "󰁌 "
-          set -g @catppuccin_icon_window_mark "󰃀 "
-          set -g @catppuccin_icon_window_silent "󰂛 "
           set -g @catppuccin_icon_window_activity "󱅫 "
           set -g @catppuccin_icon_window_bell "󰂞 "
-
+          set -g @catppuccin_icon_window_current "󰖯 "
+          set -g @catppuccin_icon_window_last "󰖰 "
+          set -g @catppuccin_icon_window_mark "󰃀 "
+          set -g @catppuccin_icon_window_silent "󰂛 "
+          set -g @catppuccin_icon_window_zoom "󰁌 "
           set -g @catppuccin_status_modules_right "cpu application session date_time"
+          set -g @catppuccin_window_right_separator "█"
+          set -g @catppuccin_window_status_enable "yes"
         '';
       }
       cpu
     ];
     secureSocket = false;
     extraConfig = ''
+      set-option -g status-interval 1
       set-option -g status-position top
 
       # To enable Yazi's image preview to work correctly in tmux
