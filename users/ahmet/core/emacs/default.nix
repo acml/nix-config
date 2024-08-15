@@ -146,8 +146,9 @@ lib.mkMerge [
 
         # :app everywhere
         wl-clipboard
-        wl-clipboard-x11
+        xclip
         xdotool
+        xsel
       ];
 
       sessionPath = [ "${EMACSDIR}/bin" ];
