@@ -33,6 +33,7 @@
     secureSocket = false;
     terminal = "tmux-256color";
     extraConfig = ''
+      set-option -a terminal-features ",*:RGB"
       set-option -g status-interval 1
       set-option -g status-position top
 
@@ -41,9 +42,6 @@
       set -ga update-environment TERM
       set -ga update-environment TERM_PROGRAM
 
-      # set -ag terminal-overrides ",alacritty*:RGB,foot*:RGB,xterm-kitty*:RGB,xterm-256color:RGB"
-      # set -as terminal-features ",alacritty*:RGB,foot*:RGB,xterm-kitty*:RGB,xterm-256color:RGB"
-      set -sg terminal-overrides ",*:RGB"
       bind R source-file ~/.config/tmux/tmux.conf \; display-message "Config reloaded..."
       bind '"' split-window -c "#{pane_current_path}"
       bind % split-window -h -c "#{pane_current_path}"
