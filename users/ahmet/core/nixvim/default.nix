@@ -240,8 +240,9 @@
       extraPackages = with pkgs; [
         universal-ctags
       ] ++ lib.optionals stdenv.hostPlatform.isLinux [
-        wl-clipboard
-        wl-clipboard-x11
+        # wl-clipboard
+        xclip
+        xsel
       ];
 
       extraPlugins = with pkgs.vimPlugins; [

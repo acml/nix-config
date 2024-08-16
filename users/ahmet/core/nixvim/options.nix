@@ -7,7 +7,7 @@
       clipboard = {
         # Select your clipboard provider according to your system:
         providers = {
-          wl-copy.enable = true; # Linux wayland
+          wl-copy.enable = false; # Linux wayland
           xclip.enable = true; # Linux Xorg (`xsel` also available)
           xsel.enable = true; # Linux Xorg (`xsel` also available)
         };
