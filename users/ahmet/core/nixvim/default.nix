@@ -515,8 +515,8 @@
               settings.telemetry.enable = false;
             };
             marksman.enable = false;
-            # nil-ls.enable = true;
-            nixd.enable = true;
+            nil-ls.enable = true;
+            # nixd.enable = true;
             taplo.enable = true;
             tsserver.enable = true;
           };
