@@ -249,7 +249,6 @@
         telescope-live-grep-args-nvim
       ];
 
-      globals.clipboard = [ "unnamedplus" ];
       globals.mapleader = " ";
 
       performance = {
