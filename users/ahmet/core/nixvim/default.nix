@@ -668,9 +668,9 @@
         statuscol.settings = {
           relculright = true;
           segments = [
-            { click = "v:lua.ScFa"; text = [{ __raw = "require('statuscol.builtin').foldfunc"; }]; }
-            { click = "v:lua.ScSa"; text = [ " %s" ]; }
-            { click = "v:lua.ScLa"; text = [{ __raw = "require('statuscol.builtin').lnumfunc"; } " "]; }
+            { click = "v:lua.ScSa"; text = [ "%s" ]; }
+            { click = "v:lua.ScLa"; text = [{ __raw = "require('statuscol.builtin').lnumfunc"; }]; }
+            { click = "v:lua.ScFa"; text = [{ __raw = "require('statuscol.builtin').foldfunc"; } " "]; }
           ];
         };
         surround.enable = true;
