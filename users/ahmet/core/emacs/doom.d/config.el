@@ -217,47 +217,25 @@
   (unless (display-graphic-p)
     (diff-hl-margin-mode)))
 
-;;
-;; Dired
-;;
-(add-hook! dired-mode
-  (dired-hide-details-mode 1)
-  (dired-auto-readme-mode 1))
-(setq dired-hide-details-hide-symlink-targets t
-      dired-omit-files "\\`[.]?#\\|\\`[.][.]?\\'\\|^\\..*$")
-
 (after! dired
-  ;; Define localleader bindings
   (map!
-   ;; Define or redefine dired bindings
    (:map dired-mode-map
+    :desc "Up" :n "h" #'dired-up-directory
+    :desc "Down" :n "l" #'dired-find-file
     :desc "Up" :n "<left>" #'dired-up-directory
     :desc "Down" :n "<right>" #'dired-find-file)))
 
-(use-package! dirvish
-  :after dired
-  :config
+(after! dirvish
   ;; Go back home? Just press `bh'
-  (setq dired-listing-switches
-        "-l --almost-all --human-readable --time-style=long-iso --group-directories-first --no-group"
+  (setq dirvish-hide-details t
         dirvish-quick-access-entries
         '(("h" "~/"                          "Home")
           ("d" "~/Downloads/"                "Downloads")
           ("m" "/mnt/"                       "Drives")
-          ("n" "~/.nixpkgs/"                 "Nix")
+          ("n" "~/.nix-config/"              "Nix")
           ("p" "~/Projects/"                 "Projects")
           ("t" "~/.local/share/Trash/files/" "TrashCan"))
-        dirvish-attributes '(subtree-state nerd-icons collapse git-msg vc-state file-size file-time)
-        dirvish-header-line-format '(:left (path) :right (free-space)))
-
-  (map! :map dirvish-mode-map :n "?" #'dirvish-dispatch)
-
-  (dirvish-define-preview exa (file)
-    "Use `exa' to generate directory preview."
-    (when (file-directory-p file) ; we only interest in directories here
-      `(shell . ("exa" "--color=always" "-al" ,file)))) ; use the output of `exa' command as preview
-
-  (add-to-list 'dirvish-preview-dispatchers 'exa))
+        dirvish-header-line-format '(:left (path) :right (free-space))))
 
 ;; Easier to match with a bspwm rule:
 ;;   bspc rule -a 'Emacs:emacs-everywhere' state=floating sticky=on
