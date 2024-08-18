@@ -225,17 +225,22 @@
     :desc "Up" :n "<left>" #'dired-up-directory
     :desc "Down" :n "<right>" #'dired-find-file)))
 
-(after! dirvish
-  ;; Go back home? Just press `bh'
-  (setq dirvish-hide-details t
-        dirvish-quick-access-entries
-        '(("h" "~/"                          "Home")
-          ("d" "~/Downloads/"                "Downloads")
-          ("m" "/mnt/"                       "Drives")
-          ("n" "~/.nix-config/"              "Nix")
-          ("p" "~/Projects/"                 "Projects")
-          ("t" "~/.local/share/Trash/files/" "TrashCan"))
-        dirvish-header-line-format '(:left (path) :right (free-space))))
+(use-package! dirvish
+  :config
+  (setq dirvish-header-line-format '(:left (path) :right (free-space))
+        dirvish-hide-details t
+        dirvish-path-separators (list (format "  %s " (nerd-icons-codicon "nf-cod-home"))
+                                      (format "  %s " (nerd-icons-codicon "nf-cod-root_folder"))
+                                      (format " %s " (nerd-icons-faicon "nf-fa-angle_right")))
+        dirvish-quick-access-entries '(("h" "~/"                          "Home")
+                                       ("d" "~/Downloads/"                "Downloads")
+                                       ("m" "/mnt/"                       "Drives")
+                                       ("n" "~/.nix-config/"              "Nix")
+                                       ("p" "~/Projects/"                 "Projects")
+                                       ("t" "~/.local/share/Trash/files/" "TrashCan"))
+        dirvish-subtree-state-style 'nerd)
+  ;; (dirvish-peek-mode)
+  (dirvish-side-follow-mode))
 
 ;; Easier to match with a bspwm rule:
 ;;   bspc rule -a 'Emacs:emacs-everywhere' state=floating sticky=on
