@@ -225,6 +225,12 @@
     :desc "Up" :n "<left>" #'dired-up-directory
     :desc "Down" :n "<right>" #'dired-find-file)))
 
+(defadvice! acml/dired-auto-readme--enable (fn &rest args)
+  :around #'dired-auto-readme--enable
+  (advice-add 'dired-revert :override #'ignore)
+  (apply fn args)
+  (advice-remove 'dired-revert #'ignore))
+
 (use-package! dirvish
   :config
   (setq dirvish-header-line-format '(:left (path) :right (free-space))
@@ -240,7 +246,8 @@
                                        ("t" "~/.local/share/Trash/files/" "TrashCan"))
         dirvish-subtree-state-style 'nerd)
   ;; (dirvish-peek-mode)
-  (dirvish-side-follow-mode))
+  (dirvish-side-follow-mode)
+  (add-hook! 'dirvish-setup-hook #'dired-auto-readme-mode))
 
 ;; Easier to match with a bspwm rule:
 ;;   bspc rule -a 'Emacs:emacs-everywhere' state=floating sticky=on
