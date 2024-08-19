@@ -234,7 +234,7 @@
 (use-package! dirvish
   :config
   (setq dirvish-header-line-format '(:left (path) :right (free-space))
-        dirvish-hide-details t
+        dirvish-hide-details '(dired dirvish dirvish-side)
         dirvish-path-separators (list (format "  %s " (nerd-icons-codicon "nf-cod-home"))
                                       (format "  %s " (nerd-icons-codicon "nf-cod-root_folder"))
                                       (format " %s " (nerd-icons-faicon "nf-fa-angle_right")))
