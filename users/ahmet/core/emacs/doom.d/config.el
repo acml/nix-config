@@ -588,43 +588,97 @@ the sequences will be lost."
 (use-package! pdf-tools :defer t
   :hook ((pdf-view-mode . pdf-view-themed-minor-mode)))
 
-(custom-set-faces!
-  '(+workspace-tab-selected-face :inherit tab-bar-tab)
-  '(+workspace-tab-face :inherit tab-bar-tab-inactive))
+(defun lkn-tab-bar--workspaces ()
+  "Return a list of the current workspaces."
+  (tab-bar-mode t)
+  (nreverse
+   (let ((show-help-function nil)
+         (persps (cl-remove persp-nil-name (persp-names) :count 1))
+         (persp (+workspace-current-name)))
+     (when (<= 1 (length persps))
+       (seq-reduce
+        (lambda (acc elm)
+          (let* ((face (if (equal persp elm)
+                           'tab-bar-tab
+                         'tab-bar-tab-inactive))
+                 (pos (1+ (cl-position elm persps)))
+                 (edge-x (get-text-property 0 'edge-x (car acc)))
+                 (tab-id (format " %d" pos))
+                 (tab-name (format " %s " elm)))
+            (push
+             (concat
+              (propertize tab-id
+                          'id pos
+                          'name elm
+                          'edge-x (+ edge-x (string-pixel-width tab-name) (string-pixel-width tab-id))
+                          'face
+                          `(:inherit ,face
+                            :weight bold))
+              (propertize tab-name 'face `,face)
+              " ")
+             acc)
+            acc))
+        persps
+        `(,(propertize (+workspace-current-name) 'edge-x 0 'invisible t)))))))
 
-(after! persp-mode
-  (defun workspaces-formatted ()
-    (let ((names (+workspace-list-names))
-          (current-name (+workspace-current-name)))
-      (mapconcat
-       #'identity
-       (cl-loop for name in names
-                for i to (length names)
-                collect
-                (propertize (format " %d %s " (1+ i) name)
-                            'face (if (equal current-name name)
-                                      '+workspace-tab-selected-face
-                                    '+workspace-tab-face)))
-       " ")))
+;; (customize-set-variable 'global-mode-string '((:eval (lkn-tab-bar--workspaces)) " "))
+(customize-set-variable 'global-mode-string '((:eval (if (< 1 (length (cl-remove persp-nil-name (persp-names) :count 1))) (lkn-tab-bar--workspaces) (tab-bar-mode -1))) " "))
+(add-hook! 'dirvish-setup-hook #'(lambda () (if (< 1 (length (cl-remove persp-nil-name (persp-names) :count 1))) (tab-bar-mode +1) (tab-bar-mode -1))))
+(customize-set-variable 'tab-bar-format '(tab-bar-format-global))
+(customize-set-variable 'tab-bar-mode t)
 
-  (defun hy/invisible-current-workspace ()
-    "The tab bar doesn't update when only faces change (i.e. the
-current workspace), so we invisibly print the current workspace
-name as well to trigger updates"
-    (propertize (safe-persp-name (get-current-persp)) 'invisible t))
+;; These two things combined prevents the tab list to be printed either as a
+;; tooltip or in the echo area
+(defun tooltip-help-tips (_event)
+  "Hook function to display a help tooltip.
+This is installed on the hook `tooltip-functions', which
+is run when the timer with id `tooltip-timeout-id' fires.
+Value is non-nil if this function handled the tip."
+  (let ((xf (lambda (str) (string-trim (substring-no-properties str)))))
+    (when (and
+           (stringp tooltip-help-message)
+           (not (string= (funcall xf tooltip-help-message) (funcall xf (format-mode-line (lkn-tab-bar--workspaces))))))
+      (tooltip-show tooltip-help-message (not tooltip-mode))
+      t)))
 
-  (customize-set-variable 'tab-bar-format '(workspaces-formatted
-                                            tab-bar-format-align-right
-                                            hy/invisible-current-workspace))
+(tooltip-mode)
 
-  ;; don't show current workspaces when we switch, since we always see them
-  (advice-add #'+workspace/display :override #'ignore)
-  ;; same for renaming and deleting (and saving, but oh well)
-  (advice-add #'+workspace-message :override #'ignore))
+(defun lkn-tab-bar--event-to-item (event)
+  "Given a click EVENT, translate to a tab.
 
-;; need to run this later for it to not break frame size for some reason
-(run-at-time nil nil (cmd! (tab-bar-mode +1)))
+We handle this by using `string-pixel-width' to calculate how
+long the tab would be in pixels and use that in the reduction in
+`lkn-tab-bar--workspaces' to determine which tab has been
+clicked."
+  (let* ((posn (event-start event))
+         (workspaces (lkn-tab-bar--workspaces))
+         (x (car (posn-x-y posn))))
+    (car (cl-remove-if (lambda (workspace)
+                         (>= x (get-text-property 0 'edge-x workspace)))
+                       workspaces))))
 
+(defun lkn-tab-bar-mouse-1 (ws)
+  "Switch to tabs by left clicking."
+  (when-let ((name (get-text-property 0 'name ws)))
+    (+workspace-switch name)))
+
+(defun lkn-tab-bar-mouse-2 (ws)
+  "Close tabs by clicking the mouse wheel."
+  (when-let ((name (get-text-property 0 'name ws)))
+    (+workspace/kill name)))
+
+(defun lkn-tab-bar-click-handler (evt)
+  "Function to handle clicks on the custom tab."
+  (interactive "e")
+  (when-let ((ws (lkn-tab-bar--event-to-item evt)))
+    (pcase (car evt)
+      ('mouse-1 (lkn-tab-bar-mouse-1 ws))
+      ('mouse-2 (lkn-tab-bar-mouse-2 ws)))))
+
+(keymap-set tab-bar-map "<mouse-1>" #'lkn-tab-bar-click-handler)
+(keymap-set tab-bar-map "<mouse-2>" #'lkn-tab-bar-click-handler)
+(keymap-set tab-bar-map "<wheel-up>" #'+workspace:switch-previous)
+(keymap-set tab-bar-map "<wheel-down>" #'+workspace:switch-next)
 
 (setq +workspaces-switch-project-function #'dired)
 
