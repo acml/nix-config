@@ -594,22 +594,17 @@ the sequences will be lost."
 
 (after! persp-mode
   (defun workspaces-formatted ()
-    (let ((names (or (seq-filter (lambda (n) (not (string= n "none"))) persp-names-cache) nil))
-          (current-name (safe-persp-name (get-current-persp))))
+    (let ((names (+workspace-list-names))
+          (current-name (+workspace-current-name)))
       (mapconcat
        #'identity
        (cl-loop for name in names
                 for i to (length names)
                 collect
-                (concat (propertize (format " %d" (1+ i)) 'face
-                                    `(:inherit ,(if (equal current-name name)
-                                                    '+workspace-tab-selected-face
-                                                  '+workspace-tab-face)
-                                      :weight bold))
-                        (propertize (format " %s " name) 'face
-                                    (if (equal current-name name)
+                (propertize (format " %d %s " (1+ i) name)
+                                    'face (if (equal current-name name)
                                         '+workspace-tab-selected-face
-                                      '+workspace-tab-face))))
+                                      '+workspace-tab-face)))
        " ")))
 
   (defun hy/invisible-current-workspace ()
