@@ -589,7 +589,7 @@ the sequences will be lost."
   :hook ((pdf-view-mode . pdf-view-themed-minor-mode)))
 
 (custom-set-faces!
-  '(+workspace-tab-selected-face :inherit tab-bar-tab :height 135)
+  '(+workspace-tab-selected-face :inherit tab-bar-tab)
   '(+workspace-tab-face :inherit tab-bar-tab-inactive))
 
 (after! persp-mode
