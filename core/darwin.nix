@@ -28,7 +28,7 @@
       SHELL = lib.getExe pkgs.zsh;
       EDITOR = "nvim";
     };
-    postBuild = ''
+    extraSetup = ''
       ln -sv ${pkgs.path} $out/nixpkgs
     '';
   };

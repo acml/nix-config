@@ -170,6 +170,9 @@
             config = {
               allowUnfree = true;
               allowAliases = true;
+              permittedInsecurePackages = [
+                "jitsi-meet-1.0.8043"
+              ];
             };
           };
 
