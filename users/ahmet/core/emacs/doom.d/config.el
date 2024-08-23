@@ -585,7 +585,7 @@ the sequences will be lost."
   (tab-bar-mode t)
   (nreverse
    (let ((show-help-function nil)
-         (persps (cl-remove persp-nil-name (persp-names) :count 1))
+         (persps (+workspace-list-names))
          (persp (+workspace-current-name)))
      (when (<= 1 (length persps))
        (seq-reduce
@@ -614,8 +614,8 @@ the sequences will be lost."
         `(,(propertize (+workspace-current-name) 'edge-x 0 'invisible t)))))))
 
 ;; (customize-set-variable 'global-mode-string '((:eval (lkn-tab-bar--workspaces)) " "))
-(customize-set-variable 'global-mode-string '((:eval (if (< 1 (length (cl-remove persp-nil-name (persp-names) :count 1))) (lkn-tab-bar--workspaces) (tab-bar-mode -1))) " "))
-(add-hook! 'dirvish-setup-hook #'(lambda () (if (< 1 (length (cl-remove persp-nil-name (persp-names) :count 1))) (tab-bar-mode +1) (tab-bar-mode -1))))
+(customize-set-variable 'global-mode-string '((:eval (if (and (fboundp 'persp-names) (< 1 (length (+workspace-list-names)))) (lkn-tab-bar--workspaces) (tab-bar-mode -1))) " "))
+(add-hook! 'dirvish-setup-hook #'(lambda () (if (< 1 (length (+workspace-list-names))) (tab-bar-mode +1) (tab-bar-mode -1))))
 (customize-set-variable 'tab-bar-format '(tab-bar-format-global))
 (customize-set-variable 'tab-bar-mode t)
 
