@@ -217,14 +217,6 @@
   (unless (display-graphic-p)
     (diff-hl-margin-mode)))
 
-(after! dired
-  (map!
-   (:map dired-mode-map
-    :desc "Up" :n "h" #'dired-up-directory
-    :desc "Down" :n "l" #'dired-find-file
-    :desc "Up" :n "<left>" #'dired-up-directory
-    :desc "Down" :n "<right>" #'dired-find-file)))
-
 (defadvice! acml/dired-auto-readme--enable (fn &rest args)
   :around #'dired-auto-readme--enable
   (advice-add 'dired-revert :override #'ignore)
