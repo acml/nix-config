@@ -220,7 +220,8 @@
 (defadvice! acml/dired-auto-readme--enable (fn &rest args)
   :around #'dired-auto-readme--enable
   (advice-add 'dired-revert :override #'ignore)
-  (apply fn args)
+  (save-excursion
+    (apply fn args))
   (advice-remove 'dired-revert #'ignore))
 
 (use-package! dirvish
