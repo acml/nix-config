@@ -12,7 +12,7 @@
     ./git.nix
     ./htop.nix
     ./emacs
-    # ./neovim
+    # ./neovim.nix
     ./nixvim
     ./ssh.nix
     ./starship.nix
