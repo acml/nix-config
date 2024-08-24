@@ -29,12 +29,10 @@
       source ${pkgs.zsh-vi-mode}/share/zsh-vi-mode/zsh-vi-mode.plugin.zsh
 
       source ${pkgs.zsh-fast-syntax-highlighting}/share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh
-
       source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-
       source ${pkgs.zsh-autopair.src}/zsh-autopair.plugin.zsh
-
       source ${pkgs.zsh-history-substring-search}/share/zsh-history-substring-search/zsh-history-substring-search.zsh
+
       bindkey "''${terminfo[kcuu1]}" history-substring-search-up
       bindkey '^[[A' history-substring-search-up
       bindkey "''${terminfo[kcud1]}" history-substring-search-down
@@ -50,6 +48,7 @@
       bindkey "^[[1;5D" backward-word
       bindkey "^[[1;3D" backward-word
       bindkey -s "^O" 'fzf | xargs -r $EDITOR^M'
+
       if command -v tmux &> /dev/null && [[ $- == *i* ]] && [[ ! "$TERM" =~ xterm-kitty ]] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$INSIDE_EMACS" ] && [ -z "$VIMRUNTIME" ] && [ -z "$TMUX" ]; then
         exec tmux new-session -A -s main >/dev/null 2>&1
       fi

@@ -9,12 +9,11 @@ with lib;
     createHome = true;
     description = "Ahmet Cemal Ozgezer";
     group = "ahmet";
-    extraGroups = [ "wheel" "dialout" ]
+    extraGroups = [ "wheel" "dialout" "audio" ]
       ++ optionals config.hardware.i2c.enable [ "i2c" ]
       ++ optionals config.networking.networkmanager.enable [ "networkmanager" ]
       ++ optionals config.programs.sway.enable [ "input" "video" ]
       ++ optionals config.services.unbound.enable [ "unbound" ]
-      ++ optionals config.sound.enable [ "audio" ]
       ++ optionals config.virtualisation.docker.enable [ "docker" ]
       ++ optionals config.virtualisation.libvirtd.enable [ "libvirtd" ]
       ++ optionals config.virtualisation.kvmgt.enable [ "kvm" ]

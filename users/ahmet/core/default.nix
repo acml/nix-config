@@ -28,7 +28,6 @@
     username = "ahmet";
     stateVersion = "23.05";
     packages = with pkgs; [
-      bandwhich
       eza
       fd
       fzf
@@ -39,6 +38,7 @@
       nix-output-monitor
       ripgrep
       rsync
+      truecolor-check
     ];
     shellAliases = {
       cat = "bat";
@@ -82,8 +82,10 @@
         };
       };
     };
-    zoxide.enable = true;
-    zoxide.options = [ "--cmd cd" ];
+    zoxide = {
+      enable = true;
+      options = [ "--cmd cd" ];
+    };
   };
 
   stylix = {
