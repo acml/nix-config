@@ -362,7 +362,7 @@ the sequences will be lost."
    left-fringe-width 16
    magit-section-visibility-indicator (if (display-graphic-p)
                                           '(magit-fringe-bitmap> . magit-fringe-bitmapv)
-                                        (cons (if (char-displayable-p ?…) "…" "...") t))))
+                                        (cons (if (char-displayable-p ?) "" "...") t))))
 
 ;; fixes magit-status for emacs29
 (add-hook! 'magit-status-mode-hook (setq truncate-lines nil))
@@ -430,8 +430,8 @@ the sequences will be lost."
       magit-save-repository-buffers nil
       ;; Don't restore the wconf after quitting magit, it's jarring
       magit-inhibit-save-previous-winconf t
-      transient-values '((magit-rebase "--autosquash" "--autostash")
-                         (magit-pull "--rebase" "--autostash")))
+      transient-values '((magit-rebase "--autostash" "--autosquash")
+                         (magit-pull "--autostash" "--rebase")))
 
 (defvar elken/mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
   "Only use `mixed-pitch-mode' for given modes.")
