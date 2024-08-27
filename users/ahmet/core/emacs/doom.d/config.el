@@ -580,8 +580,12 @@ the sequences will be lost."
 (after! spell-fu
   (cl-pushnew 'org-modern-tag (alist-get 'org-mode +spell-excluded-faces-alist)))
 
-(use-package! pdf-tools :defer t
-  :hook ((pdf-view-mode . pdf-view-themed-minor-mode)))
+(use-package! pdf-occur :commands (pdf-occur-global-minor-mode))
+(use-package! pdf-history :commands (pdf-history-minor-mode))
+(use-package! pdf-links :commands (pdf-links-minor-mode))
+(use-package! pdf-outline :commands (pdf-outline-minor-mode))
+(use-package! pdf-annot :commands (pdf-annot-minor-mode))
+(use-package! pdf-sync :commands (pdf-sync-minor-mode))
 
 (defun lkn-tab-bar--workspaces ()
   "Return a list of the current workspaces."
