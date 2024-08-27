@@ -49,7 +49,7 @@ lib.mkMerge [
         ## Optional dependencies
         dtach
         fd # faster projectile indexing
-        imagemagick # for image-dired
+        imagemagick_light # for image-dired
         unzip
         zstd # for undo-fu-session/undo-tree compression
 
@@ -138,6 +138,13 @@ lib.mkMerge [
         # golangci-lint
         # gore
         # gotools
+
+        # dirvish previewers
+        epub-thumbnailer
+        ffmpegthumbnailer
+        imagemagick_light
+        mediainfo
+        poppler_utils
 
         trash-cli
       ] ++ lib.optionals stdenv.hostPlatform.isLinux [

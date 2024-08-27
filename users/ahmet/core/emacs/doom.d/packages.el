@@ -56,11 +56,9 @@
 (package! dts-mode)
 (package! exercism)
 
-;; (package! dired-show-readme :recipe (:host gitlab :repo "kisaragi-hiu/dired-show-readme"))
 (package! dired-auto-readme :recipe (:host github :repo "amno1/dired-auto-readme"))
 (package! org-pretty-table :recipe (:host github :repo "Fuco1/org-pretty-table")) ;; dired-auto-readme dependency
 (package! org-view-mode)                                                          ;; dired-auto-readme dependency
-(unpin! dirvish)
 
 ; (package! evil-colemak-basics)
 
