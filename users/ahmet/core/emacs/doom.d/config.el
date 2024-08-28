@@ -212,11 +212,6 @@
 
 (use-package! daemons :defer t)
 
-(use-package! diff-hl
-  :config
-  (unless (display-graphic-p)
-    (diff-hl-margin-mode)))
-
 (defadvice! acml/dired-auto-readme--enable (fn &rest args)
   :around #'dired-auto-readme--enable
   (advice-add 'dired-revert :override #'ignore)
