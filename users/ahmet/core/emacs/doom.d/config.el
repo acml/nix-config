@@ -804,6 +804,13 @@ clicked."
 
 (use-package! turkish :commands (turkish-mode))
 
+(when (modulep! :completion vertico)
+  (after! consult
+    (consult-customize
+     +default/search-project +default/search-other-project
+     +default/search-project-for-symbol-at-point
+     :preview-key 'any)))
+
 (after! vterm
   (setq vterm-max-scrollback 100000))
 
