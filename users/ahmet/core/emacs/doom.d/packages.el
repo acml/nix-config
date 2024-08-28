@@ -65,7 +65,8 @@
 (package! highlight-parentheses :recipe (:host github :repo "emacsmirror/highlight-parentheses"))
 (package! journalctl-mode)
 (package! mixed-pitch)
-(package! modus-themes :recipe (:host github :repo "protesilaos/modus-themes"))
+(package! modus-themes)
+(package! ef-themes)
 (package! nov)
 (package! obvious :recipe (:host github :repo "alphapapa/obvious.el"))
 
