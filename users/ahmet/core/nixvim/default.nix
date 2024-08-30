@@ -266,7 +266,6 @@
         alpha = {
           enable = true;
           theme = null;
-          iconsEnabled = true;
           layout =
             let
               padding = val: {
