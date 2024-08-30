@@ -7,12 +7,10 @@
     stylix.homeManagerModules.stylix
 
     ./bash.nix
-    # ./btop.nix
     ./fish.nix
     ./git.nix
     ./htop.nix
     ./emacs
-    # ./neovim.nix
     ./nixvim
     ./ssh.nix
     ./starship.nix
