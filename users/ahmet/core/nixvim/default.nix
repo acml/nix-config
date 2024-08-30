@@ -503,7 +503,7 @@
           enable = true;
           servers = {
             bashls.enable = true;
-            clangd.enable = true;
+            ccls.enable = true;
             cmake.enable = true;
             dockerls.enable = true;
             gopls.enable = true;

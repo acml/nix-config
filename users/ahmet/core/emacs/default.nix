@@ -73,7 +73,7 @@ lib.mkMerge [
         tectonic
 
         # :lang cc
-        clang-tools
+        ccls
         glslang
 
         # CMake LSP
