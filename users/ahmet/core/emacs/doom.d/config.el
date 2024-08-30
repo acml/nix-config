@@ -223,7 +223,8 @@
 
 (use-package! dirvish
   :config
-  (setq dirvish-header-line-format '(:left (path) :right (free-space))
+  (setq dirvish-attributes '(vc-state collapse nerd-icons subtree-state)
+        dirvish-header-line-format '(:left (path) :right (free-space))
         dirvish-hide-details '(dired dirvish dirvish-side)
         dirvish-path-separators (list (format "  %s " (nerd-icons-codicon "nf-cod-home"))
                                       (format "  %s " (nerd-icons-codicon "nf-cod-root_folder"))
