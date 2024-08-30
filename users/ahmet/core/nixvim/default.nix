@@ -241,15 +241,15 @@
 
       globals.mapleader = " ";
 
-      performance = {
-        byteCompileLua = {
-          enable = true;
-          nvimRuntime = true;
-          plugins = true;
-        };
-        combinePlugins.enable = true;
-        combinePlugins.standalonePlugins = [ "nvim-treesitter" "nvim-treesitter-textobjects" "hmts.nvim" "vimplugin-orgmode" "vimplugin-treesitter-grammar-org" "mini.nvim" ];
-      };
+      # performance = {
+      #   byteCompileLua = {
+      #     enable = true;
+      #     nvimRuntime = true;
+      #     plugins = true;
+      #   };
+      #   combinePlugins.enable = true;
+      #   combinePlugins.standalonePlugins = [ "nvim-treesitter" "nvim-treesitter-textobjects" "hmts.nvim" "vimplugin-orgmode" "vimplugin-treesitter-grammar-org" "mini.nvim" ];
+      # };
 
       plugins = {
         alpha = {
