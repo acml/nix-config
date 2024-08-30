@@ -739,6 +739,7 @@
             "<leader>." = { action = "find_files cwd=%:p:h"; options = { desc = "Find file"; }; };
             "<leader>/" = { action = "live_grep_args"; options = { desc = "Search project"; }; };
             "<leader><leader>" = { action = "find_files"; options = { desc = "Find file in project"; }; };
+            "<leader>bb" = { action = "buffers"; options = { desc = "Switch buffer"; }; };
             "<leader>ff" = { action = "find_files cwd=%:p:h"; options = { desc = "Find file"; }; };
             "<leader>fr" = { action = "oldfiles"; options = { desc = "Recent files"; }; };
             "<leader>hh" = { action = "help_tags"; options = { desc = "help"; }; };

@@ -4,21 +4,22 @@
 
     nixvim = {
       keymaps = [
-        { action = "<cmd>nohlsearch<CR><Esc>"; key = "<Esc>"; }
-        { action = "<C-\\><C-n>"; key = "<Esc><Esc>"; mode = "t"; options.desc = "Exit terminal mode"; }
-        { action = "<cmd>bdelete<CR>"; key = "<leader>bd"; options = { desc = "Kill buffer"; }; }
-        { action = "<cmd>edit #<CR>"; key = "<leader>bl"; options = { desc = "Switch to last buffer"; }; }
-        { action = "<cmd>edit #<CR>"; key = "<leader>`"; options = { desc = "Switch to last buffer"; }; }
-        { action = "<cmd>bnext<CR>"; key = "<leader>bn"; options = { desc = "Next buffer"; }; }
-        { action = "<cmd>bprevious<CR>"; key = "<leader>bp"; options = { desc = "Previous buffer"; }; }
+        { key = "<Esc>"; action = "<cmd>nohlsearch<CR><Esc>"; }
+        { key = "<Esc><Esc>"; action = "<C-\\><C-n>"; mode = "t"; options = { desc = "Exit terminal mode"; }; }
 
-        { action = "<cmd>update<CR>"; key = "<leader>fs"; options = { desc = "Save buffer"; }; }
-        { action = "<cmd>update<CR>"; key = "<leader>bs"; options = { desc = "Save buffer"; }; }
-        { action = "<cmd>wall<CR>"; key = "<leader>bS"; options = { desc = "Save all buffers"; }; }
+        { key = "<leader>bd"; action = "<cmd>bdelete<CR>"; options = { desc = "Kill buffer"; }; }
+        { key = "<leader>bl"; action = "<cmd>edit #<CR>"; options = { desc = "Switch to last buffer"; }; }
+        { key = "<leader>`"; action = "<cmd>edit #<CR>"; options = { desc = "Switch to last buffer"; }; }
+        { key = "<leader>bn"; action = "<cmd>bnext<CR>"; options = { desc = "Next buffer"; }; }
+        { key = "<leader>bp"; action = "<cmd>bprevious<CR>"; options = { desc = "Previous buffer"; }; }
 
-        { action = "<cmd>Neogit cwd=%:p:h<CR>"; key = "<leader>gg"; options = { desc = "Neogit status"; }; }
-        { action = "<cmd>Neotree toggle<CR>"; key = "<leader>op"; options = { desc = "Project sidebar"; }; }
-        { action.__raw = "function() require('yazi').yazi() end"; key = "<leader>o-"; options = { desc = "Directory editor"; }; }
+        { key = "<leader>fs"; action = "<cmd>update<CR>"; options = { desc = "Save buffer"; }; }
+        { key = "<leader>bs"; action = "<cmd>update<CR>"; options = { desc = "Save buffer"; }; }
+        { key = "<leader>bS"; action = "<cmd>wall<CR>"; options = { desc = "Save all buffers"; }; }
+
+        { key = "<leader>gg"; action = "<cmd>Neogit cwd=%:p:h<CR>"; options = { desc = "Neogit status"; }; }
+        { key = "<leader>op"; action = "<cmd>Neotree toggle<CR>"; options = { desc = "Project sidebar"; }; }
+        { key = "<leader>o-"; action.__raw = "function() require('yazi').yazi() end"; options = { desc = "Directory editor"; }; }
       ];
     };
   };
