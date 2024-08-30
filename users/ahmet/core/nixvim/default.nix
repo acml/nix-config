@@ -152,7 +152,6 @@
           local action_state = require("telescope.actions.state")
           local fb = require("telescope").extensions.file_browser
           local lga = require("telescope").extensions.live_grep_args
-          local current_line = action_state.get_current_line()
 
           fb.file_browser({
             files = false,
@@ -166,8 +165,7 @@
 
                 lga.live_grep_args({
                   results_title = relative .. "/",
-                  cwd = absolute,
-                  default_text = current_line,
+                  cwd = absolute
                 })
               end)
 
@@ -176,18 +174,9 @@
           })
         end
 
-        nnoremap("<leader>ff", function() require('telescope').extensions.file_browser.file_browser( { cwd = vim.fn.expand('%:p:h') } ) end,     { desc = 'Find file' } )
-        nnoremap("<leader>.",  function() require('telescope').extensions.file_browser.file_browser( { cwd = vim.fn.expand('%:p:h') } ) end,     { desc = 'Find file' } )
-        nnoremap("<leader>*",  function() require('telescope-live-grep-args.shortcuts').grep_word_under_cursor() end,                            { desc = 'Search for symbol in project' } )
-        nnoremap("<leader>/",  function() require('telescope').extensions.live_grep_args.live_grep_args() end,                                   { desc = 'Search project' } )
-        nnoremap("<leader>pp", function() require('telescope').extensions.projects.projects() end,                                               { desc = 'Switch project' } )
-        nnoremap("<leader>sd", function() require('telescope').extensions.live_grep_args.live_grep_args( { cwd = vim.fn.expand('%:p:h') } ) end, { desc = 'Search current directory' } )
-        nnoremap("<leader>sD", function() select_dir_for_grep() end,                                                                             { desc = 'Search other directory' })
-        nnoremap("<leader>ss", function() require('telescope.builtin').current_buffer_fuzzy_find() end,                                          { desc = 'Search buffer' } )
-        nnoremap("<leader>sb", function() require('telescope.builtin').current_buffer_fuzzy_find() end,                                          { desc = 'Search buffer' } )
-        nnoremap("<leader>hh", function() require('telescope.builtin').help_tags( ) end,                                                         { desc = 'help' } )
-        nnoremap("<leader>hm", function() require('telescope.builtin').man_pages( { sections = { 'ALL' } } ) end,                                { desc = 'man' } )
-        nnoremap("<leader>ht", function() require('telescope.builtin').colorscheme( { enable_preview = true } ) end,                             { desc = 'Change Colorscheme' } )
+        nnoremap("<leader>*",  function() require('telescope-live-grep-args.shortcuts').grep_word_under_cursor() end, { desc = 'Search for symbol in project' } )
+        nnoremap("<leader>sD", function() select_dir_for_grep() end, { desc = 'Search other directory' })
+        nnoremap("<leader>sS", function() require('telescope.builtin').current_buffer_fuzzy_find( { default_text = vim.fn.expand('<cword>'), fuzzy = false } ) end, { desc = 'Search buffer for thing at point' } )
 
         nnoremap("<leader>ot", "<cmd>ToggleTerm direction=horizontal<cr>", { desc = 'Toggle terminal (horizontal)' } )
         nnoremap("<leader>of", "<cmd>ToggleTerm direction=float<cr>", { desc = 'Toggle terminal (floating)' } )
@@ -745,12 +734,22 @@
             undo.enable = true;
           };
           keymaps = {
-            "<leader>," = { action = "buffers"; options = { desc = "Switch buffer"; }; };
-            "<leader><leader>" = { action = "find_files"; options = { desc = "Find file in project"; }; };
-            "<leader>fr" = { action = "oldfiles"; options = { desc = "Recent files"; }; };
-            "<leader>hk" = { action = "keymaps"; options = { desc = "key-bindings"; }; };
             "<leader>'" = { action = "resume"; options = { desc = "Resume last search"; }; };
+            "<leader>," = { action = "buffers"; options = { desc = "Switch buffer"; }; };
+            "<leader>." = { action = "find_files cwd=%:p:h"; options = { desc = "Find file"; }; };
+            "<leader>/" = { action = "live_grep_args"; options = { desc = "Search project"; }; };
+            "<leader><leader>" = { action = "find_files"; options = { desc = "Find file in project"; }; };
+            "<leader>ff" = { action = "find_files cwd=%:p:h"; options = { desc = "Find file"; }; };
+            "<leader>fr" = { action = "oldfiles"; options = { desc = "Recent files"; }; };
+            "<leader>hh" = { action = "help_tags"; options = { desc = "help"; }; };
+            "<leader>hk" = { action = "keymaps"; options = { desc = "key-bindings"; }; };
+            "<leader>hm" = { action = "man_pages sections=ALL"; options = { desc = "man"; }; };
+            "<leader>ht" = { action = "colorscheme enable_preview=true"; options = { desc = "Change Colorscheme"; }; };
+            "<leader>pp" = { action = "projects"; options = { desc = "Switch project"; }; };
+            "<leader>sb" = { action = "current_buffer_fuzzy_find fuzzy=false"; options = { desc = "Search buffer"; }; };
+            "<leader>sd" = { action = "live_grep_args cwd=%:p:h"; options = { desc = "Search current directory"; }; };
             "<leader>si" = { action = "lsp_document_symbols"; options = { desc = "Jump to symbol"; }; };
+            "<leader>ss" = { action = "current_buffer_fuzzy_find fuzzy=false"; options = { desc = "Search buffer"; }; };
           };
         };
         # tmux-navigator.enable = true;
