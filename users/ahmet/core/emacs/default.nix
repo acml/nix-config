@@ -48,8 +48,10 @@ lib.mkMerge [
 
         ## Optional dependencies
         dtach
+        exiftool # for image-dired
         fd # faster projectile indexing
-        imagemagick_light # for image-dired
+        graphicsmagick # for image-dired
+        libjpeg # for image-dired
         unzip
         zstd # for undo-fu-session/undo-tree compression
 
@@ -142,7 +144,6 @@ lib.mkMerge [
         # dirvish previewers
         epub-thumbnailer
         ffmpegthumbnailer
-        imagemagick_light
         mediainfo
         poppler_utils
 
@@ -191,6 +192,7 @@ lib.mkMerge [
           (lib.mkIf isDarwin pkgs.emacs29)
         ];
         extraPackages = epkgs: (with epkgs; [
+          djvu
           pdf-tools
           treesit-grammars.with-all-grammars
           vterm
