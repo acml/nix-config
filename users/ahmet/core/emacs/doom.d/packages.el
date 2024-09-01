@@ -68,6 +68,7 @@
 (package! modus-themes)
 (package! ef-themes)
 (package! nov)
+(package! visual-fill-column) ; dependency of nov
 (package! obvious :recipe (:host github :repo "alphapapa/obvious.el"))
 
 (package! org-modern)
