@@ -223,9 +223,10 @@
 
 (use-package! dirvish
   :config
-  (setq dirvish-attributes '(vc-state collapse nerd-icons subtree-state)
+  (setq dirvish-attributes '(file-size nerd-icons subtree-state vc-state collapse)
         dirvish-header-line-format '(:left (path) :right (free-space))
         dirvish-hide-details '(dired dirvish dirvish-side)
+        dirvish-hide-cursor '(dired dirvish dirvish-side)
         dirvish-path-separators (list (format "  %s " (nerd-icons-codicon "nf-cod-home"))
                                       (format "  %s " (nerd-icons-codicon "nf-cod-root_folder"))
                                       (format " %s " (nerd-icons-faicon "nf-fa-angle_right")))
