@@ -26,7 +26,7 @@ lib.mkMerge [
         emacs-all-the-icons-fonts
         julia-mono
         noto-fonts-emoji
-        symbola
+        # symbola
         (nerdfonts.override {
           fonts = [
             "FiraCode"
