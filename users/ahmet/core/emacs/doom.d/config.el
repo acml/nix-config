@@ -808,7 +808,10 @@ clicked."
     (consult-customize
      +default/search-project +default/search-other-project
      +default/search-project-for-symbol-at-point
-     :preview-key 'any)))
+     +default/search-cwd +default/search-other-cwd
+     +default/search-notes-for-symbol-at-point
+     +default/search-emacsd
+     :preview-key (list "C-SPC" :debounce 0.1 'any))))
 
 (after! vterm
   (setq vterm-max-scrollback 100000))
