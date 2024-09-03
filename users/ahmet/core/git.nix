@@ -1,11 +1,10 @@
-{ lib, pkgs, ... }: {
+{ pkgs, ... }: {
   programs.git = {
     enable = true;
     delta = {
       enable = true;
       options = {
         navigate = true;
-        syntax-theme = "Nord";
       };
     };
     package = pkgs.gitFull;
