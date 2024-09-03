@@ -306,9 +306,11 @@
    '(("gopls.staticcheck" t t))))
 
 (after! lsp-mode
-  (setq lsp-headerline-breadcrumb-enable t
+  (setq lsp-enable-file-watchers t
+        lsp-file-watch-threshold 15000
         lsp-lens-enable nil
-        lsp-signature-render-documentation t))
+        lsp-signature-render-documentation t
+        lsp-headerline-breadcrumb-enable t))
 
 (after! lsp-ui
   (setq lsp-ui-doc-enable nil ; fixes the LSP lag
