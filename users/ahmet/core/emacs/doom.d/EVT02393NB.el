@@ -30,5 +30,7 @@
                                     :compile "./setenv_docker.sh make -j$(nproc) -s all_targets 2>&1 | tee build-$(date -Iseconds).log"
                                     :configure "/usr/bin/git dt checkout -f"))
 
+(add-to-list 'auto-mode-alist '("\\.igt" . makefile-mode))
+
 (provide 'EVT02393NB)
 ;;; EVT02393NB.el ends here
