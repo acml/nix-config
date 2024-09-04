@@ -688,17 +688,19 @@
         project-nvim = {
           enable = true;
           enableTelescope = true;
-          manualMode = true;
-          patterns = [
-            "proj.default.ini"
-            ".git"
-            "_darcs"
-            ".hg"
-            ".bzr"
-            ".svn"
-            "Makefile"
-            "package.json"
-          ];
+          settings = {
+            manual_mode = true;
+            patterns = [
+              "proj.default.ini"
+              ".git"
+              "_darcs"
+              ".hg"
+              ".bzr"
+              ".svn"
+              "Makefile"
+              "package.json"
+            ];
+          };
         };
         rainbow-delimiters.enable = true;
         refactoring.enable = true;
