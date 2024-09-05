@@ -565,7 +565,10 @@
               settings.telemetry.enable = false;
             };
             marksman.enable = false;
-            nil-ls.enable = true;
+            nil-ls = {
+              enable = true;
+              settings.nix.flake.autoArchive = true;
+            };
             # nixd.enable = true;
             taplo.enable = true;
             tsserver.enable = true;
