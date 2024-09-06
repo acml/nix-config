@@ -624,6 +624,7 @@
             useLibuvFileWatcher = true;
           };
           popupBorderStyle = "rounded";
+          sourceSelector.winbar = true;
           window = {
             autoExpandWidth = true;
             mappings = { "<tab>" = { command = "toggle_node"; }; };
