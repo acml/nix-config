@@ -366,9 +366,6 @@ the sequences will be lost."
                                           '(magit-fringe-bitmap> . magit-fringe-bitmapv)
                                         (cons (if (char-displayable-p ?) "" "...") t))))
 
-;; fixes magit-status for emacs29
-(add-hook! 'magit-status-mode-hook (setq truncate-lines nil))
-
 (after! magit
   (magit-add-section-hook 'magit-status-sections-hook
                           'magit-insert-ignored-files
