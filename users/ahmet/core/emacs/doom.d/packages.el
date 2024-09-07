@@ -64,6 +64,7 @@
 
 (package! highlight-parentheses :recipe (:host github :repo "emacsmirror/highlight-parentheses"))
 (package! journalctl-mode)
+(package! magit-todos)
 (package! mixed-pitch)
 (package! modus-themes)
 (package! ef-themes)

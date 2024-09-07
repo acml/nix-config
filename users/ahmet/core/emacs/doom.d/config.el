@@ -435,6 +435,10 @@ the sequences will be lost."
       transient-values '((magit-rebase "--autostash" "--autosquash")
                          (magit-pull "--autostash" "--rebase")))
 
+(use-package! magit-todos
+  :after magit
+  :config (magit-todos-mode 1))
+
 (defvar elken/mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
   "Only use `mixed-pitch-mode' for given modes.")
 
