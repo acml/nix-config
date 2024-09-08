@@ -586,8 +586,12 @@
         };
         lualine = {
           enable = true;
-          globalstatus = true;
-          ignoreFocus = [ "neo-tree" ];
+          settings = {
+            options = {
+              globalstatus = true;
+              ignore_focus = [ "neo-tree" ];
+            };
+          };
         };
         luasnip.enable = true;
         mini = {
