@@ -577,6 +577,12 @@ the sequences will be lost."
           ("results" . "🠶")))
   (custom-set-faces! '(org-modern-statistics :inherit org-checkbox-statistics-todo)))
 
+(use-package! ox-latex
+  :after org
+  :config
+  (setq org-latex-pdf-process
+        '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f")))
+
 (after! spell-fu
   (cl-pushnew 'org-modern-tag (alist-get 'org-mode +spell-excluded-faces-alist)))
 
