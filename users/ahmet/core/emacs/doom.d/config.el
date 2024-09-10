@@ -239,7 +239,11 @@
         dirvish-subtree-state-style 'nerd)
   ;; (dirvish-peek-mode)
   (dirvish-side-follow-mode)
-  (add-hook! 'dirvish-setup-hook #'dired-auto-readme-mode))
+  (add-hook! 'dirvish-setup-hook #'dired-auto-readme-mode)
+  (use-package! dirvish-side
+    :config
+    (setq dirvish-side-display-alist
+          '((side . right) (slot . -1)))))
 
 ;; Easier to match with a bspwm rule:
 ;;   bspc rule -a 'Emacs:emacs-everywhere' state=floating sticky=on
