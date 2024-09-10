@@ -105,7 +105,7 @@
       # url = "github:nix-community/nixvim/nixos-23.05";
       url = "github:nix-community/nixvim";
       inputs = {
-        # nixpkgs.follows = "nixpkgs";
+        nixpkgs.follows = "nixpkgs";
         devshell.follows = "";
         git-hooks.follows = "";
         treefmt-nix.follows = "";
