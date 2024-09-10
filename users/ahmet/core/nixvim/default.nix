@@ -1,6 +1,7 @@
 { pkgs, ... }: {
 
   imports = [
+    ./autocmd.nix
     ./keymaps.nix
     ./options.nix
   ];
@@ -37,16 +38,6 @@
           local hl = "DiagnosticSign" .. type
           vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
         end
-
-        vim.api.nvim_create_autocmd('FileType', {
-          group = augroup,
-          pattern = 'NeogitLogView',
-          callback = function()
-            vim.defer_fn(function()
-              vim.cmd [[set signcolumn=yes]]
-            end, 0)
-          end,
-        })
 
         vim.cmd("set ignorecase")
         vim.cmd("set smartcase")
@@ -220,10 +211,6 @@
           org_agenda_files = {'~/Documents/org/*', '~/my-orgs/**/*'},
           org_default_notes_file = '~/Documents/org/refile.org',
         })
-      '';
-
-      extraConfigVim = /* vim */ ''
-        autocmd FileType make set noexpandtab
       '';
 
       extraPackages = with pkgs; [
