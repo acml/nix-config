@@ -7,7 +7,6 @@
         navigate = true;
       };
     };
-    package = pkgs.gitFull;
     lfs.enable = true;
     userEmail = "ozgezer@gmail.com";
     userName = "Ahmet Cemal Ozgezer";
