@@ -245,6 +245,9 @@
     (setq dirvish-side-display-alist
           '((side . right) (slot . -1)))))
 
+(after! eglot
+  (set-eglot-client! '(c-mode c-ts-mode c++-mode c++-ts-mode objc-mode) `("ccls" ,(concat "--init={\"cache\": {\"directory\": \"" (file-truename "~/.cache/ccls") "\"}}"))))
+
 ;; Easier to match with a bspwm rule:
 ;;   bspc rule -a 'Emacs:emacs-everywhere' state=floating sticky=on
 (setq emacs-everywhere-frame-name-format "emacs-everywhere")
