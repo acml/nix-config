@@ -214,9 +214,11 @@
 
 (defadvice! acml/dired-auto-readme--enable (fn &rest args)
   :around #'dired-auto-readme--enable
-  (advice-add 'dired-revert :override #'ignore)
-  (save-excursion (apply fn args))
-  (advice-remove 'dired-revert #'ignore))
+  (let ((visible (dirvish-side--session-visible-p)))
+    (unless (eq visible (selected-window))
+      (advice-add 'dired-revert :override #'ignore)
+      (save-excursion (apply fn args))
+      (advice-remove 'dired-revert #'ignore))))
 
 (defadvice! acml/dirvish-subtree-toggle (fn &rest args)
   :around #'dirvish-subtree-toggle (save-excursion (apply fn args)))
