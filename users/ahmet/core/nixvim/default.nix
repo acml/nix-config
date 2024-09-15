@@ -417,7 +417,7 @@
           enable = true;
           settings = {
             snippet = {
-              expand = ''
+              expand = /* lua */ ''
                 function(args)
                   require('luasnip').lsp_expand(args.body)
                 end
@@ -542,7 +542,7 @@
             bashls.enable = true;
             ccls = {
               enable = true;
-              initOptions.cache.directory.__raw = ''vim.fn.expand("$HOME/.cache/ccls")'';
+              initOptions.cache.directory = { __raw = ''vim.fn.expand("$HOME/.cache/ccls")''; };
             };
             cmake.enable = true;
             dockerls.enable = true;
@@ -636,7 +636,7 @@
               diffview = true;
               telescope = true;
             };
-            telescope_sorter = ''require("telescope").extensions.fzf.native_fzf_sorter'';
+            telescope_sorter = /* lua */ ''require("telescope").extensions.fzf.native_fzf_sorter'';
           };
         };
         neotest.enable = true;
