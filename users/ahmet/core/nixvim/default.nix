@@ -476,6 +476,7 @@
             ];
           };
         };
+        compiler.enable = true;
         dap.enable = true;
         debugprint.enable = true;
         diffview.enable = true;
@@ -683,6 +684,9 @@
         nvim-bqf.enable = true;
         nvim-colorizer.enable = true;
         nvim-ufo.enable = true;
+        overseer.enable = true;
+        precognition.enable = true;
+        precognition.settings.startVisible = false;
         project-nvim = {
           enable = true;
           enableTelescope = true;
@@ -786,6 +790,7 @@
         trim.enable = true;
         trim.settings.trim_on_write = false;
         trouble.enable = true;
+        ts-comments.enable = true;
         ts-context-commentstring.enable = true;
 
         vim-matchup = {
