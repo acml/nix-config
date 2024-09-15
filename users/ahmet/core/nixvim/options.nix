@@ -42,7 +42,7 @@
 
         # misc
         wrap = false;
-        scrolloff = 8;
+        # scrolloff = 8;
 
         # Sets how neovim will display certain whitespace characters in the editor.
         # See `:help 'list'`
