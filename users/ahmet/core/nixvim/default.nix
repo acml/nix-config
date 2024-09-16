@@ -563,7 +563,7 @@
             };
             # nixd.enable = true;
             taplo.enable = true;
-            tsserver.enable = true;
+            ts-ls.enable = true;
           };
         };
         lsp-format.enable = true;
