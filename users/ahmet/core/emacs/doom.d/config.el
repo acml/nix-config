@@ -310,6 +310,11 @@
 
 (use-package! journalctl-mode :defer t)
 
+(use-package! ll-debug
+  :config
+  (setcdr (assq 'c++-mode ll-debug-statement-alist)
+          (cdr (assq 'c-mode ll-debug-statement-alist))))
+
 (after! lsp-go
   (lsp-register-custom-settings
    '(("gopls.staticcheck" t t))))
