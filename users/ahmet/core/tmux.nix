@@ -32,10 +32,16 @@
     prefix = "C-\\\\";
     secureSocket = false;
     terminal = "tmux-256color";
-    extraConfig = ''
-      set-option -a terminal-features ",*:RGB"
+    extraConfig = /* tmux */ ''
       set-option -g status-interval 1
       set-option -g status-position top
+
+      set-option -a terminal-features ",*:RGB"
+
+      # undercurl support
+      set -as terminal-overrides ',*:Smulx=\E[4::%p1%dm'
+      # underscore colours - needs tmux-3.0
+      set -as terminal-overrides ',*:Setulc=\E[58::2::%p1%{65536}%/%d::%p1%{256}%/%{255}%&%d::%p1%{255}%&%d%;m'
 
       # To enable Yazi's image preview to work correctly in tmux
       set -g allow-passthrough on
