@@ -117,28 +117,6 @@
         vim.keymap.set('n', '[E', "<cmd>cfirst<cr>zv", { silent = true, desc = "first qf item" })
         vim.keymap.set('n', ']E', "<cmd>clast<cr>zv", { silent = true, desc = "last qf item" })
 
-        local telescope = require("telescope")
-        local lga_actions = require("telescope-live-grep-args.actions")
-
-        telescope.setup {
-          extensions = {
-            live_grep_args = {
-              auto_quoting = true, -- enable/disable auto-quoting
-              -- define mappings, e.g.
-              mappings = { -- extend mappings
-                i = {
-                  ["<C-k>"] = lga_actions.quote_prompt(),
-                  ["<C-i>"] = lga_actions.quote_prompt({ postfix = " --iglob " }),
-                },
-              },
-              -- ... also accepts theme settings, for example:
-              -- theme = "dropdown", -- use dropdown theme
-              -- theme = { }, -- use own theme spec
-              -- layout_config = { mirror=true }, -- mirror preview pane
-            }
-          }
-        }
-
         select_dir_for_grep = function(prompt_bufnr)
           local action_state = require("telescope.actions.state")
           local fb = require("telescope").extensions.file_browser
@@ -223,7 +201,6 @@
 
       extraPlugins = with pkgs.vimPlugins; [
         orgmode
-        telescope-live-grep-args-nvim
       ];
 
       globals.mapleader = " ";
@@ -685,6 +662,7 @@
         nvim-bqf.enable = true;
         nvim-colorizer.enable = true;
         nvim-ufo.enable = true;
+        nvim-surround.enable = true;
         overseer.enable = true;
         precognition.enable = true;
         precognition.settings.startVisible = false;
@@ -727,7 +705,6 @@
             { click = "v:lua.ScFa"; text = [{ __raw = "require('statuscol.builtin').foldfunc"; } " "]; }
           ];
         };
-        surround.enable = true;
         tagbar.enable = true;
         telescope = {
           enable = true;
@@ -735,6 +712,16 @@
             file-browser.enable = true;
             frecency.enable = true;
             fzf-native.enable = true;
+            live-grep-args.enable = true;
+            live-grep-args.settings = {
+              mappings = {
+                i = {
+                  "<C-i>".__raw = ''require("telescope-live-grep-args.actions").quote_prompt({ postfix = " --iglob " })'';
+                  "<C-k>".__raw = ''require("telescope-live-grep-args.actions").quote_prompt()'';
+                  "<C-space>".__raw = ''require("telescope-live-grep-args.actions").to_fuzzy_refine'';
+                };
+              };
+            };
             ui-select.enable = true;
             undo.enable = true;
           };
@@ -796,7 +783,6 @@
 
         vim-matchup = {
           enable = true;
-          enableSurround = true;
           treesitterIntegration.enable = true;
           treesitterIntegration.includeMatchWords = true;
         };
