@@ -176,8 +176,7 @@
 (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t)
                     ("^\\*\\(?:Wo\\)?Man " :size 82 :side right :select t :quit t)))
 
-(use-package! avy
-  :config
+(after! avy
   (setq avy-all-windows 'all-frames
         avy-all-windows-alt nil
         avy-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)))
@@ -206,11 +205,11 @@
                                       :completion (:detailedLabel t)
                                       :cache (:directory ,(file-truename "~/.cache/ccls")))))
 
-(use-package compile ; built-in
-  :config
+(after! compile
   (setq compilation-scroll-output t))
 
-(use-package! daemons :defer t)
+(use-package! daemons
+  :commands (daemons daemons-disable daemons-enable daemons-reload daemons-restart daemons-start daemons-status daemons-stop))
 
 (defadvice! acml/dired-auto-readme--enable (fn &rest args)
   :around #'dired-auto-readme--enable
@@ -223,8 +222,7 @@
 (defadvice! acml/dirvish-subtree-toggle (fn &rest args)
   :around #'dirvish-subtree-toggle (save-excursion (apply fn args)))
 
-(use-package! dirvish
-  :config
+(after! dirvish
   (setq dirvish-attributes '(file-size nerd-icons subtree-state vc-state collapse)
         dirvish-header-line-format '(:left (path) :right (free-space))
         dirvish-hide-details '(dired dirvish dirvish-side)
@@ -241,11 +239,11 @@
         dirvish-subtree-state-style 'nerd)
   ;; (dirvish-peek-mode)
   (dirvish-side-follow-mode)
-  (add-hook! 'dirvish-setup-hook #'dired-auto-readme-mode)
-  (use-package! dirvish-side
-    :config
+  (add-hook! 'dirvish-setup-hook #'dired-auto-readme-mode))
+
+(after! dirvish-side
     (setq dirvish-side-display-alist
-          '((side . right) (slot . -1)))))
+          '((side . right) (slot . -1))))
 
 (after! eglot
   (set-eglot-client! '(c-mode c-ts-mode c++-mode c++-ts-mode objc-mode) `("ccls" ,(concat "--init={\"cache\": {\"directory\": \"" (file-truename "~/.cache/ccls") "\"}}")))
@@ -272,7 +270,7 @@
                         (+ emacs-everywhere-window-y
                            (/ emacs-everywhere-window-height 2)))))
 
-(use-package! exercism
+(use-package! exercism :commands (exercism)
   :config
   (map! (:leader :desc "Exercism" :n "oe" #'exercism))
   (setq exercism-directory "~/Projects/exercism"))
@@ -294,8 +292,7 @@
 ;   (global-evil-colemak-basics-mode))
 
 ;; :ui window-select settings, ignoring +numbers flag for now
-(use-package! ace-window
-  :config
+(after! ace-window
   (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)))
 
 (after! expand-region
@@ -309,9 +306,23 @@
   :hook
   (prog-mode . highlight-parentheses-mode))
 
-(use-package! journalctl-mode :defer t)
+(after! indent-bars
+  (setq
+    indent-bars-color '(highlight :face-bg t :blend 0.15)
+    indent-bars-pattern "."
+    indent-bars-width-frac 0.1
+    indent-bars-pad-frac 0.1
+    indent-bars-zigzag nil
+    indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 1) ; blend=1: blend with BG only
+    indent-bars-highlight-current-depth '(:blend 0.5) ; pump up the BG blend on current
+    indent-bars-display-on-blank-lines t))
+
+(use-package! journalctl-mode :commands (journalctl))
 
 (use-package! ll-debug
+  :commands (ll-debug-comment-region-or-line ll-debug-copy-and-comment-region-or-line ll-debug-insert ll-debug-mode
+                                             ll-debug-revert ll-debug-toggle-comment-region-or-line
+                                             ll-debug-uncomment-region-or-line)
   :config
   (setcdr (assq 'c++-mode ll-debug-statement-alist)
           (cdr (assq 'c-mode ll-debug-statement-alist))))
@@ -479,6 +490,8 @@ the sequences will be lost."
   :config
   (setq nov-text-width most-positive-fixnum)
   (setq visual-fill-column-center-text t))
+
+(map! (:leader :desc "No comments, it is obvious" :n "to" #'obvious-mode))
 
 (use-package! deft
   :after org
@@ -707,8 +720,7 @@ clicked."
       :desc "Swap Left"  "<" #'+workspace/swap-left
       :desc "Swap Right" ">" #'+workspace/swap-right)
 
-(use-package! proced
-  :defer t
+(use-package! proced :commands (proced)
   :init
   (setq proced-auto-update-flag t
         proced-auto-update-interval 1
@@ -857,9 +869,7 @@ clicked."
    '(("\\`g s" . "\\`evilem--?motion-\\(.*\\)") . (nil . " \\1"))))
 
 ;; text mode directory tree
-(use-package! ztree
-  :defer t
-  :init
+(after! ztree
   (setq ztree-draw-unicode-lines t
         ztree-show-number-of-children t))
 
