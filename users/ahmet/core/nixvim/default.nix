@@ -27,13 +27,13 @@
         # tokyonight.enable = true;
       };
 
-      extraConfigLua = /* lua */ ''
+      extraConfigLua = ''
 
         -- UFO folding
         vim.o.fillchars          = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
         vim.cmd [[set signcolumn=yes]]
 
-        local signs = { Error = "", Warn = "", Hint = "", Info = "" }
+        local signs = { Error = "", Warn = "", Hint = "", Info = "" }
         for type, icon in pairs(signs) do
           local hl = "DiagnosticSign" .. type
           vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
@@ -553,22 +553,57 @@
           lightbulb.sign = false;
           diagnostic.diagnosticOnlyCurrent = true;
         };
-        lualine = {
-          enable = true;
-          settings = {
-            options = {
-              globalstatus = true;
-              ignore_focus = [ "neo-tree" ];
+        lualine =
+          let
+            diff = {
+              __unkeyed-1 = "diff";
+              symbols = {
+                added = " ";
+                modified = " ";
+                removed = " ";
+              };
+            };
+            filename = {
+              __unkeyed-1 = "filename";
+              symbols = {
+                modified = "";
+                readonly = "";
+                unnamed = "";
+                newfile = "";
+              };
+            };
+          in
+          {
+            enable = true;
+            settings = {
+              sections = {
+                # lualine_a = [ "mode" ];
+                lualine_b = [ "branch" diff "diagnostics" /* filetype filename "navic" */ ];
+                lualine_c = [ filename ];
+                # lualine_x = [ "encoding" "fileformat" "filetype" ];
+                # lualine_y = [ "progress" ];
+                # lualine_z = [ "location" ];
+              };
+              options = {
+                globalstatus = true;
+                icons_enabled = true;
+                ignore_focus = [ "neo-tree" "nvim-tree" "mini-files" ];
+              };
             };
           };
-        };
         luasnip.enable = true;
         mini = {
           enable = true;
           modules = {
             align = { };
             bracketed = { };
-            comment = { };
+            comment = {
+              custom_commentstring.__raw = ''
+                function()
+                  return require('ts_context_commentstring').calculate_commentstring() or vim.bo.commentstring
+                end
+              '';
+            };
             map = { };
             operators = { };
             pairs = { };
@@ -584,10 +619,10 @@
           };
           closeIfLastWindow = true;
           defaultComponentConfigs.diagnostics.symbols = {
-            error = "";
-            hint = "";
-            info = "";
-            warn = "";
+            error = "";
+            hint = "";
+            info = "";
+            warn = "";
           };
           documentSymbols.followCursor = true;
           filesystem = {
