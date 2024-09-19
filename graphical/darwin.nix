@@ -61,24 +61,29 @@
   };
 
   system = {
-    # defaults = {
-    #   NSGlobalDomain = {
-    #     AppleInterfaceStyle = "Dark";
-    #     AppleTemperatureUnit = "Celsius";
-    #     InitialKeyRepeat = 25;
-    #     KeyRepeat = 2;
-    #     NSAutomaticSpellingCorrectionEnabled = false;
-    #   };
-    #   finder.QuitMenuItem = true;
-    #   dock = {
-    #     autohide = true;
-    #     autohide-delay = 0.0;
-    #     autohide-time-modifier = 0.0;
-    #     mineffect = "scale";
-    #     orientation = "left";
-    #     show-recents = false;
-    #   };
-    # };
+    defaults = {
+      #   NSGlobalDomain = {
+      #     AppleInterfaceStyle = "Dark";
+      #     AppleTemperatureUnit = "Celsius";
+      #     InitialKeyRepeat = 25;
+      #     KeyRepeat = 2;
+      #     NSAutomaticSpellingCorrectionEnabled = false;
+      #   };
+      #   finder.QuitMenuItem = true;
+      #   dock = {
+      #     autohide = true;
+      #     autohide-delay = 0.0;
+      #     autohide-time-modifier = 0.0;
+      #     mineffect = "scale";
+      #     orientation = "left";
+      #     show-recents = false;
+      #   };
+      trackpad = {
+        Clicking = true;
+        Dragging = true;
+        TrackpadRightClick = true;
+      };
+    };
     keyboard = {
       enableKeyMapping = true;
       remapCapsLockToControl = true;
