@@ -84,7 +84,7 @@ lib.mkMerge [
 
         # Nix
         nixfmt-classic
-        # nil
+        nil
 
         # Markdown exporting
         mdl
