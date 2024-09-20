@@ -513,6 +513,40 @@
         helpview.enable = true;
         hmts.enable = true;
         illuminate.enable = true;
+        indent-blankline = {
+          enable = true;
+          settings = {
+            exclude = {
+              buftypes = [
+                "terminal"
+                "nofile"
+                "quickfix"
+                "prompt"
+              ];
+              filetypes = [
+                "lspinfo"
+                "packer"
+                "checkhealth"
+                "help"
+                "man"
+                "neo-tree"
+                "gitcommit"
+                "TelescopePrompt"
+                "TelescopeResults"
+                "''"
+              ];
+            };
+            indent = {
+              char = "▏";
+            };
+            scope = {
+              enabled = false;
+              show_end = false;
+              show_exact_scope = false;
+              show_start = true;
+            };
+          };
+        };
         lastplace.enable = true;
         # lint.enable = true;
         lsp = {
@@ -603,6 +637,17 @@
                   return require('ts_context_commentstring').calculate_commentstring() or vim.bo.commentstring
                 end
               '';
+            };
+            indentscope = {
+              draw = {
+                delay = 100;
+                priority = 2;
+                animation.__raw = ''require('mini.indentscope').gen_animation.none()'';
+              };
+              options = {
+                try_as_border = true;
+              };
+              symbol = "▏";
             };
             map = { };
             operators = { };
@@ -804,7 +849,7 @@
           folding = true;
           nixvimInjections = true;
           settings = {
-            indent.enable = true;
+            indent.enable = false;
             highlight.enable = true;
           };
         };

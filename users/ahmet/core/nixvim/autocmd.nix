@@ -110,6 +110,43 @@
           event = [ "FocusGained" "TermClose" "TermLeave" ];
         }
 
+        {
+          event = [ "FileType" ];
+          pattern = [
+            "TelescopePrompt"
+            "TelescopeResults"
+            "Trouble"
+            "alpha"
+            "checkhealth"
+            "dashboard"
+            "fzf"
+            "gitcommit"
+            "help"
+            "lazy"
+            "lazyterm"
+            "lspinfo"
+            "man"
+            "mason"
+            "neo-tree"
+            "nofile"
+            "notify"
+            "packer"
+            "prompt"
+            "quickfix"
+            "terminal"
+            "toggleterm"
+            "trouble"
+            "\'\'"
+          ];
+          callback = {
+            __raw = ''
+              function()
+                vim.b.miniindentscope_disable = true
+              end
+            '';
+          };
+        }
+
       ];
     };
   };
