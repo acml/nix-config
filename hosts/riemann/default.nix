@@ -1,6 +1,8 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, nixos-hardware, pkgs, ... }:
 {
   imports = [
+    # nixos-hardware.nixosModules.raspberry-pi-4
+
     ../../core
 
     # ../../hardware/nixos-aarch64-builder
@@ -13,7 +15,13 @@
 
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
-    initrd.availableKernelModules = [ "xhci_pci" "usbhid" "usb_storage" ];
+    initrd.availableKernelModules = [
+      "usbhid"
+      "usb_storage"
+      "vc4"
+      "pcie_brcmstb" # required for the pcie bus to work
+      "reset-raspberrypi" # required for vl805 firmware to load
+    ];
     kernelParams = [ "console=ttyS1,115200n8" ];
     loader = {
       # Use the extlinux boot loader. (NixOS wants to enable GRUB by default)
@@ -30,6 +38,7 @@
     "/boot/firmware" = {
       device = "/dev/disk/by-label/FIRMWARE";
       fsType = "vfat";
+      options = [ "noauto" ];
     };
     "/" = {
       device = "/dev/disk/by-label/NIXOS_SD";
@@ -107,6 +116,7 @@
           is_system_service = false;
         };
       };
+      user = "klipper";
       group = "klipper";
     };
     oauth2-proxy.nginx.virtualHosts.${config.services.mainsail.hostName} = { };
@@ -176,7 +186,7 @@
         group = "klipper";
       };
     };
-    groups.klipper.members = [ "moonraker" ];
+    groups.klipper = { };
   };
 
 }
