@@ -33,12 +33,10 @@
       ;;
       ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
       ;; font string. You generally only need these two:
-      ;; (setq doom-font (font-spec :family "Iosevka" :size 14)
-      ;;       doom-variable-pitch-font (font-spec :family "Ubuntu Nerd Font" :size 14))
-      doom-font (font-spec :family "Iosevka Nerd Font" :size (cond ((featurep :system 'macos) 13.0)
+      doom-font (font-spec :family "Iosevka Comfy" :size (cond ((featurep :system 'macos) 13.0)
                                                                    ((string= (system-name) "EVT02393NB") 10.8)
                                                                    (t 12.0)))
-      doom-big-font (font-spec :family "Iosevka Nerd Font" :size (if (featurep :system 'macos) 26.0 20.0))
+      doom-big-font (font-spec :family "Iosevka Comfy" :size (if (featurep :system 'macos) 26.0 20.0))
       doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size (cond ((featurep :system 'macos) 13.0)
                                                                                    ((string= (system-name) "EVT02393NB") 10.8)
                                                                                    (t 12.0)))

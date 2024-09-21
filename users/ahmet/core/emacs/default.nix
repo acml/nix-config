@@ -24,14 +24,15 @@ lib.mkMerge [
       packages = with pkgs; [
         # fonts
         emacs-all-the-icons-fonts
-        noto-fonts-emoji
+        iosevka-comfy.comfy
+        lmmath
         symbola
         (nerdfonts.override {
           fonts = [
             "IBMPlexMono"
             "Iosevka"
-            "Overpass"
             "NerdFontsSymbolsOnly"
+            "Overpass"
           ];
         })
 
