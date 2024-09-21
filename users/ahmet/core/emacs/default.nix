@@ -24,12 +24,10 @@ lib.mkMerge [
       packages = with pkgs; [
         # fonts
         emacs-all-the-icons-fonts
-        julia-mono
         noto-fonts-emoji
         symbola
         (nerdfonts.override {
           fonts = [
-            "FiraCode"
             "IBMPlexMono"
             "Iosevka"
             "Overpass"
