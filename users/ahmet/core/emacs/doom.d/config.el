@@ -13,7 +13,7 @@
       ;; There are two ways to load a theme. Both assume the theme is installed and
       ;; available. You can either set `doom-theme' or manually load a theme with the
       ;; `load-theme' function. This is the default:
-      doom-theme (if (display-graphic-p) 'ef-eagle 'catppuccin)
+      doom-theme (if (display-graphic-p) 'ef-eagle 'ef-dark)
       ;; modus-operandi modus-vivendi doom-one doom-gruvbox doom-tomorrow-night
 
       ;; This determines the style of line numbers in effect. If set to `nil', line
@@ -42,8 +42,6 @@
       doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size (cond ((featurep :system 'macos) 13.0)
                                                                                    ((string= (system-name) "EVT02393NB") 10.8)
                                                                                    (t 12.0)))
-      ;; doom-unicode-font (font-spec :family "Noto Nerd Font")
-      ;; doom-unicode-font (font-spec :family "JuliaMono")
       doom-serif-font (font-spec :family "BlexMono Nerd Font" :size (if (featurep :system 'macos) 13.0 12.0) :weight 'light)
       
       fancy-splash-image (funcall
@@ -117,31 +115,16 @@
 (after! recentf
   (add-to-list 'recentf-exclude doom-local-dir))
 
-;; Prevents some cases of Emacs flickering
-(add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
-
-;; (add-to-list 'default-frame-alist '(alpha . (95)))
-;; (set-frame-parameter (selected-frame) 'alpha '(95))
-
 (when (daemonp)
   (add-hook 'after-make-frame-functions
             (lambda (frame)
               (with-selected-frame frame
-                ;; Adjust the font settings of FRAME so Emacs can display emoji properly.
-                ;; (set-fontset-font t 'symbol (font-spec :family "Apple Color Emoji") frame)
-                ;; (set-fontset-font t 'symbol (font-spec :family "Segoe UI Emoji") frame 'append)
-                ;; (set-fontset-font t 'symbol (font-spec :family "Noto Color Emoji") frame 'append)
-                ;; (set-fontset-font t 'symbol (font-spec :family "Noto Emoji") frame 'append)
-                ;; (load-theme 'doom-one t)
                 (if (not (display-graphic-p))
                     (load-theme 'catppuccin t)
                   (load-theme 'ef-eagle t)
                   (set-frame-parameter (selected-frame) 'fullscreen 'maximized))))))
 
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
-
-;; (unless (display-graphic-p)
-;;   (remove-hook 'doom-first-buffer-hook #'global-hl-line-mode))
 
 ;; Directional window-selection routines
 (use-package! windmove
@@ -294,6 +277,16 @@
 ;; :ui window-select settings, ignoring +numbers flag for now
 (after! ace-window
   (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)))
+
+(use-package! ef-themes
+  :bind ("<f5>" . ef-themes-toggle)
+  :custom
+  (ef-themes-to-toggle '(ef-eagle ef-dark))
+  (ef-themes-variable-pitch-ui t)
+  (ef-themes-mixed-fonts t)
+  ;; (ef-themes-headings '((0 1.4) (1 1.3) (2 1.2) (3 1.1)))
+  :init
+  (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t))
 
 (after! expand-region
   (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
@@ -473,6 +466,7 @@ the sequences will be lost."
 (add-hook 'doom-init-ui-hook #'init-mixed-pitch-h)
 
 (use-package! modus-themes
+  :disabled
   :init
   (setq modus-themes-italic-constructs t
         modus-themes-bold-constructs nil
@@ -843,7 +837,7 @@ clicked."
      +default/search-cwd +default/search-other-cwd
      +default/search-notes-for-symbol-at-point
      +default/search-emacsd
-     :preview-key (list "C-SPC" :debounce 0.1 'any))))
+     :preview-key (list "C-SPC" :debounce 0.2 'any))))
 
 (after! vterm
   (setq vterm-max-scrollback 100000))
