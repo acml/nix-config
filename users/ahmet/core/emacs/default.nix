@@ -58,8 +58,8 @@ lib.mkMerge [
       packages = with pkgs; [
         # fonts
         emacs-all-the-icons-fonts
+        hack-font
         iosevka-comfy.comfy
-        lmmath
         symbola
         (nerdfonts.override {
           fonts = [
