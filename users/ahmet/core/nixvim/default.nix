@@ -866,6 +866,7 @@
           treesitterIntegration.enable = true;
           treesitterIntegration.includeMatchWords = true;
         };
+        web-devicons.enable = true;
         which-key = {
           enable = true;
           settings.spec = [
