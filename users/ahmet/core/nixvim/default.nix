@@ -600,7 +600,7 @@
             filename = {
               __unkeyed-1 = "filename";
               symbols = {
-                modified = "";
+                modified = "";
                 readonly = "";
                 unnamed = "";
                 newfile = "";
