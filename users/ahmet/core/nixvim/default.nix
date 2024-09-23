@@ -458,7 +458,6 @@
         debugprint.enable = true;
         diffview.enable = true;
         direnv.enable = true;
-        flash.enable = true;
         friendly-snippets.enable = true;
         git-conflict.enable = true;
         gitblame.enable = true;
@@ -628,6 +627,7 @@
         luasnip.enable = true;
         mini = {
           enable = true;
+          mockDevIcons = true;
           modules = {
             align = { };
             bracketed = { };
@@ -638,6 +638,7 @@
                 end
               '';
             };
+            icons = { };
             indentscope = {
               draw = {
                 delay = 100;
@@ -649,6 +650,7 @@
               };
               symbol = "▏";
             };
+            jump = { };
             map = { };
             operators = { };
             pairs = { };
@@ -866,7 +868,6 @@
           treesitterIntegration.enable = true;
           treesitterIntegration.includeMatchWords = true;
         };
-        web-devicons.enable = true;
         which-key = {
           enable = true;
           settings.spec = [
