@@ -248,20 +248,10 @@
               (padding 2)
               {
                 type = "button";
-                val = "📄 New     ";
+                val = "  New";
                 on_press.raw = "<cmd>ene<CR>";
                 opts = {
-                  # hl = "comment";
-                  keymap = [
-                    "n"
-                    "n"
-                    "<cmd>:ene<CR>"
-                    {
-                      noremap = true;
-                      silent = true;
-                      nowait = true;
-                    }
-                  ];
+                  keymap = [ "n" "n" "<cmd>:ene<CR>" { noremap = true; silent = true; nowait = true; } ];
                   shortcut = "n";
 
                   position = "center";
@@ -274,20 +264,10 @@
               (padding 1)
               {
                 type = "button";
-                val = "🌺 Recent  ";
+                val = "  Recent";
                 on_press.__raw = "require('telescope.builtin').oldfiles";
                 opts = {
-                  # hl = "comment";
-                  keymap = [
-                    "n"
-                    "r"
-                    "<cmd>:Telescope oldfiles<CR>"
-                    {
-                      noremap = true;
-                      silent = true;
-                      nowait = true;
-                    }
-                  ];
+                  keymap = [ "n" "r" "<cmd>:Telescope oldfiles<CR>" { noremap = true; silent = true; nowait = true; } ];
                   shortcut = "r";
 
                   position = "center";
@@ -300,20 +280,10 @@
               (padding 1)
               {
                 type = "button";
-                val = "💼 Projects";
+                val = "  Projects";
                 on_press.raw = "require'telescope'.extensions.projects.projects{}";
                 opts = {
-                  # hl = "comment";
-                  keymap = [
-                    "n"
-                    "p"
-                    "<cmd>:Telescope projects<CR>"
-                    {
-                      noremap = true;
-                      silent = true;
-                      nowait = true;
-                    }
-                  ];
+                  keymap = [ "n" "p" "<cmd>:Telescope projects<CR>" { noremap = true; silent = true; nowait = true; } ];
                   shortcut = "p";
 
                   position = "center";
@@ -326,20 +296,10 @@
               (padding 1)
               {
                 type = "button";
-                val = "🔎 Restore";
+                val = "󰁯  Restore";
                 on_press.raw = "require('persistence').load({ last = true })";
                 opts = {
-                  # hl = "comment";
-                  keymap = [
-                    "n"
-                    "s"
-                    "<cmd>:lua require('persistence').load({ last = true })<CR>"
-                    {
-                      noremap = true;
-                      silent = true;
-                      nowait = true;
-                    }
-                  ];
+                  keymap = [ "n" "s" "<cmd>:lua require('persistence').load({ last = true })<CR>" { noremap = true; silent = true; nowait = true; } ];
                   shortcut = "s";
 
                   position = "center";
@@ -352,20 +312,10 @@
               (padding 1)
               {
                 type = "button";
-                val = "❌ Quit";
+                val = "󰈆  Quit";
                 on_press.__raw = "function() vim.cmd[[qa]] end";
                 opts = {
-                  # hl = "comment";
-                  keymap = [
-                    "n"
-                    "q"
-                    ":qa<CR>"
-                    {
-                      noremap = true;
-                      silent = true;
-                      nowait = true;
-                    }
-                  ];
+                  keymap = [ "n" "q" ":qa<CR>" { noremap = true; silent = true; nowait = true; } ];
                   shortcut = "q";
 
                   position = "center";
@@ -377,10 +327,7 @@
               }
               # (padding 3)
               # {
-              #   opts = {
-              #     hl = "AlphaFooter";
-              #     position = "center";
-              #   };
+              #   opts = { hl = "AlphaFooter"; position = "center"; };
               #
               #   type = "text";
               #   val = [
