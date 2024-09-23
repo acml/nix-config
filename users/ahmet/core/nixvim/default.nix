@@ -888,12 +888,12 @@
           settings = {
             open_for_directories = true;
             enable_mouse_support = true;
-            # use_ya_for_events_reading = true;
-            # use_yazi_client_id_flag = true;
-            #
-            # highlight_groups = {
-            #   hovered_buffer = null;
-            # };
+            use_ya_for_events_reading = true;
+            use_yazi_client_id_flag = true;
+
+            highlight_groups = {
+              hovered_buffer = null;
+            };
 
             floating_window_scaling_factor = 0.8;
           };
