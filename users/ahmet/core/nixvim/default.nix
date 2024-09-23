@@ -693,6 +693,7 @@
         nvim-ufo.enable = true;
         nvim-surround.enable = true;
         overseer.enable = true;
+        persistence.enable = true;
         precognition.enable = true;
         precognition.settings.startVisible = false;
         project-nvim = {
