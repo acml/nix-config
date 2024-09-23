@@ -1,4 +1,4 @@
-{ lib, hostType, ... }: {
+{ lib, hostType, pkgs, ... }: {
   xdg = {
     configFile."kitty/relative_resize.py" = {
       source = ./relative_resize.py;
@@ -30,6 +30,11 @@
       map --when-focus-on var:IS_NVIM alt+h
       map --when-focus-on var:IS_NVIM alt+l
       ";
+    font = {
+      package = pkgs.iosevka-comfy.comfy;
+      name = "Iosevka Comfy";
+      size = 14.0;
+    };
     settings = {
       scrollback_lines = 5000;
       scrollback_pager_history_size = 32768;

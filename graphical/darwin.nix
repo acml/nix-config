@@ -55,7 +55,7 @@
   services.skhd = {
     enable = true;
     skhdConfig = ''
-      cmd - return : open --new -a kitty.app --args -1 -d ~
+      cmd - return : open -a kitty.app -n
       cmd + alt - return : emacsclient --alternate-editor="" --create-frame
     '';
   };

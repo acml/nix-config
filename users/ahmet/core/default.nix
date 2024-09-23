@@ -103,6 +103,7 @@
       bat.enable = lib.mkDefault false;
       btop.enable = lib.mkDefault false;
       emacs.enable = lib.mkDefault false;
+      kitty.enable = lib.mkDefault false;
     };
   };
 
