@@ -151,12 +151,12 @@
         nnoremap("<leader>of", "<cmd>ToggleTerm direction=float<cr>", { desc = 'Toggle terminal (floating)' } )
         nnoremap("<leader>oT", "<cmd>ToggleTerm direction=vertical<cr>", { desc = 'Toggle terminal (vertical)' } )
 
-        nnoremap("<leader>xx", function() require("trouble").toggle() end, { desc = 'toggle diagnostics' } )
-        nnoremap("<leader>xw", function() require("trouble").toggle("workspace_diagnostics") end, { desc = 'workspace diagnostics' } )
-        nnoremap("<leader>xd", function() require("trouble").toggle("document_diagnostics") end, { desc = 'document diagnostics' } )
-        nnoremap("<leader>xq", function() require("trouble").toggle("quickfix") end, { desc = 'quickfix' } )
-        nnoremap("<leader>xl", function() require("trouble").toggle("loclist") end, { desc = 'loclist' } )
-        nnoremap("gR", function() require("trouble").toggle("lsp_references") end, { desc = 'lsp references' } )
+        nnoremap("<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", { desc = 'Diagnostics (Trouble)' } )
+        nnoremap("<leader>xd", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { desc = 'Document Diagnostics (Trouble)' } )
+        nnoremap("<leader>xq", "<cmd>Trouble qflist toggle<cr>", { desc = 'Quickfix List (Trouble)' } )
+        nnoremap("<leader>xs", "<cmd>Trouble symbols toggle focus=false<cr>", { desc = 'Symbols (Trouble)' } )
+        nnoremap("<leader>xl", "<cmd>Trouble loclist toggle<cr>", { desc = 'Location List (Trouble)' } )
+        nnoremap("gl", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", { desc = 'LSP Definitions / references / ... (Trouble)' } )
 
         local status, map = pcall(require, "mini.map")
         if status then
