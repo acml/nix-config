@@ -531,7 +531,6 @@
           enable = true;
           codeAction.extendGitSigns = true;
           lightbulb.sign = false;
-          diagnostic.diagnosticOnlyCurrent = true;
         };
         lualine =
           let
@@ -541,6 +540,16 @@
                 added = " ";
                 modified = " ";
                 removed = " ";
+              };
+            };
+            diagnostics = {
+              __unkeyed-1 = "diagnostics";
+              # sources = [ "nvim_lsp" ];
+              symbols = {
+                error = " ";
+                warn = " ";
+                info = " ";
+                hint = " ";
               };
             };
             filename = {
@@ -558,7 +567,7 @@
             settings = {
               sections = {
                 # lualine_a = [ "mode" ];
-                lualine_b = [ "branch" diff "diagnostics" /* filetype filename "navic" */ ];
+                lualine_b = [ "branch" diff diagnostics ];
                 lualine_c = [ filename ];
                 # lualine_x = [ "encoding" "fileformat" "filetype" ];
                 # lualine_y = [ "progress" ];
@@ -825,7 +834,7 @@
             { __unkeyed-1 = "<leader>g"; desc = "+git"; }
             { __unkeyed-1 = "<leader>h"; desc = "+help"; icon = "󰋖"; }
             { __unkeyed-1 = "<leader>o"; desc = "+open"; icon = "󰌧"; }
-            { __unkeyed-1 = "<leader>p"; desc = "+project"; icon = "💼"; }
+            { __unkeyed-1 = "<leader>p"; desc = "+project"; icon = ""; }
             { __unkeyed-1 = "<leader>s"; desc = "+search"; }
             { __unkeyed-1 = "<leader>x"; desc = "+diagnostics"; }
           ];
