@@ -46,7 +46,7 @@
                           (lambda (choices) (elt
                                         choices (random (length choices))))
                           (directory-files (concat (expand-file-name
-                                                    doom-private-dir) "splash")
+                                                    doom-user-dir) "splash")
                                            t "^\\([^.]\\|\\.[^.]\\|\\.\\..\\)" t))
 
       auth-source-cache-expiry nil ; default is 7200 (2h)
@@ -166,7 +166,7 @@
   :hook (after-init . beginend-global-mode))
 
 ;; WSL specific setting
-(when (and (eq system-type 'gnu/linux) (string-match "-[Mm]icrosoft" operating-system-release))
+(when (and (eq system-type 'gnu/linux) (string-match "-[Mm]icrosoft" (shell-command-to-string "uname -r")))
   ;; teach Emacs how to open links with your default browser
   (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
         (cmd-args '("/c" "start")))
@@ -909,4 +909,4 @@ you're done. This can be called from an external shell script."
           (add-hook 'delete-frame-functions #'cleanup-scratch-frame))))))
 
 ;; different configs on different computers
-(load (concat doom-private-dir (system-name) ".el") t)
+(load (concat doom-user-dir (system-name) ".el") t)
