@@ -735,17 +735,6 @@ clicked."
   ((prog-mode . rainbow-mode)
    (org-mode . rainbow-mode)))
 
-(after! evil-collection
-  (after! trashed
-    (evil-collection-trashed-setup)))
-
-(use-package evil-collection
-  :after evil
-  :custom
-  (evil-collection-setup-minibuffer t)
-  :config
-  (evil-collection-init))
-
 (use-package! scopeline
   :after tree-sitter
   :config (add-hook 'prog-mode-hook #'scopeline-mode))
