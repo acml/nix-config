@@ -33,7 +33,7 @@
     font = {
       package = pkgs.iosevka-comfy.comfy;
       name = "Iosevka Comfy";
-      size = 14.0;
+      size = 15.0;
     };
     settings = {
       scrollback_lines = 5000;
