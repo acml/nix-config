@@ -762,15 +762,19 @@ clicked."
   (defvar treemacs-file-ignore-extensions '()
     "File extension which `treemacs-ignore-filter' will ensure are ignored")
   (defvar treemacs-file-ignore-globs '()
-    "Globs which will are transformed to `treemacs-file-ignore-regexps' which `treemacs-ignore-filter' will ensure are ignored")
+    "Globs which will are transformed to
+`treemacs-file-ignore-regexps' which `treemacs-ignore-filter'
+will ensure are ignored")
   (defvar treemacs-file-ignore-regexps '()
-    "RegExps to be tested to ignore files, generated from `treeemacs-file-ignore-globs'")
+    "RegExps to be tested to ignore files, generated from
+`treeemacs-file-ignore-globs'")
   (defun treemacs-file-ignore-generate-regexps ()
     "Generate `treemacs-file-ignore-regexps' from `treemacs-file-ignore-globs'"
     (setq treemacs-file-ignore-regexps (mapcar 'dired-glob-regexp treemacs-file-ignore-globs)))
   (if (equal treemacs-file-ignore-globs '()) nil (treemacs-file-ignore-generate-regexps))
   (defun treemacs-ignore-filter (file full-path)
-    "Ignore files specified by `treemacs-file-ignore-extensions', and `treemacs-file-ignore-regexps'"
+    "Ignore files specified by `treemacs-file-ignore-extensions', and
+`treemacs-file-ignore-regexps'"
     (or (member (file-name-extension file) treemacs-file-ignore-extensions)
         (let ((ignore-file nil))
           (dolist (regexp treemacs-file-ignore-regexps ignore-file)
@@ -834,6 +838,12 @@ clicked."
 (map! :after vterm
       :map vterm-mode-map
       "<deletechar>" #'vterm-send-delete)
+
+(add-hook! 'vterm-mode-hook
+  (defface my-vterm-face
+    '((t :family "IosevkaTerm Nerd Font"))
+    "Temporary buffer-local face" :group 'my-vterm-mode)
+  (buffer-face-set 'my-vterm-face))
 
 (use-package! vundo
   :bind ("C-x u" . vundo)

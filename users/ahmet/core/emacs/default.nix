@@ -65,6 +65,7 @@ lib.mkMerge [
           fonts = [
             "IBMPlexMono"
             "Iosevka"
+            "IosevkaTerm"
             "NerdFontsSymbolsOnly"
             "Overpass"
           ];
