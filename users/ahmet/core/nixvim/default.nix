@@ -783,6 +783,13 @@
             "<leader>si" = { action = "lsp_document_symbols"; options = { desc = "Jump to symbol"; }; };
             "<leader>ss" = { action = "current_buffer_fuzzy_find fuzzy=false"; options = { desc = "Search buffer"; }; };
           };
+          settings = {
+            pickers = {
+              buffers = { sort_mru = true; sort_lastused = true; theme = "ivy"; };
+              find_files = { theme = "ivy"; };
+              oldfiles = { theme = "ivy"; };
+            };
+          };
         };
         # tmux-navigator.enable = true;
         todo-comments.enable = true;
