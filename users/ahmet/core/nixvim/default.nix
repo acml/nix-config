@@ -725,6 +725,7 @@
         rainbow-delimiters.enable = true;
         refactoring.enable = true;
         refactoring.enableTelescope = true;
+        render-markdown.enable = true;
         rustaceanvim.enable = true;
         smart-splits.enable = true;
         sniprun.enable = true;
