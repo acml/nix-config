@@ -239,12 +239,13 @@ lib.mkMerge [
   # user systemd service for Linux
   (lib.mkIf isLinux {
     services.emacs = {
-      enable = true;
+      enable = false;
       client = {
         enable = true;
         arguments = [
           "--no-wait"
           "--create-frame"
+          # "--alternate-editor=\"\""
         ];
       };
       package = myEmacs;
