@@ -312,7 +312,7 @@
     indent-bars-color '(highlight :face-bg t :blend 0.15)
     indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 1) ; blend=1: blend with BG only
     indent-bars-highlight-current-depth '(:blend 0.5) ; pump up the BG blend on current
-    indent-bars-pattern "."
+    ;; indent-bars-pattern "."
     indent-bars-starting-column nil
     indent-bars-width-frac 0.1))
 
