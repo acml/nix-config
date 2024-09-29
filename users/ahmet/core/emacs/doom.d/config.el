@@ -166,7 +166,7 @@
   :hook (after-init . beginend-global-mode))
 
 ;; WSL specific setting
-(when (and (eq system-type 'gnu/linux) (string-match "-[Mm]icrosoft" (shell-command-to-string "uname -r")))
+(when (and (eq system-type 'gnu/linux) (getenv "WSLENV"))
   ;; teach Emacs how to open links with your default browser
   (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
         (cmd-args '("/c" "start")))
@@ -190,7 +190,17 @@
   (setq compilation-scroll-output t))
 
 (use-package! daemons
-  :commands (daemons daemons-disable daemons-enable daemons-reload daemons-restart daemons-start daemons-status daemons-stop))
+  :commands (daemons daemons-disable daemons-enable daemons-reload daemons-restart daemons-start daemons-status daemons-stop)
+  :config
+  (require 'evil-collection-daemons)
+  (evil-collection-define-key '(normal visual) 'daemons-mode-map
+    "e" 'daemons-enable-at-point
+    "d" 'daemons-disable-at-point
+    "u" 'daemons-systemd-toggle-user)
+  (evil-collection-define-key '(normal visual) 'daemons-output-mode-map
+    "e" 'daemons-enable-at-point
+    "d" 'daemons-disable-at-point
+    "u" 'daemons-systemd-toggle-user))
 
 (defadvice! acml/dired-auto-readme--enable (fn &rest args)
   :around #'dired-auto-readme--enable
