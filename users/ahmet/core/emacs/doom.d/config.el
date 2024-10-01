@@ -213,6 +213,12 @@
 (defadvice! acml/dirvish-subtree-toggle (fn &rest args)
   :around #'dirvish-subtree-toggle (save-excursion (apply fn args)))
 
+(defadvice! acml/dirvish-side (fn &rest args)
+  :around #'dirvish-side
+  (setq dirvish-attributes (delq 'file-size dirvish-attributes))
+  (apply fn args)
+  (setq dirvish-attributes (add-to-list 'dirvish-attributes 'file-size)))
+
 (after! dirvish
   (setq dirvish-attributes '(file-size nerd-icons subtree-state vc-state collapse)
         dirvish-header-line-format '(:left (path) :right (free-space))
@@ -227,6 +233,7 @@
                                        ("n" "~/.nix-config/"              "Nix")
                                        ("p" "~/Projects/"                 "Projects")
                                        ("t" "~/.local/share/Trash/files/" "TrashCan"))
+        dirvish-subtree-prefix "  "
         dirvish-subtree-state-style 'nerd)
   ;; (dirvish-peek-mode)
   (dirvish-side-follow-mode)
