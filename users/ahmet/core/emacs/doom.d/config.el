@@ -480,6 +480,9 @@ the sequences will be lost."
 
 (add-hook 'doom-init-ui-hook #'init-mixed-pitch-h)
 
+(add-hook! markdown-mode
+  (add-hook! before-save :local #'markdown-toc-refresh-toc))
+
 (use-package! modus-themes
   :disabled
   :init
