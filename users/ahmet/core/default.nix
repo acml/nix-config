@@ -43,7 +43,7 @@
       cls = "clear";
       l = "ls";
       la = "ls --all";
-      ls = "eza --binary --header --long";
+      ls = "eza --binary --header --long --icons";
       man = "batman";
     };
   };
