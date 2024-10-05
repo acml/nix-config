@@ -860,10 +860,8 @@ will ensure are ignored")
       "<deletechar>" #'vterm-send-delete)
 
 (add-hook! 'vterm-mode-hook
-  (defface my-vterm-face
-    '((t :family "IosevkaTerm Nerd Font"))
-    "Temporary buffer-local face" :group 'my-vterm-mode)
-  (buffer-face-set 'my-vterm-face))
+  (set (make-local-variable 'buffer-face-mode-face) '(:family "IosevkaTerm Nerd Font"))
+  (buffer-face-mode t))
 
 (use-package! vundo
   :bind ("C-x u" . vundo)
