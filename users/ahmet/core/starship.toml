@@ -177,7 +177,7 @@ disabled = false
 [sudo]
 format = "[\u276f ](fg:sudo bold)[as $symbol]($style)" # \u276F ❯ \ueab6 
 style = 'fg:red bold'
-symbol = "\uf007! " # \uf007  # \uf21b \uedcc ' ' # ' '
+symbol = "\uf007 ! " # \uf007  # \uf21b \uedcc ' ' # ' '
 disabled = false
 
 [directory]
