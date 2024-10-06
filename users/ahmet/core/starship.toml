@@ -25,7 +25,7 @@
 # ╭╴ # \u256D\u2574
 # ╰╴ # \u2570\u2574
 format = """
-[\u256D\u2574](fg:greydimmed)\
+[╭╴](fg:greydimmed)\
 $os\
 $shell\
 $username\
@@ -45,7 +45,7 @@ $memory_usage\
 $cmd_duration\
 $line_break\
 \
-[\u2570\u2574](fg:greydimmed)\
+[╰╴](fg:greydimmed)\
 [$character]($style)"""
 
 # move the rest of the prompt to the right
@@ -102,52 +102,52 @@ disabled = false
 
 [os.symbols]
 AIX = "AIX "
-Alpaquita = "\uf26a " # \uf26a  # \ue3a5\ue390 
-AlmaLinux = "\uf31d " # 
-Alpine = "\uf300 " # ""
-Amazon = "\uf270 " # ""
-Android = "\ue70e " # ""
-Arch = "\uf303 " # ""
-Artix = "\uf31f " # 
-CentOS = "\uf304 " # ""
-Debian = "\uf306 " # ""
-DragonFly = "\ueef8 " #    🐉
-Emscripten = "\u26A1 " # ⚡
-EndeavourOS = "\uf322 " # "" # 
-Fedora = "\uf30a " # ""
-FreeBSD = "\uf30c " # ""
-Garuda = "\uf337 " # ""
-Gentoo = "\uf30d " # ""
-HardenedBSD = "\uf132 " # 
-Illumos = "\uf326 " # "🐦"
-Kali = "\uf327 " # 
-Linux = "\uf17c " # ""
-Mabox = "\uf1b2 " #  📦
-Macos = "\uf302 " # ""
-Manjaro = "\uf312 " # ""
-Mariner = "\ue7ae " # \ue7ae 
-MidnightBSD = "\ue3e0 " # 🌘
-Mint = "\uf30e " # ""
-NetBSD = "\u2691 " # ⚑
-NixOS = "\uf313 " # ""
-OpenBSD = "\uf328 " # ""
-OpenCloudOS = "\uf0c2 " # 
-openEuler = "\u2208 " # \u2208 ∈
-openSUSE = "\uf314 " # ""
-OracleLinux = "\u213A " # \u213A ℺ # ⊂⊃ \u2282\u2283
-Pop = "\uf32a " # ""
-Raspbian = "\uf315 " # ""
-Redhat = "\uf316 " # "" # 󱄛
-RedHatEnterprise = "\uf316 " # "" # 󱄛
-RockyLinux = "\uf32b " # 
-Redox = "\uf331 " #   󰺕
-Solus = "\uf32d " # "" # " "
-SUSE = "\uef6d " # ""
-Ubuntu = "\uf31b " # ""
+Alpaquita = " " # \uf26a  # \ue3a5\ue390 
+AlmaLinux = " " # 
+Alpine = " " # ""
+Amazon = " " # ""
+Android = " " # ""
+Arch = " " # ""
+Artix = " " # 
+CentOS = " " # ""
+Debian = " " # ""
+DragonFly = " " #    🐉
+Emscripten = "⚡ " # ⚡
+EndeavourOS = " " # "" # 
+Fedora = " " # ""
+FreeBSD = " " # ""
+Garuda = " " # ""
+Gentoo = " " # ""
+HardenedBSD = " " # 
+Illumos = "🐦 " # "🐦"
+Kali = " " # 
+Linux = " " # ""
+Mabox = " " #  📦
+Macos = " " # ""
+Manjaro = " " # ""
+Mariner = " " # \ue7ae 
+MidnightBSD = "🌘 " # 🌘
+Mint = " " # ""
+NetBSD = "⚑ " # ⚑
+NixOS = " " # ""
+OpenBSD = " " # ""
+OpenCloudOS = " " # 
+openEuler = "∈ " # \u2208 ∈
+openSUSE = " " # ""
+OracleLinux = "℺ " # \u213A ℺ # ⊂⊃ \u2282\u2283
+Pop = " " # ""
+Raspbian = " " # ""
+Redhat = " " # "" # 󱄛
+RedHatEnterprise = " " # "" # 󱄛
+RockyLinux = " " # 
+Redox = " " #   󰺕
+Solus = " " # "" # " "
+SUSE = " " # ""
+Ubuntu = " " # ""
 Ultramarine = "󱙳 " # 🔷
-Unknown = "\uf108 " # ""
-Void = "\uf32e " #  
-Windows = "\uf17a " # ""
+Unknown = " " # ""
+Void = " " #  
+Windows = " " # ""
 
 [shell]
 format = '[$indicator]($style)()'
@@ -161,7 +161,7 @@ unknown_indicator = '?_ ' # '?_ ' ' '
 disabled = true # set to false if you want to see the shell indicator
 
 [username]
-format = "[\u276f ](fg:user bold)[$user]($style)[ ]()" # \u276F ❯ \ueab6 
+format = "[❯ ](fg:user bold)[$user]($style)[ ]()" # \u276F ❯ \ueab6 
 style_user = 'fg:user bold'
 style_root = 'fg:userroot bold'
 show_always = false
@@ -170,26 +170,26 @@ disabled = false
 [hostname]
 format = '[$ssh_symbol ](fg:sshsymbol bold)[$hostname](fg:hostname bold)[ ]()'
 ssh_only = true
-ssh_symbol = "\ue36e" # \ue36e '' # '⇒' # ' ' # 'ﬁ⇒'
+ssh_symbol = "" # \ue36e '' # '⇒' # ' ' # 'ﬁ⇒'
 # trim_at = '.companyname.com'
 disabled = false
 
 [sudo]
-format = "[\u276f ](fg:sudo bold)[as $symbol]($style)" # \u276F ❯ \ueab6 
+format = "[❯ ](fg:sudo bold)[as $symbol ]($style)" # \u276F ❯ \ueab6 
 style = 'fg:red bold'
-symbol = "\uf007 ! " # \uf007  # \uf21b \uedcc ' ' # ' '
+symbol = " !" # \uf007  # \uf21b \uedcc ' ' # ' '
 disabled = false
 
 [directory]
-format = "[\u276f ](fg:directory bold)[$read_only]($read_only_style)[$repo_root]($repo_root_style)[$path ]($style)" # \u276F ❯ \ueab6 
+format = "[❯ ](fg:directory bold)[$read_only]($read_only_style)[$repo_root]($repo_root_style)[$path ]($style)" # \u276F ❯ \ueab6 
 style = 'fg:directory bold'
-home_symbol = "\uf015 ~" # \uf015 ' ~'
-read_only = "\uf023 " # \uf023 ' '
+home_symbol = " ~" # \uf015 ' ~'
+read_only = " " # \uf023 ' '
 read_only_style = 'fg:directory'
 truncation_length = 3
 truncation_symbol = '…/'
 truncate_to_repo = true
-repo_root_format = "[\u276f ](fg:directory bold)[$read_only]($read_only_style)[$before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path ]($style)" # \u276F ❯ \ueab6 
+repo_root_format = "[❯ ](fg:directory bold)[$read_only]($read_only_style)[$before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path ]($style)" # \u276F ❯ \ueab6 
 repo_root_style = 'fg:directory bold'
 use_os_path_sep = true
 disabled = false
@@ -197,7 +197,7 @@ disabled = false
 [direnv]
 symbol = 'direnv'
 style = 'fg:greydimmed'
-format = "[\u276f $symbol $loaded/$allowed ]($style)"
+format = "[❯ $symbol $loaded/$allowed ]($style)"
 allowed_msg = 'a' # 'ok' # '✓'
 not_allowed_msg = '!a' # 'nok' # '!'
 denied_msg = 'x' # '✘'
@@ -206,27 +206,27 @@ unloaded_msg = '-' # "\ueabc!" # \ueabc ! # '->!' # 'no' # '󰅚' # '󱥸!' \
 disabled = false
 
 [php]
-format = " [\u276f [$symbol](php italic)($version )]($style)"
+format = " [❯ [$symbol](php italic)($version )]($style)"
 style = 'fg:php'
-symbol = "php " # \ue73d  # 󰌟
+symbol = " " # \ue73d  # 󰌟
 
 [python]
-format = "[\u276f ${symbol}${pyenv_prefix}(${version} )(($virtualenv) )]($style)"
+format = "[❯ ${symbol}${pyenv_prefix}(${version} )(($virtualenv) )]($style)"
 style = 'fg:python'
-symbol = "\ue73c " # 
+symbol = " " # 
 pyenv_version_name = true
 
 [git_branch]
-format = "[\u276f $symbol $branch(:$remote_branch)]($style)[ ]()" # \u3009 \uf460 ❯
+format = "[❯ $symbol $branch(:$remote_branch)]($style)[ ]()" # \u3009 \uf460 ❯
 style = 'fg:orangegit'
-symbol = "\ue702" # \ue702 
+symbol = "" # \ue702 
 # ignore_branches = ['master', 'main']
 
 [git_commit]
 format = '[\($hash$tag\)]($style)[ ]()'
 style = 'fg:orangegit'
 commit_hash_length = 8
-tag_symbol = " \uf412 " # \uf412 '  ' # '  ''
+tag_symbol = "  " # \uf412 '  ' # '  ''
 tag_disabled = false
 disabled = false
 
@@ -240,10 +240,10 @@ disabled = false
 format = '([$all_status$ahead_behind]($style))'
 style = 'fg:orangegit'
 conflicted = "[\ueaaf ${count} ](fg:conflicted)" # 
-ahead = "[\u21E1 ${count} ](fg:ahead)" # ⇡ \ueaa0
-behind = "[\u21E3 ${count} ](fg:behind)" # ⇣ \uea9d
-diverged = "[\u2195\u21E1 ${ahead_count} \u21E3 ${behind_count} ](fg:diverged)" # \u2195\u21E1 ⇕ ↕ ⇳ 󰹹 󰹺 󰧈
-up_to_date = "[\u2714 ](fg:uptodate)" # \u2714 ✔ \u2713 \ueab2 ✓
+ahead = "[⇡ ${count} ](fg:ahead)" # ⇡ \ueaa0
+behind = "[⇣ ${count} ](fg:behind)" # ⇣ \uea9d
+diverged = "[↕\u21E1 ${ahead_count} \u21E3 ${behind_count} ](fg:diverged)" # \u2195\u21E1 ⇕ ↕ ⇳ 󰹹 󰹺 󰧈
+up_to_date = "[✔ ](fg:uptodate)" # \u2714 ✔ \u2713 \ueab2 ✓
 untracked = "[󰟉 ${count} ](fg:untracked)" # 󰟉 \uf441 \ueb32 ﳇ ' ' # '? '
 stashed = "[\ueb29 ${count} ](fg:stashed)" # \ueb29  '📦 '# ' ' # ' ' # ' ' # ' '
 modified = "[\uf040 ${count} ](fg:modified)" # \uf040 󰷉 '📝' # '! ' #  #  #  \uf044 \uea73
@@ -254,7 +254,7 @@ disabled = false
 
 [fill]
 style = 'fg:fill'
-symbol = "\u2500" # "\u2500" "─" # no line: ' '
+symbol = "─" # "\u2500" "─" # no line: ' '
 
 [status]
 format = "[$symbol $status $hex_status( \uf0a2 $signal_number-$signal_name)]($style)" # \uf0a2  , \ueaa2
@@ -265,7 +265,7 @@ disabled = false
 [jobs]
 format = "[ \ueab5 ](fg:jobs bold)[$symbol $number]($style)" # \u3009
 style = 'fg:jobs'
-symbol = "\ueb7b" # \ueb7b  \uef0c 省 # '廒' # '󰜎' # ''
+symbol = "" # \ueb7b  \uef0c 省 # '廒' # '󰜎' # ''
 symbol_threshold = 1
 number_threshold = 2
 disabled = false
