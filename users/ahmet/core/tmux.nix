@@ -14,7 +14,7 @@
       sensible
       {
         plugin = catppuccin;
-        extraConfig = ''
+        extraConfig = /* tmux */ ''
           set -g @catppuccin_icon_window_activity "󱅫 "
           set -g @catppuccin_icon_window_bell "󰂞 "
           set -g @catppuccin_icon_window_current "󰖯 "
