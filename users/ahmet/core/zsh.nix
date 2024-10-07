@@ -19,7 +19,7 @@
       export LESSHISTFILE="${config.xdg.dataHome}/less_history"
       export CARGO_HOME="${config.xdg.cacheHome}/cargo"
     '';
-    initExtra = ''
+    initExtra = /* bash */ ''
       # 1Password CLI
       if [ -e "$HOME/.config/op/plugins.sh" ]; then
         source "$HOME/.config/op/plugins.sh"
@@ -49,7 +49,7 @@
       bindkey "^[[1;3D" backward-word
       bindkey -s "^O" 'fzf | xargs -r $EDITOR^M'
 
-      if command -v tmux &> /dev/null && [[ $- == *i* ]] && [[ ! "$TERM" =~ xterm-kitty ]] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$INSIDE_EMACS" ] && [ -z "$VIMRUNTIME" ] && [ -z "$TMUX" ]; then
+      if command -v tmux &> /dev/null && [[ $- == *i* ]] && [[ ! "$TERM" =~ xterm-kitty ]] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$INSIDE_EMACS" ] && [ -z "$MYVIMRC" ] && [ -z "$VIMRUNTIME" ] && [ -z "$TMUX" ]; then
         exec tmux new-session -A -s main >/dev/null 2>&1
       fi
 
