@@ -8,13 +8,13 @@
     uid = 22314791;
     packages = with pkgs; [
       cargo-nextest
+      less
+      ncurses
       nix-fast-build
       opensshWithKerberos
       rustup
     ];
-    sessionVariables = {
-      TERMINFO_DIRS = "${pkgs.ncurses.outPath}/share/terminfo:/usr/share/terminfo";
-    };
+    file.".terminfo".source = pkgs.ncurses.outPath + "/share/terminfo";
   };
 
   programs = {
@@ -31,6 +31,5 @@
       '';
     };
     git.userEmail = lib.mkForce "bemeurer@amazon.com";
-    tmux.terminal = lib.mkForce "tmux-256color";
   };
 }

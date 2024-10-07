@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }: {
+{ config, lib, pkgs, ... }: {
   imports = [
     ../../users/bemeurer
     ../../users/bemeurer/dev/aws.nix
@@ -8,13 +8,13 @@
     uid = 22314791;
     packages = with pkgs; [
       cargo-nextest
+      less
+      ncurses
       nix-fast-build
       opensshWithKerberos
       rustup
     ];
-    sessionVariables = {
-      TERMINFO_DIRS = "${pkgs.ncurses.outPath}/share/terminfo:/usr/share/terminfo";
-    };
+    file.".terminfo".source = pkgs.ncurses.outPath + "/share/terminfo";
   };
 
   programs = {
@@ -31,6 +31,10 @@
       '';
     };
     git.userEmail = lib.mkForce "bemeurer@amazon.com";
-    tmux.terminal = lib.mkForce "tmux-256color";
+    zsh.initExtraFirst = ''
+      if [[ "$ZSH_VERSION" != "${config.programs.zsh.package.version}" ]]; then
+        exec "${config.programs.zsh.package}/bin/zsh"
+      fi
+    '';
   };
 }

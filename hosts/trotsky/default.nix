@@ -8,15 +8,12 @@
     uid = 1000;
     packages = with pkgs; [
       cargo-nextest
+      less
+      ncurses
       nix-fast-build
       opensshWithKerberos
       rustup
-      ncurses
-      less
     ];
-    sessionVariables = {
-      TERMINFO_DIRS = "${pkgs.ncurses.outPath}/share/terminfo:/usr/share/terminfo";
-    };
     file = {
       ".ssh/config".enable = false;
       ".terminfo".source = pkgs.ncurses.outPath + "/share/terminfo";
