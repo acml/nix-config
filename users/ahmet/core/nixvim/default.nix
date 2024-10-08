@@ -509,18 +509,18 @@
             html.enable = true;
             htmx.enable = false; # fails on darwin
             jsonls.enable = true;
-            lua-ls = {
+            lua_ls = {
               enable = true;
               settings.telemetry.enable = false;
             };
             marksman.enable = false;
-            nil-ls = {
+            nil_ls = {
               enable = true;
               settings.nix.flake.autoArchive = true;
             };
             # nixd.enable = true;
             taplo.enable = true;
-            ts-ls.enable = true;
+            ts_ls.enable = true;
           };
         };
         lsp-format.enable = true;
