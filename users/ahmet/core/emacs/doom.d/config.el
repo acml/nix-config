@@ -207,7 +207,7 @@
   (let ((visible (dirvish-side--session-visible-p)))
     (unless (eq visible (selected-window))
       (advice-add 'dired-revert :override #'ignore)
-      (save-excursion (apply fn args))
+      (apply fn args)
       (advice-remove 'dired-revert #'ignore))))
 
 (defadvice! acml/dirvish-subtree-toggle (fn &rest args)
