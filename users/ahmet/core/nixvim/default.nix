@@ -758,7 +758,7 @@
                 i = {
                   "<C-i>".__raw = ''require("telescope-live-grep-args.actions").quote_prompt({ postfix = " --iglob " })'';
                   "<C-k>".__raw = ''require("telescope-live-grep-args.actions").quote_prompt()'';
-                  "<C-space>".__raw = ''require("telescope-live-grep-args.actions").to_fuzzy_refine'';
+                  "<C-space>".__raw = ''require("telescope.actions").to_fuzzy_refine'';
                 };
               };
             };
