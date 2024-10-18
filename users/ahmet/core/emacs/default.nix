@@ -102,6 +102,7 @@ lib.mkMerge [
 
         # :tools lookup & :lang org +roam
         sqlite
+        wordnet
         (lib.mkIf isLinux maim) # org-download-clipboard
         gnuplot # org-plot/gnuplot
         graphviz # org-roam-graph
