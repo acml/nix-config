@@ -60,7 +60,9 @@ lib.mkMerge [
         emacs-all-the-icons-fonts
         hack-font
         iosevka-comfy.comfy
+        quivira
         symbola
+        unifont
         (nerdfonts.override {
           fonts = [
             "IBMPlexMono"
