@@ -60,7 +60,7 @@ lib.mkMerge [
         emacs-all-the-icons-fonts
         hack-font
         iosevka-comfy.comfy
-        quivira
+        (lib.mkIf isLinux quivira)
         symbola
         unifont
         (nerdfonts.override {
