@@ -25,5 +25,8 @@ localOverlays // {
     (final: prev: {
       inherit (inputs.nix-fast-build.packages.${final.stdenv.hostPlatform.system}) nix-fast-build;
     })
+    (self: super: {
+      utillinux = super.util-linux;
+    })
   ] ++ (lib.attrValues localOverlays));
 }
