@@ -34,11 +34,11 @@
       ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
       ;; font string. You generally only need these two:
       doom-font (font-spec :family "Iosevka Comfy" :size (cond ((featurep :system 'macos) 13.0)
-                                                                   ((string= (system-name) "EVT02393NB") 10.8)
+                                                                   ((string= (system-name) "EVT03660NB") 10.8)
                                                                    (t 12.0)))
       doom-big-font (font-spec :family "Iosevka Comfy" :size (if (featurep :system 'macos) 26.0 20.0))
       doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size (cond ((featurep :system 'macos) 13.0)
-                                                                                   ((string= (system-name) "EVT02393NB") 10.8)
+                                                                                   ((string= (system-name) "EVT03660NB") 10.8)
                                                                                    (t 12.0)))
       doom-serif-font (font-spec :family "BlexMono Nerd Font" :size (if (featurep :system 'macos) 13.0 12.0) :weight 'light)
       
@@ -187,7 +187,15 @@
                                       :cache (:directory ,(file-truename "~/.cache/ccls")))))
 
 (after! compile
-  (setq compilation-scroll-output t))
+  (setq compilation-scroll-output t)
+  ;; compilation-read-command uses `read-shell-command` by default, which doesn't use
+  ;; completion at all. So I overwrite it to use `completing-read` instead, which seems to work great.
+  (defun compilation-read-command (command)
+    (completing-read "Compile command: " compile-history
+                     nil nil command
+                     (if (equal (car compile-history) command)
+                         '(compile-history . 1)
+                       'compile-history))))
 
 (use-package! daemons
   :commands (daemons daemons-disable daemons-enable daemons-reload daemons-restart daemons-start daemons-status daemons-stop)

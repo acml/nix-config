@@ -1,4 +1,4 @@
-;;; EVT02393NB.el --- Description -*- lexical-binding: t; -*-
+;;; EVT03660NB.el --- Description -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2022 Ahmet Cemal Özgezer
 ;;
@@ -32,5 +32,5 @@
 
 (add-to-list 'auto-mode-alist '("\\.igt" . makefile-mode))
 
-(provide 'EVT02393NB)
-;;; EVT02393NB.el ends here
+(provide 'EVT03660NB)
+;;; EVT03660NB.el ends here
