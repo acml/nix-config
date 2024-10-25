@@ -27,7 +27,7 @@
   (projectile-register-project-type 'cp1200dt '("proj.default.ini")
                                     :project-file "proj.default.ini"
                                     :compilation-dir "cp1200/cp1243-1/csd"
-                                    :compile "./setenv_docker.sh make -j$(nproc) -s all_targets 2>&1 | tee >(sed $'s/\033[[][^A-Za-z]*m//g' > build-$(date -Iseconds).log)"
+                                    :compile "./docker_make.sh -j$(nproc) -s all_targets 2>&1 | tee >(sed $'s/\033[[][^A-Za-z]*m//g' > build-$(date -Iseconds).log)"
                                     :configure "/usr/bin/git dt checkout -f"))
 
 (add-to-list 'auto-mode-alist '("\\.igt" . makefile-mode))
