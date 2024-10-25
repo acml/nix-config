@@ -30,14 +30,13 @@
       fd
       fzf
       kalker
-      mosh
       neofetch
       nix-closure-size
       nix-output-monitor
       ripgrep
       rsync
       truecolor-check
-    ];
+    ] ++ (lib.optional (hostType != "darwin") mosh);
     shellAliases = {
       cat = "bat";
       cls = "clear";
