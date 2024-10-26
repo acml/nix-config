@@ -55,6 +55,7 @@
 (package! disk-usage)
 (package! dts-mode)
 (package! exercism)
+(package! google-c-style)
 
 (package! dired-auto-readme :recipe (:host github :repo "amno1/dired-auto-readme"))
 (package! ll-debug)

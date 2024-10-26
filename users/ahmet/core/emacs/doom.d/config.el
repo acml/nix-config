@@ -181,6 +181,11 @@
         calendar-latitude 41.168602
         calendar-longitude 29.047024))
 
+(add-hook! 'c-mode-common-hook
+  (google-set-c-style)
+  (c-set-offset 'access-label -2)
+  (google-make-newline-indent))
+
 (after! ccls
   (setq ccls-initialization-options `(:index (:comments 2)
                                       :completion (:detailedLabel t)
