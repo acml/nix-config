@@ -215,6 +215,10 @@
     "d" 'daemons-disable-at-point
     "u" 'daemons-systemd-toggle-user))
 
+(use-package! dired
+  :config
+  (setq dired-listing-switches (concat dired-listing-switches " --time-style=long-iso")))
+
 (defadvice! acml/dired-auto-readme--enable (fn &rest args)
   :around #'dired-auto-readme--enable
   (let ((visible (dirvish-side--session-visible-p)))
