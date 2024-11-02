@@ -3,6 +3,7 @@
   home = {
     packages = with pkgs; lib.optionals stdenv.hostPlatform.isLinux [
       sysstat
+      tmux-mem-cpu-load
     ];
   };
 
@@ -22,12 +23,12 @@
           set -g @catppuccin_icon_window_mark "󰃀 "
           set -g @catppuccin_icon_window_silent "󰂛 "
           set -g @catppuccin_icon_window_zoom "󰁌 "
-          set -g @catppuccin_status_modules_right "cpu application session date_time"
+          # set -g @catppuccin_status_modules_right "application session date_time"
           set -g @catppuccin_window_right_separator "█"
           set -g @catppuccin_window_status_enable "yes"
         '';
       }
-      cpu
+      # cpu
     ];
     prefix = "C-\\\\";
     secureSocket = false;
@@ -84,6 +85,12 @@
       bind-key -T copy-mode-vi 'C-k' select-pane -U
       bind-key -T copy-mode-vi 'C-l' select-pane -R
       bind-key -T copy-mode-vi 'C-\' select-pane -l
+
+      set -g status-right "#[bg=#{@thm_flamingo},fg=#{@thm_crust}]#[reverse]#[noreverse]󰊚  "
+      set -ag status-right "#[fg=#{@thm_fg},bg=#{@thm_mantle}] #(tmux-mem-cpu-load) "
+      set -ag status-right "#{E:@catppuccin_status_application}"
+      set -ag status-right "#{E:@catppuccin_status_session}"
+      set -ag status-right "#{E:@catppuccin_status_date_time}"
     '';
   };
 }
