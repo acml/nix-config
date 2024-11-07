@@ -69,10 +69,6 @@
     yazi = {
       enable = true;
       catppuccin.enable = false;
-      enableBashIntegration = true;
-      enableFishIntegration = true;
-      enableNushellIntegration = true;
-      enableZshIntegration = true;
       settings = {
         manager = {
           ratio = [ 1 2 5 ];
