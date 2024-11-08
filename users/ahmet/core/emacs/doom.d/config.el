@@ -310,6 +310,10 @@
 (after! ace-window
   (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)))
 
+(defun acml/ediff-before-setup ()
+  (select-frame (make-frame)))
+(add-hook 'ediff-before-setup-hook 'acml/ediff-before-setup)
+
 (use-package! ef-themes
   :bind ("<f5>" . ef-themes-toggle)
   :custom
