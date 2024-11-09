@@ -192,15 +192,7 @@
                                       :cache (:directory ,(file-truename "~/.cache/ccls")))))
 
 (after! compile
-  (setq compilation-scroll-output t)
-  ;; compilation-read-command uses `read-shell-command` by default, which doesn't use
-  ;; completion at all. So I overwrite it to use `completing-read` instead, which seems to work great.
-  (defun compilation-read-command (command)
-    (completing-read "Compile command: " compile-history
-                     nil nil command
-                     (if (equal (car compile-history) command)
-                         '(compile-history . 1)
-                       'compile-history))))
+  (setq compilation-scroll-output t))
 
 (use-package! daemons
   :commands (daemons daemons-disable daemons-enable daemons-reload daemons-restart daemons-start daemons-status daemons-stop)
@@ -257,8 +249,8 @@
   (add-hook! 'dirvish-setup-hook #'dired-auto-readme-mode))
 
 (after! dirvish-side
-    (setq dirvish-side-display-alist
-          '((side . right) (slot . -1))))
+  (setq dirvish-side-display-alist
+        '((side . right) (slot . -1))))
 
 (after! eglot
   (set-eglot-client! '(c-mode c-ts-mode c++-mode c++-ts-mode objc-mode) `("ccls" ,(concat "--init={\"cache\": {\"directory\": \"" (file-truename "~/.cache/ccls") "\"}}")))
@@ -286,9 +278,9 @@
                            (/ emacs-everywhere-window-height 2)))))
 
 (use-package! exercism :commands (exercism)
-  :config
-  (map! (:leader :desc "Exercism" :n "oe" #'exercism))
-  (setq exercism-directory "~/Projects/exercism"))
+              :config
+              (map! (:leader :desc "Exercism" :n "oe" #'exercism))
+              (setq exercism-directory "~/Projects/exercism"))
 
 (after! evil
   (setq
@@ -297,14 +289,14 @@
    evil-vsplit-window-right t  ; Switch to the new window after splitting
    evil-split-window-below t))
 
-; (use-package! evil-colemak-basics
-;   :after evil evil-snipe
-;   ;; :hook (ediff-keymap-setup-hook . evil-colemak-basics-mode)
-;   :init
-;   (setq evil-colemak-basics-rotate-t-f-j nil
-;         evil-colemak-basics-char-jump-commands 'evil-snipe)
-;   :config
-;   (global-evil-colemak-basics-mode))
+(use-package! evil-colemak-basics :disabled
+              :after evil evil-snipe
+              ;; :hook (ediff-keymap-setup-hook . evil-colemak-basics-mode)
+              :init
+              (setq evil-colemak-basics-rotate-t-f-j nil
+                    evil-colemak-basics-char-jump-commands 'evil-snipe)
+              :config
+              (global-evil-colemak-basics-mode))
 
 ;; :ui window-select settings, ignoring +numbers flag for now
 (after! ace-window
@@ -337,12 +329,12 @@
 
 (after! indent-bars
   (setq
-    indent-bars-color '(highlight :face-bg t :blend 0.15)
-    indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 1) ; blend=1: blend with BG only
-    indent-bars-highlight-current-depth '(:blend 0.5) ; pump up the BG blend on current
-    ;; indent-bars-pattern "."
-    indent-bars-starting-column nil
-    indent-bars-width-frac 0.1))
+   indent-bars-color '(highlight :face-bg t :blend 0.15)
+   indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 1) ; blend=1: blend with BG only
+   indent-bars-highlight-current-depth '(:blend 0.5) ; pump up the BG blend on current
+   ;; indent-bars-pattern "."
+   indent-bars-starting-column nil
+   indent-bars-width-frac 0.1))
 
 (use-package! journalctl-mode :commands (journalctl))
 
@@ -752,10 +744,10 @@ clicked."
       :desc "Swap Right" ">" #'+workspace/swap-right)
 
 (use-package! proced :commands (proced)
-  :init
-  (setq proced-auto-update-flag t
-        proced-auto-update-interval 1
-        proced-descend t))
+              :init
+              (setq proced-auto-update-flag t
+                    proced-auto-update-interval 1
+                    proced-descend t))
 
 (after! projectile
   (setq ;; projectile-switch-project-action 'projectile-dired
@@ -765,6 +757,7 @@ clicked."
                                        projectile-root-bottom-up
                                        projectile-root-top-down-recurring)
    projectile-enable-caching t
+   projectile-enable-cmake-presets t
    projectile-project-search-path '(("~/git_pa" . 2) ("~/Projects" . 3)))
   (projectile-register-project-type 'acml/exercism-lua '(".exercism" ".busted" "HELP.md" "README.md")
                                     :project-file '("?*.lua")
