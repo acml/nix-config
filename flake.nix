@@ -98,7 +98,7 @@
 
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     nixvim = {
       # If you are not running an unstable channel of nixpkgs, select the corresponding branch of nixvim.
@@ -156,65 +156,60 @@
   };
 
   outputs = inputs@{ self, flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; }
-      (toplevel@{ withSystem, ... }: {
-        imports = [
-          inputs.git-hooks.flakeModule
-          inputs.treefmt-nix.flakeModule
-        ];
-        systems = [ "aarch64-darwin" "aarch64-linux" "x86_64-darwin" "x86_64-linux" ];
-        perSystem = ctx@{ config, self', inputs', pkgs, system, ... }: {
-          _module.args.pkgs = import inputs.nixpkgs {
-            localSystem = system;
-            overlays = [ self.overlays.default ];
-            config = {
-              allowUnfree = true;
-              allowAliases = true;
-              permittedInsecurePackages = [
-                "jitsi-meet-1.0.8043"
-              ];
-            };
-          };
-
-          devShells = import ./nix/dev-shell.nix ctx;
-
-          packages = import ./nix/packages.nix toplevel ctx;
-
-          pre-commit = {
-            check.enable = true;
-            settings.hooks = {
-              actionlint.enable = true;
-              luacheck.enable = true;
-              nil.enable = true;
-              shellcheck.enable = true;
-              statix.enable = true;
-              stylua.enable = true;
-              treefmt.enable = true;
-            };
-          };
-
-          treefmt = {
-            projectRootFile = "flake.nix";
-            programs = {
-              nixpkgs-fmt.enable = true;
-              shfmt = {
-                enable = true;
-                indent_size = 0;
-              };
-            };
+    flake-parts.lib.mkFlake { inherit inputs; } (toplevel@{ withSystem, ... }: {
+      imports = [ inputs.git-hooks.flakeModule inputs.treefmt-nix.flakeModule ];
+      systems =
+        [ "aarch64-darwin" "aarch64-linux" "x86_64-darwin" "x86_64-linux" ];
+      perSystem = ctx@{ config, self', inputs', pkgs, system, ... }: {
+        _module.args.pkgs = import inputs.nixpkgs {
+          localSystem = system;
+          overlays = [ self.overlays.default ];
+          config = {
+            allowUnfree = true;
+            allowAliases = true;
+            permittedInsecurePackages = [ "jitsi-meet-1.0.8043" ];
           };
         };
 
-        flake = {
-          hosts = import ./nix/hosts.nix;
+        devShells = import ./nix/dev-shell.nix ctx;
 
-          darwinConfigurations = import ./nix/darwin.nix toplevel;
-          homeConfigurations = import ./nix/home-manager.nix toplevel;
-          nixosConfigurations = import ./nix/nixos.nix toplevel;
+        packages = import ./nix/packages.nix toplevel ctx;
 
-          deploy = import ./nix/deploy.nix toplevel;
-
-          overlays = import ./nix/overlay.nix toplevel;
+        pre-commit = {
+          check.enable = true;
+          settings.hooks = {
+            actionlint.enable = true;
+            luacheck.enable = true;
+            nil.enable = true;
+            shellcheck.enable = true;
+            statix.enable = true;
+            stylua.enable = true;
+            treefmt.enable = true;
+          };
         };
-      });
+
+        treefmt = {
+          projectRootFile = "flake.nix";
+          programs = {
+            nixpkgs-fmt.enable = true;
+            shfmt = {
+              enable = true;
+              indent_size = 0;
+            };
+          };
+        };
+      };
+
+      flake = {
+        hosts = import ./nix/hosts.nix;
+
+        darwinConfigurations = import ./nix/darwin.nix toplevel;
+        homeConfigurations = import ./nix/home-manager.nix toplevel;
+        nixosConfigurations = import ./nix/nixos.nix toplevel;
+
+        deploy = import ./nix/deploy.nix toplevel;
+
+        overlays = import ./nix/overlay.nix toplevel;
+      };
+    });
 }
