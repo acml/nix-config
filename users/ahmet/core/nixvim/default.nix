@@ -648,7 +648,7 @@
             console_timeout = 10000;
             disable_hint = true;
             disable_signs = true;
-            graph_style = "unicode";
+            graph_style.__raw = if pkgs.stdenv.isLinux then ''"unicode"'' else ''"kitty"'';
             integrations = {
               diffview = true;
               telescope = true;
