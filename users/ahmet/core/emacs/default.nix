@@ -10,35 +10,32 @@ let
   myEmacs = lib.mkMerge [
     (lib.mkIf isLinux pkgs.emacs29)
     (lib.mkIf isDarwin (pkgs.emacs29-pgtk.overrideAttrs (old: {
-      patches =
-        (old.patches or [ ])
-        ++ [
-          # Fix OS window role (needed for window managers like yabai)
-          (pkgs.fetchpatch {
-            url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-28/fix-window-role.patch";
-            sha256 = "sha256-+z/KfsBm1lvZTZNiMbxzXQGRTjkCFO4QPlEK35upjsE=";
-          })
-          # no-frame-refocus-cocoa
-          (pkgs.fetchpatch {
-            url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-28/no-frame-refocus-cocoa.patch";
-            sha256 = "sha256-QLGplGoRpM4qgrIAJIbVJJsa4xj34axwT3LiWt++j/c=";
-          })
-          # Use poll instead of select to get file descriptors
-          (pkgs.fetchpatch {
-            url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-29/poll.patch";
-            sha256 = "sha256-jN9MlD8/ZrnLuP2/HUXXEVVd6A+aRZNYFdZF8ReJGfY=";
-          })
-          # Enable rounded window with no decoration
-          (pkgs.fetchpatch {
-            url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-29/round-undecorated-frame.patch";
-            sha256 = "sha256-uYIxNTyfbprx5mCqMNFVrBcLeo+8e21qmBE3lpcnd+4=";
-          })
-          # Make Emacs aware of OS-level light/dark mode
-          (pkgs.fetchpatch {
-            url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-28/system-appearance.patch";
-            sha256 = "sha256-oM6fXdXCWVcBnNrzXmF0ZMdp8j0pzkLE66WteeCutv8=";
-          })
-        ];
+      patches = (old.patches or [ ]) ++ [
+        # Fix OS window role (needed for window managers like yabai)
+        (pkgs.fetchpatch {
+          url =
+            "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-28/fix-window-role.patch";
+          sha256 = "sha256-+z/KfsBm1lvZTZNiMbxzXQGRTjkCFO4QPlEK35upjsE=";
+        })
+        # no-frame-refocus-cocoa
+        (pkgs.fetchpatch {
+          url =
+            "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-28/no-frame-refocus-cocoa.patch";
+          sha256 = "sha256-QLGplGoRpM4qgrIAJIbVJJsa4xj34axwT3LiWt++j/c=";
+        })
+        # Enable rounded window with no decoration
+        (pkgs.fetchpatch {
+          url =
+            "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-29/round-undecorated-frame.patch";
+          sha256 = "sha256-uYIxNTyfbprx5mCqMNFVrBcLeo+8e21qmBE3lpcnd+4=";
+        })
+        # Make Emacs aware of OS-level light/dark mode
+        (pkgs.fetchpatch {
+          url =
+            "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-28/system-appearance.patch";
+          sha256 = "sha256-oM6fXdXCWVcBnNrzXmF0ZMdp8j0pzkLE66WteeCutv8=";
+        })
+      ];
     })))
   ];
 in
@@ -55,146 +52,148 @@ lib.mkMerge [
         '';
       };
 
-      packages = with pkgs; [
-        # fonts
-        emacs-all-the-icons-fonts
-        hack-font
-        iosevka-comfy.comfy
-        (lib.mkIf isLinux quivira)
-        symbola
-        unifont
-        (nerdfonts.override {
-          fonts = [
-            "IBMPlexMono"
-            "Iosevka"
-            "IosevkaTerm"
-            "NerdFontsSymbolsOnly"
-            "Overpass"
-          ];
-        })
+      packages = with pkgs;
+        [
+          # fonts
+          emacs-all-the-icons-fonts
+          hack-font
+          iosevka-comfy.comfy
+          (lib.mkIf isLinux quivira)
+          symbola
+          unifont
+          (nerdfonts.override {
+            fonts = [
+              "IBMPlexMono"
+              "Iosevka"
+              "IosevkaTerm"
+              "NerdFontsSymbolsOnly"
+              "Overpass"
+            ];
+          })
 
-        (lib.mkIf isDarwin coreutils-prefixed)
-        (lib.mkIf isDarwin pngpaste)
+          (lib.mkIf isDarwin coreutils-prefixed)
+          (lib.mkIf isDarwin pngpaste)
 
-        exercism
+          exercism
 
-        ## Doom dependencies
-        (ripgrep.override { withPCRE2 = true; })
-        # ripgrep-all
+          ## Doom dependencies
+          (ripgrep.override { withPCRE2 = true; })
+          # ripgrep-all
 
-        ## Optional dependencies
-        dtach
-        exiftool # for image-dired
-        fd # faster projectile indexing
-        graphicsmagick # for image-dired
-        libjpeg # for image-dired
-        unzip
-        zstd # for undo-fu-session/undo-tree compression
+          ## Optional dependencies
+          dtach
+          exiftool # for image-dired
+          fd # faster projectile indexing
+          graphicsmagick # for image-dired
+          libjpeg # for image-dired
+          unzip
+          zstd # for undo-fu-session/undo-tree compression
 
-        ## Module dependencies
+          ## Module dependencies
 
-        # :checkers spell
-        (aspellWithDicts (dicts: with dicts; [ en en-computers en-science tr ]))
+          # :checkers spell
+          (aspellWithDicts
+            (dicts: with dicts; [ en en-computers en-science tr ]))
 
-        # :checkers grammar
-        languagetool
+          # :checkers grammar
+          languagetool
 
-        # :tools editorconfig
-        editorconfig-core-c # per-project style config
+          # :tools editorconfig
+          editorconfig-core-c # per-project style config
 
-        # :tools lookup & :lang org +roam
-        sqlite
-        wordnet
-        (lib.mkIf isLinux maim) # org-download-clipboard
-        gnuplot # org-plot/gnuplot
-        graphviz # org-roam-graph
-        # :lang latex & :lang org (latex previews)
-        tectonic
+          # :tools lookup & :lang org +roam
+          sqlite
+          wordnet
+          (lib.mkIf isLinux maim) # org-download-clipboard
+          gnuplot # org-plot/gnuplot
+          graphviz # org-roam-graph
+          # :lang latex & :lang org (latex previews)
+          tectonic
 
-        # :lang cc
-        ccls
-        glslang
+          # :lang cc
+          ccls
+          glslang
 
-        # CMake LSP
-        cmake
-        cmake-language-server
+          # CMake LSP
+          cmake
+          cmake-language-server
 
-        # Nix
-        nixfmt-classic
-        nil
+          # Nix
+          nixfmt-classic
+          nil
 
-        # Markdown exporting
-        mdl
-        pandoc
+          # Markdown exporting
+          mdl
+          pandoc
 
-        # Python LSP setup
-        # nodePackages.pyright
-        # pipenv
-        # (python3.withPackages (ps: with ps; [
-        #   black isort pyflakes pytest
-        # ]))
+          # Python LSP setup
+          # nodePackages.pyright
+          # pipenv
+          # (python3.withPackages (ps: with ps; [
+          #   black isort pyflakes pytest
+          # ]))
 
-        # JavaScript
-        # nodePackages.typescript-language-server
+          # JavaScript
+          # nodePackages.typescript-language-server
 
-        # HTML/CSS/JSON language servers
-        nodePackages.prettier
-        nodePackages.vscode-langservers-extracted
+          # HTML/CSS/JSON language servers
+          nodePackages.prettier
+          nodePackages.vscode-langservers-extracted
 
-        # Yaml
-        nodePackages.yaml-language-server
+          # Yaml
+          nodePackages.yaml-language-server
 
-        # Bash
-        nodePackages.bash-language-server
-        shellcheck
-        shfmt
+          # Bash
+          nodePackages.bash-language-server
+          shellcheck
+          shfmt
 
-        # :lang lua
-        # (lib.mkIf isLinux sumneko-lua-language-server)
-        lua-language-server
+          # :lang lua
+          # (lib.mkIf isLinux sumneko-lua-language-server)
+          lua-language-server
 
-        # Rust
-        # cargo
-        # cargo-audit
-        # cargo-edit
-        # clippy
-        # rust-analyzer
-        # rustfmt
-        # rustc.out
+          # Rust
+          # cargo
+          # cargo-audit
+          # cargo-edit
+          # clippy
+          # rust-analyzer
+          # rustfmt
+          # rustc.out
 
-        # :lang go
-        # go_1_18
-        # delve # vscode
-        # go-outline # vscode
-        # go-tools # vscode (staticcheck)
-        # golint # vscode
-        # gomodifytags # vscode
-        # gopkgs # vscode
-        # gopls # vscode
-        # gotests # vscode
-        # impl # vscode
-        # gocode
-        # golangci-lint
-        # gore
-        # gotools
+          # :lang go
+          # go_1_18
+          # delve # vscode
+          # go-outline # vscode
+          # go-tools # vscode (staticcheck)
+          # golint # vscode
+          # gomodifytags # vscode
+          # gopkgs # vscode
+          # gopls # vscode
+          # gotests # vscode
+          # impl # vscode
+          # gocode
+          # golangci-lint
+          # gore
+          # gotools
 
-        # dirvish previewers
-        epub-thumbnailer
-        ffmpegthumbnailer
-        mediainfo
-        poppler_utils
+          # dirvish previewers
+          epub-thumbnailer
+          ffmpegthumbnailer
+          mediainfo
+          poppler_utils
 
-        trash-cli
-      ] ++ lib.optionals stdenv.hostPlatform.isLinux [
-        man-pages
-        man-pages-posix
+          trash-cli
+        ] ++ lib.optionals stdenv.hostPlatform.isLinux [
+          man-pages
+          man-pages-posix
 
-        # :app everywhere
-        # wl-clipboard
-        xclip
-        xdotool
-        xsel
-      ];
+          # :app everywhere
+          # wl-clipboard
+          xclip
+          xdotool
+          xsel
+        ];
 
       sessionPath = [ "${EMACSDIR}/bin" ];
       sessionVariables = {
@@ -216,8 +215,10 @@ lib.mkMerge [
         force = true;
       };
       dataFile = {
-        "doom/etc/lsp/lua-language-server/main.lua".source = "${pkgs.lua-language-server}/share/lua-language-server/bin/main.lua";
-        "doom/etc/lsp/lua-language-server/bin/lua-language-server".source = "${pkgs.lua-language-server}/bin/lua-language-server";
+        "doom/etc/lsp/lua-language-server/main.lua".source =
+          "${pkgs.lua-language-server}/share/lua-language-server/bin/main.lua";
+        "doom/etc/lsp/lua-language-server/bin/lua-language-server".source =
+          "${pkgs.lua-language-server}/bin/lua-language-server";
       };
     };
 
@@ -225,12 +226,13 @@ lib.mkMerge [
       emacs = {
         enable = true;
         package = myEmacs;
-        extraPackages = epkgs: (with epkgs; [
-          djvu
-          pdf-tools
-          treesit-grammars.with-all-grammars
-          vterm
-        ]);
+        extraPackages = epkgs:
+          (with epkgs; [
+            djvu
+            pdf-tools
+            treesit-grammars.with-all-grammars
+            vterm
+          ]);
       };
 
       jq.enable = true; # cli to extract data out of json input
