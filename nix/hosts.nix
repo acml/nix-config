@@ -38,18 +38,6 @@ let
     else throw "unknown host type '${type}'";
 in
 {
-  bohr = mkHost {
-    type = "nixos";
-    address = "100.123.20.11";
-    hostPlatform = "x86_64-linux";
-    pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBTh+kYOeeYoBuxvA00nGojfBHUQlXW3iF7aRIw9VbY1";
-  };
-  fourier = mkHost {
-    type = "nixos";
-    address = "100.77.107.1";
-    hostPlatform = "x86_64-linux";
-    pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMJEc036Z0umFUeSgksRgBWhcEeqiVhuXNQZTipZVRMn";
-  };
   goethe = mkHost {
     type = "home-manager";
     hostPlatform = "x86_64-linux";
@@ -65,12 +53,6 @@ in
     address = "100.80.1.112";
     hostPlatform = "x86_64-linux";
     pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHws1wwXYHDmU+Bjcbw8IZv2V+fbxaTDQc44XoUQ604t";
-  };
-  nozick = mkHost {
-    type = "nixos";
-    address = "100.124.29.84";
-    hostPlatform = "x86_64-linux";
-    pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBEzb5JCgcXJZHDkY09vBAvIF34JabI+ZBpGqJDy6KbI";
   };
   plato = mkHost {
     type = "nixos";
