@@ -862,6 +862,7 @@ will ensure are ignored")
      +default/search-cwd +default/search-other-cwd
      +default/search-notes-for-symbol-at-point
      +default/search-emacsd
+     consult-bookmark
      :preview-key (list "C-SPC" :debounce 0.2 'any))))
 
 (after! vterm
