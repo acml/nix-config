@@ -8,7 +8,7 @@ let
   # EDITOR = "emacsclient -tc";
   ALTERNATE_EDITOR = "emacs";
   myEmacs = lib.mkMerge [
-    (lib.mkIf isLinux pkgs.emacs29)
+    (lib.mkIf isLinux pkgs.emacs30)
     (lib.mkIf isDarwin (pkgs.emacs29-pgtk.overrideAttrs (old: {
       patches = (old.patches or [ ]) ++ [
         # Fix OS window role (needed for window managers like yabai)
