@@ -112,6 +112,7 @@ lib.mkMerge [
 
           # :lang cc
           ccls
+          # clang-tools
           glslang
 
           # CMake LSP
