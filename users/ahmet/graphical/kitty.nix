@@ -7,7 +7,7 @@
   };
   programs.kitty = {
     enable = true;
-    extraConfig = "
+    extraConfig = ''
       map ctrl+j neighboring_window down
       map ctrl+k neighboring_window up
       map ctrl+h neighboring_window left
@@ -29,7 +29,55 @@
       map --when-focus-on var:IS_NVIM alt+k
       map --when-focus-on var:IS_NVIM alt+h
       map --when-focus-on var:IS_NVIM alt+l
-      ";
+
+      symbol_map U+2026 IosevkaTerm Nerd Font
+      symbol_map U+2600-U+26FF Noto Color Emoji
+
+      # Seti-UI + Custom
+      symbol_map  U+e5fa-U+e6b5 IosevkaTerm Nerd Font
+
+      # Devicons
+      symbol_map U+e700-U+e7c5 IosevkaTerm Nerd Font
+
+      # Font Awesome (with a gap)
+      symbol_map U+ed00-U+f2ff IosevkaTerm Nerd Font
+
+      # Font Awesome Extension
+      symbol_map U+e200-U+e2a9 IosevkaTerm Nerd Font
+
+      # Material Design Icons
+      symbol_map U+f0001-U+f1af0 IosevkaTerm Nerd Font
+
+      # Weather
+      symbol_map U+e300-U+e3e3 IosevkaTerm Nerd Font
+
+      # Octicons
+      symbol_map U+f400-U+f533,U+2665,U+26A1 IosevkaTerm Nerd Font
+
+      # Powerline Symbols
+      symbol_map U+e0a0-U+e0a2,U+e0b0-U+e0b3 IosevkaTerm Nerd Font
+
+      # Powerline Extra Symbols
+      symbol_map U+e0a3,U+e0b4-U+e0c8,U+e0ca,U+e0cc-U+e0d7 IosevkaTerm Nerd Font
+
+      # IEC Power Symbols
+      symbol_map U+23fb-U+23fe,U+2b58 IosevkaTerm Nerd Font
+
+      # Font Logos
+      symbol_map U+f300-U+f375 IosevkaTerm Nerd Font
+
+      # Pomicons
+      symbol_map U+e000-U+e00a IosevkaTerm Nerd Font
+
+      # Codicons
+      symbol_map U+ea60-U+ec1e IosevkaTerm Nerd Font
+
+      # Additional sets - Heavy Angle Brackets
+      symbol_map U+276c-U+2771 IosevkaTerm Nerd Font
+
+      # Additional sets - Box Drawing
+      symbol_map U+2500-U+259f IosevkaTerm Nerd Font
+    '';
     font = {
       package = pkgs.iosevka-comfy.comfy;
       name = "Iosevka Comfy";
