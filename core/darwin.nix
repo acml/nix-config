@@ -20,10 +20,7 @@
       ncurses
       openssh
     ];
-    systemPath = lib.mkBefore [
-      "/opt/homebrew/bin"
-      "/opt/homebrew/sbin"
-    ];
+    systemPath = lib.mkBefore [ "/opt/homebrew/bin" "/opt/homebrew/sbin" ];
     variables = {
       SHELL = lib.getExe pkgs.zsh;
       EDITOR = "nvim";
@@ -34,7 +31,7 @@
   };
 
   homebrew = {
-    enable = true;
+    enable = false;
     onActivation = {
       cleanup = "zap";
       autoUpdate = true;
@@ -43,7 +40,8 @@
     brews = [ "git" ];
   };
 
-  programs.fish.loginShellInit = "fish_add_path --move --prepend --path $HOME/.nix-profile/bin /run/wrappers/bin /etc/profiles/per-user/$USER/bin /run/current-system/sw/bin /nix/var/nix/profiles/default/bin";
+  programs.fish.loginShellInit =
+    "fish_add_path --move --prepend --path $HOME/.nix-profile/bin /run/wrappers/bin /etc/profiles/per-user/$USER/bin /run/current-system/sw/bin /nix/var/nix/profiles/default/bin";
 
   services = {
     nix-daemon = {
