@@ -183,11 +183,11 @@ disabled = false
 [directory]
 format = "[❯ ](fg:directory bold)[$read_only]($read_only_style)[$repo_root]($repo_root_style)[$path ]($style)" # \u276F ❯ \ueab6 
 style = 'fg:directory bold'
-home_symbol = " ~" # \uf015 ' ~'
+home_symbol = " " # \uf015 ' ~'
 read_only = " " # \uf023 ' '
 read_only_style = 'fg:directory'
 truncation_length = 3
-truncation_symbol = "…\ufe0f/" # \ufe0f is a variation selector which forces the preciding character to be printed as emoji.
+truncation_symbol = "︙/" # "…\ufe0f/" \ufe0f is a variation selector which forces the preciding character to be printed as emoji.
 truncate_to_repo = true
 repo_root_format = "[❯ ](fg:directory bold)[$read_only]($read_only_style)[$before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path ]($style)" # \u276F ❯ \ueab6 
 repo_root_style = 'fg:directory bold'
