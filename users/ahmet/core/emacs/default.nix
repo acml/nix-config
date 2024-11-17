@@ -224,6 +224,7 @@ lib.mkMerge [
         extraPackages = epkgs:
           (with epkgs; [
             djvu
+            emacsql
             pdf-tools
             treesit-grammars.with-all-grammars
             vterm
