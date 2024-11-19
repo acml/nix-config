@@ -196,7 +196,7 @@ disabled = false
 
 [direnv]
 symbol = 'direnv'
-style = 'fg:greydimmed'
+style = 'fg:grey'
 format = "[❯ $symbol $loaded/$allowed ]($style)"
 allowed_msg = 'a' # 'ok' # '✓'
 not_allowed_msg = '!a' # 'nok' # '!'
