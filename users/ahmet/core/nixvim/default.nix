@@ -184,11 +184,6 @@
           -- vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, {})
           vim.keymap.set("n", "<leader>ca", '<cmd>Lspsaga code_action<cr>', { desc = "LSP Execute code action" })
         end
-
-        require('orgmode').setup({
-          org_agenda_files = {'~/Documents/org/*', '~/my-orgs/**/*'},
-          org_default_notes_file = '~/Documents/org/refile.org',
-        })
       '';
 
       extraPackages = with pkgs; [
@@ -197,10 +192,6 @@
         # wl-clipboard
         xclip
         xsel
-      ];
-
-      extraPlugins = with pkgs.vimPlugins; [
-        orgmode
       ];
 
       globals.mapleader = " ";
@@ -337,6 +328,7 @@
               # }
             ];
         };
+        cmake-tools.enable = true;
         cmp = {
           enable = true;
           settings = {
@@ -704,7 +696,13 @@
         nvim-colorizer.enable = true;
         nvim-ufo.enable = true;
         nvim-surround.enable = true;
-        overseer.enable = true;
+        orgmode = {
+          enable = true;
+          settings = {
+            org_agenda_files = [ "~/Documents/**/*" "~/my-orgs/**/*" ];
+            org_default_notes_file = "~/Documents/refile.org";
+          };
+        };
         persistence.enable = true;
         precognition.enable = true;
         precognition.settings.startVisible = false;
@@ -731,6 +729,15 @@
         render-markdown.enable = true;
         rustaceanvim.enable = true;
         smart-splits.enable = true;
+        snacks.enable = true;
+        snacks.settings = {
+          statuscolumn = {
+            left = [ "mark" "sign" ];
+            right = [ "fold" "git" ];
+            folds.open = true;
+            folds.git_hl = true;
+          };
+        };
         sniprun.enable = true;
         spider.enable = true;
         spider.keymaps.motions = {
@@ -738,15 +745,6 @@
           e = "e";
           ge = "ge";
           w = "w";
-        };
-        statuscol.enable = true;
-        statuscol.settings = {
-          relculright = true;
-          segments = [
-            { click = "v:lua.ScSa"; text = [ "%s" ]; }
-            { click = "v:lua.ScLa"; text = [{ __raw = "require('statuscol.builtin').lnumfunc"; }]; }
-            { click = "v:lua.ScFa"; text = [{ __raw = "require('statuscol.builtin').foldfunc"; } " "]; }
-          ];
         };
         tagbar.enable = true;
         telescope = {
