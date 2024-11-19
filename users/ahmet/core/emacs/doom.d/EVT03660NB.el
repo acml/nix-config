@@ -23,11 +23,11 @@
 (after! projectile
   (projectile-register-project-type 'cp1200 '("audis_linux" "audis_tools" "audis_utils" "cp1200" "cp1500" "le_nbg2")
                                     :compilation-dir "cp1200/cp1243-1/csd"
-                                    :compile "make -j$(nproc) -s all_targets 2>&1 | tee >(sed $'s/\x1b\[[0-9;]*[mGKHF]//g' > build-$(date -Iseconds).log)")
+                                    :compile "script --quiet --return --log-out build-$(date -Iseconds).log --command \"make -j$(nproc) -s all_targets 2>&1\"")
   (projectile-register-project-type 'cp1200dt '("proj.default.ini")
                                     :project-file "proj.default.ini"
                                     :compilation-dir "cp1200/cp1243-1/csd"
-                                    :compile "./docker_make.sh -j$(nproc) -s all_targets 2>&1 | tee >(sed $'s/\x1b\[[0-9;]*[mGKHF]//g' > build-$(date -Iseconds).log)"
+                                    :compile "script --quiet --return --log-out build-$(date -Iseconds).log --command \"./docker_make.sh -j$(nproc) -s all_targets 2>&1\""
                                     :configure "/usr/bin/git dt checkout -f"))
 
 (add-to-list 'auto-mode-alist '("\\.igt" . makefile-mode))
