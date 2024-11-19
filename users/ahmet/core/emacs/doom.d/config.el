@@ -376,7 +376,7 @@
   (aset buffer-display-table ?\^M []))
 
 ;; https://newbedev.com/how-do-i-display-ansi-color-codes-in-emacs-for-any-mode
-(defun acml/ansi-color (&optional beg end)
+(defun acml/ansi-color ()
   "Color the ANSI escape sequences in the active region or whole buffer.
 Sequences start with an escape \033 (typically shown as \"^[\")
 and end with \"m\", e.g. this is two sequences
@@ -386,10 +386,12 @@ a cyan background and the second sequence turns it off.
 
 This strips the ANSI escape sequences and if the buffer is saved,
 the sequences will be lost."
-  (interactive
-   (if (use-region-p)
-       (list (region-beginning) (region-end))
-     (list (point-min) (point-max))))
+  (interactive)
+  (let (beg end
+            (ansi-color-context-region nil))
+    (if (use-region-p)
+        (setq beg (region-beginning) end (region-end))
+      (setq beg (point-min) end (point-max))))
   (if buffer-read-only
       ;; read-only buffers may be pointing a read-only file system, so don't mark the buffer as
       ;; modified. If the buffer where to become modified, a warning will be generated when emacs
@@ -398,7 +400,13 @@ the sequences will be lost."
             (modified (buffer-modified-p)))
         (ansi-color-apply-on-region beg end t)
         (set-buffer-modified-p modified))
-    (ansi-color-apply-on-region beg end t)))
+    (ansi-color-apply-on-region (point-min) (point-max) t)))
+(add-hook 'find-file-hook #'acml/render-log)
+(defun acml/render-log ()
+  (when (and (stringp buffer-file-name)
+             (string-match "\\.log\\'" buffer-file-name))
+    (acml/hide-dos-eol)
+    (acml/ansi-color)))
 
 (setq-default left-fringe-width 8
               right-fringe-width 8)
