@@ -105,8 +105,8 @@ lib.mkMerge [
           tectonic
 
           # :lang cc
-          ccls
-          # clang-tools
+          # ccls
+          clang-tools
           glslang
 
           # CMake LSP
