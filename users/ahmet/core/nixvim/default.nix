@@ -492,10 +492,10 @@
           servers = {
             bashls.enable = true;
             ccls = {
-              enable = true;
+              enable = false;
               initOptions.cache.directory = { __raw = ''vim.fn.expand("$HOME/.cache/ccls")''; };
             };
-            clangd.enable = false;
+            clangd.enable = true;
             cmake.enable = true;
             dockerls.enable = true;
             gopls.enable = true;
