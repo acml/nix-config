@@ -190,6 +190,9 @@
             min_distance = 6,
             prefix_string = " ¤ "
           },
+          language_config = {
+            nix = { disabled = true }
+          }
         })
       '';
 
