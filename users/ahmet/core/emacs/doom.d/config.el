@@ -778,8 +778,11 @@ clicked."
    (org-mode . rainbow-mode)))
 
 (use-package! scopeline
-  :after tree-sitter
-  :config (add-hook 'prog-mode-hook #'scopeline-mode))
+  :commands (scopeline-mode)
+  :config
+  (add-to-list 'scopeline-targets '(c++-mode "function_definition" "for_statement" "if_statement" "while_statement"))
+  :init
+  (add-hook! 'prog-mode-hook #'scopeline-mode))
 
 (setq +treemacs-git-mode 'deferred
       ;; treemacs-collapse-dirs 5
