@@ -651,12 +651,14 @@
           settings = {
             console_timeout = 10000;
             disable_hint = true;
-            disable_signs = true;
+            disable_signs = false;
             graph_style = "unicode";
             integrations = {
               diffview = true;
               telescope = true;
             };
+            signs.item = [ "" "" ];
+            signs.section = [ "" "" ];
             telescope_sorter = /* lua */ ''require("telescope").extensions.fzf.native_fzf_sorter'';
           };
         };
