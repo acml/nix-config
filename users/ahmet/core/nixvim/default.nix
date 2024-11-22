@@ -184,6 +184,13 @@
           -- vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, {})
           vim.keymap.set("n", "<leader>ca", '<cmd>Lspsaga code_action<cr>', { desc = "LSP Execute code action" })
         end
+
+        require('nvim-biscuits').setup({
+          default_config = {
+            min_distance = 6,
+            prefix_string = " ¤ "
+          },
+        })
       '';
 
       extraPackages = with pkgs; [
@@ -192,6 +199,10 @@
         # wl-clipboard
         xclip
         xsel
+      ];
+
+      extraPlugins = with pkgs.vimPlugins; [
+        nvim-biscuits
       ];
 
       globals.mapleader = " ";
