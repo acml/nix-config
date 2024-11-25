@@ -194,6 +194,8 @@
             nix = { disabled = true }
           }
         })
+
+        require('go').setup()
       '';
 
       extraPackages = with pkgs; [
@@ -205,6 +207,7 @@
       ];
 
       extraPlugins = with pkgs.vimPlugins; [
+        go-nvim
         nvim-biscuits
       ];
 
