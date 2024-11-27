@@ -655,6 +655,7 @@
         neogit = {
           enable = true;
           settings = {
+            auto_show_console_on = "error";
             console_timeout = 10000;
             disable_hint = true;
             disable_signs = false;
