@@ -198,7 +198,9 @@
         require('go').setup()
       '';
 
+      extraLuaPackages = ps: [ ps.magick ];
       extraPackages = with pkgs; [
+        imagemagick
         universal-ctags
       ] ++ lib.optionals stdenv.hostPlatform.isLinux [
         # wl-clipboard
@@ -468,6 +470,7 @@
         helpview.enable = true;
         hmts.enable = true;
         illuminate.enable = true;
+        image.enable = true;
         indent-blankline = {
           enable = true;
           settings = {

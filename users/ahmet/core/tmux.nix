@@ -44,8 +44,9 @@
       # underscore colours - needs tmux-3.0
       set -as terminal-overrides ',*:Setulc=\E[58::2::%p1%{65536}%/%d::%p1%{256}%/%{255}%&%d::%p1%{255}%&%d%;m'
 
+      set -g visual-activity off
       # To enable Yazi's image preview to work correctly in tmux
-      set -g allow-passthrough on
+      set -gq allow-passthrough on
       set -ga update-environment TERM
       set -ga update-environment TERM_PROGRAM
 
