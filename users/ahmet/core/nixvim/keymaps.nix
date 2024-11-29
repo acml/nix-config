@@ -8,7 +8,7 @@
         { key = "<Esc><Esc>"; action = "<C-\\><C-n>"; mode = "t"; options = { desc = "Exit terminal mode"; }; }
         { key = "gp"; action = "`[v`]"; options = { desc = "Reselect pasted text"; }; }
 
-        { key = "<leader>bd"; action = "<cmd>bdelete<CR>"; options = { desc = "Kill buffer"; }; }
+        { key = "<leader>bd"; action.__raw = "function() Snacks.bufdelete() end"; options = { desc = "Kill buffer"; }; }
         { key = "<leader>bl"; action = "<cmd>edit #<CR>"; options = { desc = "Switch to last buffer"; }; }
         { key = "<leader>`"; action = "<cmd>edit #<CR>"; options = { desc = "Switch to last buffer"; }; }
         { key = "<leader>bn"; action = "<cmd>bnext<CR>"; options = { desc = "Next buffer"; }; }
