@@ -226,127 +226,6 @@
       # };
 
       plugins = {
-        alpha = {
-          enable = true;
-          theme = null;
-          layout =
-            let
-              padding = val: {
-                type = "padding";
-                inherit val;
-              };
-            in
-            [
-              (padding 3)
-              {
-                opts = {
-                  hl = "AlphaHeader";
-                  position = "center";
-                };
-                type = "text";
-                val = [
-                  "                                                                     "
-                  "       ████ ██████           █████      ██                     "
-                  "      ███████████             █████                             "
-                  "      █████████ ███████████████████ ███   ███████████   "
-                  "     █████████  ███    █████████████ █████ ██████████████   "
-                  "    █████████ ██████████ █████████ █████ █████ ████ █████   "
-                  "  ███████████ ███    ███ █████████ █████ █████ ████ █████  "
-                  " ██████  █████████████████████ ████ █████ █████ ████ ██████ "
-                ];
-              }
-              (padding 2)
-              {
-                type = "button";
-                val = "  New";
-                on_press.raw = "<cmd>ene<CR>";
-                opts = {
-                  keymap = [ "n" "n" "<cmd>:ene<CR>" { noremap = true; silent = true; nowait = true; } ];
-                  shortcut = "n";
-
-                  position = "center";
-                  cursor = 3;
-                  width = 38;
-                  align_shortcut = "right";
-                  hl_shortcut = "Keyword";
-                };
-              }
-              (padding 1)
-              {
-                type = "button";
-                val = "  Recent";
-                on_press.__raw = "require('telescope.builtin').oldfiles";
-                opts = {
-                  keymap = [ "n" "r" "<cmd>:Telescope oldfiles<CR>" { noremap = true; silent = true; nowait = true; } ];
-                  shortcut = "r";
-
-                  position = "center";
-                  cursor = 3;
-                  width = 38;
-                  align_shortcut = "right";
-                  hl_shortcut = "Keyword";
-                };
-              }
-              (padding 1)
-              {
-                type = "button";
-                val = "  Projects";
-                on_press.raw = "require'telescope'.extensions.projects.projects{}";
-                opts = {
-                  keymap = [ "n" "p" "<cmd>:Telescope projects<CR>" { noremap = true; silent = true; nowait = true; } ];
-                  shortcut = "p";
-
-                  position = "center";
-                  cursor = 3;
-                  width = 38;
-                  align_shortcut = "right";
-                  hl_shortcut = "Keyword";
-                };
-              }
-              (padding 1)
-              {
-                type = "button";
-                val = "󰁯  Restore";
-                on_press.raw = "require('persistence').load({ last = true })";
-                opts = {
-                  keymap = [ "n" "s" "<cmd>:lua require('persistence').load({ last = true })<CR>" { noremap = true; silent = true; nowait = true; } ];
-                  shortcut = "s";
-
-                  position = "center";
-                  cursor = 3;
-                  width = 38;
-                  align_shortcut = "right";
-                  hl_shortcut = "Keyword";
-                };
-              }
-              (padding 1)
-              {
-                type = "button";
-                val = "󰈆  Quit";
-                on_press.__raw = "function() vim.cmd[[qa]] end";
-                opts = {
-                  keymap = [ "n" "q" ":qa<CR>" { noremap = true; silent = true; nowait = true; } ];
-                  shortcut = "q";
-
-                  position = "center";
-                  cursor = 3;
-                  width = 38;
-                  align_shortcut = "right";
-                  hl_shortcut = "Keyword";
-                };
-              }
-              # (padding 3)
-              # {
-              #   opts = { hl = "AlphaFooter"; position = "center"; };
-              #
-              #   type = "text";
-              #   val = [
-              #     "  Loaded X plugins  in Y ms  "
-              #     ".............................."
-              #   ];
-              # }
-            ];
-        };
         cmake-tools.enable = true;
         cmp = {
           enable = true;
@@ -506,6 +385,7 @@
           };
         };
         lastplace.enable = true;
+        lazy.enable = true;
         # lint.enable = true;
         lsp = {
           enable = true;
@@ -754,6 +634,27 @@
         smart-splits.enable = true;
         snacks.enable = true;
         snacks.settings = {
+          dashboard = {
+            enabled = true;
+            preset.header = ''
+                                                                                 
+                    ████ ██████           █████      ██                    
+                   ███████████             █████                            
+                   █████████ ███████████████████ ███   ███████████  
+                  █████████  ███    █████████████ █████ ██████████████  
+                 █████████ ██████████ █████████ █████ █████ ████ █████  
+               ███████████ ███    ███ █████████ █████ █████ ████ █████ 
+              ██████  █████████████████████ ████ █████ █████ ████ ██████
+            '';
+            sections.__raw = ''
+              {
+                { section = 'header' },
+                { section = 'keys', gap = 1 },
+                { section = 'recent_files', icon = ' ', title = 'Recent Files', indent = 2, padding = {2, 2} },
+                { section = 'projects', icon = ' ', title = 'Projects', indent = 2, padding = 2 },
+              }
+            '';
+          };
           statuscolumn = {
             left = [ "mark" "sign" ];
             right = [ "fold" "git" ];
