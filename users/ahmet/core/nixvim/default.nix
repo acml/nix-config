@@ -147,9 +147,9 @@
         nnoremap("<leader>sD", function() select_dir_for_grep() end, { desc = 'Search other directory' })
         nnoremap("<leader>sS", function() require('telescope.builtin').current_buffer_fuzzy_find( { default_text = vim.fn.expand('<cword>'), fuzzy = false } ) end, { desc = 'Search buffer for thing at point' } )
 
-        nnoremap("<leader>ot", "<cmd>ToggleTerm direction=horizontal<cr>", { desc = 'Toggle terminal (horizontal)' } )
-        nnoremap("<leader>of", "<cmd>ToggleTerm direction=float<cr>", { desc = 'Toggle terminal (floating)' } )
-        nnoremap("<leader>oT", "<cmd>ToggleTerm direction=vertical<cr>", { desc = 'Toggle terminal (vertical)' } )
+        nnoremap("<leader>ot", function() Snacks.terminal.toggle() end, { desc = 'Toggle terminal (horizontal)' } )
+        nnoremap("<leader>of", function() Snacks.terminal.toggle(nil, { win = {position = "float"}} ) end, { desc = 'Toggle terminal (floating)' } )
+        nnoremap("<leader>oT", function() Snacks.terminal.toggle(nil, { win = {position = "right"}} ) end, { desc = 'Toggle terminal (vertical)' } )
 
         nnoremap("<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", { desc = 'Diagnostics (Trouble)' } )
         nnoremap("<leader>xd", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { desc = 'Document Diagnostics (Trouble)' } )
@@ -818,22 +818,6 @@
         };
         # tmux-navigator.enable = true;
         todo-comments.enable = true;
-        toggleterm = {
-          enable = true;
-          settings = {
-            float_opts.border = "rounded";
-            open_mapping = "[[<F10>]]";
-            size = /* lua */ ''
-              function(term)
-                if term.direction == "horizontal" then
-                  return 12
-                elseif term.direction == "vertical" then
-                  return vim.o.columns * 0.4
-                end
-              end
-            '';
-          };
-        };
 
         treesitter = {
           enable = true;
