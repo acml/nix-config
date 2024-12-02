@@ -649,7 +649,7 @@
             sections.__raw = ''
               {
                 { section = 'header' },
-                { section = 'keys', gap = 1 },
+                { section = 'keys' },
                 { section = 'recent_files', icon = ' ', title = 'Recent Files', indent = 2, padding = {2, 2} },
                 { section = 'projects', icon = ' ', title = 'Projects', indent = 2, padding = 2 },
               }
