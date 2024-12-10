@@ -226,6 +226,7 @@
       # };
 
       plugins = {
+        colorizer.enable = true;
         cmake-tools.enable = true;
         cmp = {
           enable = true;
@@ -503,6 +504,7 @@
             map = { };
             operators = { };
             pairs = { };
+            sessions = { };
             splitjoin = { };
           };
         };
@@ -596,7 +598,6 @@
         };
         notify.enable = true;
         nvim-bqf.enable = true;
-        nvim-colorizer.enable = true;
         nvim-ufo.enable = true;
         nvim-surround.enable = true;
         orgmode = {
