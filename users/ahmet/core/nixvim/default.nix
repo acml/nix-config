@@ -347,6 +347,7 @@
             map({'o', 'x'}, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
           end
         '';
+        grug-far.enable = true;
         helpview.enable = true;
         hmts.enable = true;
         illuminate.enable = true;
