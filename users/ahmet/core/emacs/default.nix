@@ -55,15 +55,11 @@ lib.mkMerge [
           (lib.mkIf isLinux quivira)
           symbola
           unifont
-          (nerdfonts.override {
-            fonts = [
-              "IBMPlexMono"
-              "Iosevka"
-              "IosevkaTerm"
-              "NerdFontsSymbolsOnly"
-              "Overpass"
-            ];
-          })
+          nerd-fonts.blex-mono
+          nerd-fonts.iosevka
+          nerd-fonts.iosevka-term
+          nerd-fonts.symbols-only
+          nerd-fonts.overpass
 
           (lib.mkIf isDarwin coreutils-prefixed)
           (lib.mkIf isDarwin pngpaste)
