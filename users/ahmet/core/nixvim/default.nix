@@ -1,10 +1,6 @@
 { pkgs, ... }: {
 
-  imports = [
-    ./autocmd.nix
-    ./keymaps.nix
-    ./options.nix
-  ];
+  imports = [ ./autocmd.nix ./keymaps.nix ./options.nix ];
 
   programs = {
 
@@ -199,19 +195,15 @@
       '';
 
       extraLuaPackages = ps: [ ps.magick ];
-      extraPackages = with pkgs; [
-        imagemagick
-        universal-ctags
-      ] ++ lib.optionals stdenv.hostPlatform.isLinux [
-        # wl-clipboard
-        xclip
-        xsel
-      ];
+      extraPackages = with pkgs;
+        [ imagemagick universal-ctags ]
+        ++ lib.optionals stdenv.hostPlatform.isLinux [
+          # wl-clipboard
+          xclip
+          xsel
+        ];
 
-      extraPlugins = with pkgs.vimPlugins; [
-        go-nvim
-        nvim-biscuits
-      ];
+      extraPlugins = with pkgs.vimPlugins; [ go-nvim nvim-biscuits ];
 
       globals.mapleader = " ";
 
@@ -232,15 +224,14 @@
           enable = true;
           settings = {
             snippet = {
-              expand = /* lua */ ''
-                function(args)
-                  require('luasnip').lsp_expand(args.body)
-                end
-              '';
+              expand = # lua
+                ''
+                  function(args)
+                    require('luasnip').lsp_expand(args.body)
+                  end
+                '';
             };
-            completion = {
-              completeopt = "menu,menuone,noinsert";
-            };
+            completion = { completeopt = "menu,menuone,noinsert"; };
             mapping = {
               # Scroll the documentation window [b]ack / [f]orward
               "<C-b>" = "cmp.mapping.scroll_docs(-4)";
@@ -301,52 +292,53 @@
         gitblame.enable = true;
         gitblame.settings.virtual_text_column = 121;
         gitsigns.enable = true;
-        gitsigns.settings.on_attach = /* lua */ ''
-          function(bufnr)
-            local gitsigns = require('gitsigns')
+        gitsigns.settings.on_attach = # lua
+          ''
+            function(bufnr)
+              local gitsigns = require('gitsigns')
 
-            local function map(mode, l, r, opts)
-              opts = opts or {}
-              opts.buffer = bufnr
-              vim.keymap.set(mode, l, r, opts)
+              local function map(mode, l, r, opts)
+                opts = opts or {}
+                opts.buffer = bufnr
+                vim.keymap.set(mode, l, r, opts)
+              end
+
+              -- Navigation
+              map('n', ']h', function()
+                if vim.wo.diff then
+                  vim.cmd.normal({']h', bang = true})
+                else
+                  gitsigns.nav_hunk('next')
+                end
+              end)
+
+              map('n', '[h', function()
+                if vim.wo.diff then
+                  vim.cmd.normal({'[h', bang = true})
+                else
+                  gitsigns.nav_hunk('prev')
+                end
+              end)
+
+              -- Actions
+              map('n', '<leader>ghs', gitsigns.stage_hunk, { desc = 'stage hunk' })
+              map('n', '<leader>ghr', gitsigns.reset_hunk, { desc = 'reset hunk' })
+              map('v', '<leader>ghs', function() gitsigns.stage_hunk {vim.fn.line('.'), vim.fn.line('v')} end, { desc = 'stage hunk' })
+              map('v', '<leader>ghr', function() gitsigns.reset_hunk {vim.fn.line('.'), vim.fn.line('v')} end, { desc = 'reset hunk' })
+              map('n', '<leader>ghS', gitsigns.stage_buffer, { desc = 'stage buffer' })
+              map('n', '<leader>ghu', gitsigns.undo_stage_hunk, { desc = 'undo stage hunk' })
+              map('n', '<leader>ghR', gitsigns.reset_buffer, { desc = 'reset buffer' })
+              map('n', '<leader>ghp', gitsigns.preview_hunk, { desc = 'preview hunk' })
+              map('n', '<leader>ghb', function() gitsigns.blame_line{full=true} end, { desc = 'blame line' })
+              map('n', '<leader>gtb', gitsigns.toggle_current_line_blame, { desc = 'toggle current line blame' })
+              map('n', '<leader>ghd', gitsigns.diffthis, { desc = 'diff this' })
+              map('n', '<leader>ghD', function() gitsigns.diffthis('~') end, { desc = 'diff ~' })
+              map('n', '<leader>gtd', gitsigns.toggle_deleted, { desc = 'toggle deleted' })
+
+              -- Text object
+              map({'o', 'x'}, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
             end
-
-            -- Navigation
-            map('n', ']h', function()
-              if vim.wo.diff then
-                vim.cmd.normal({']h', bang = true})
-              else
-                gitsigns.nav_hunk('next')
-              end
-            end)
-
-            map('n', '[h', function()
-              if vim.wo.diff then
-                vim.cmd.normal({'[h', bang = true})
-              else
-                gitsigns.nav_hunk('prev')
-              end
-            end)
-
-            -- Actions
-            map('n', '<leader>ghs', gitsigns.stage_hunk, { desc = 'stage hunk' })
-            map('n', '<leader>ghr', gitsigns.reset_hunk, { desc = 'reset hunk' })
-            map('v', '<leader>ghs', function() gitsigns.stage_hunk {vim.fn.line('.'), vim.fn.line('v')} end, { desc = 'stage hunk' })
-            map('v', '<leader>ghr', function() gitsigns.reset_hunk {vim.fn.line('.'), vim.fn.line('v')} end, { desc = 'reset hunk' })
-            map('n', '<leader>ghS', gitsigns.stage_buffer, { desc = 'stage buffer' })
-            map('n', '<leader>ghu', gitsigns.undo_stage_hunk, { desc = 'undo stage hunk' })
-            map('n', '<leader>ghR', gitsigns.reset_buffer, { desc = 'reset buffer' })
-            map('n', '<leader>ghp', gitsigns.preview_hunk, { desc = 'preview hunk' })
-            map('n', '<leader>ghb', function() gitsigns.blame_line{full=true} end, { desc = 'blame line' })
-            map('n', '<leader>gtb', gitsigns.toggle_current_line_blame, { desc = 'toggle current line blame' })
-            map('n', '<leader>ghd', gitsigns.diffthis, { desc = 'diff this' })
-            map('n', '<leader>ghD', function() gitsigns.diffthis('~') end, { desc = 'diff ~' })
-            map('n', '<leader>gtd', gitsigns.toggle_deleted, { desc = 'toggle deleted' })
-
-            -- Text object
-            map({'o', 'x'}, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
-          end
-        '';
+          '';
         grug-far.enable = true;
         helpview.enable = true;
         hmts.enable = true;
@@ -356,12 +348,7 @@
           enable = true;
           settings = {
             exclude = {
-              buftypes = [
-                "terminal"
-                "nofile"
-                "quickfix"
-                "prompt"
-              ];
+              buftypes = [ "terminal" "nofile" "quickfix" "prompt" ];
               filetypes = [
                 "lspinfo"
                 "packer"
@@ -375,9 +362,7 @@
                 "''"
               ];
             };
-            indent = {
-              char = "▏";
-            };
+            indent = { char = "▏"; };
             scope = {
               enabled = false;
               show_end = false;
@@ -395,7 +380,9 @@
             bashls.enable = true;
             ccls = {
               enable = false;
-              initOptions.cache.directory = { __raw = ''vim.fn.expand("$HOME/.cache/ccls")''; };
+              initOptions.cache.directory = {
+                __raw = ''vim.fn.expand("$HOME/.cache/ccls")'';
+              };
             };
             clangd.enable = true;
             cmake.enable = true;
@@ -494,11 +481,10 @@
               draw = {
                 delay = 100;
                 priority = 2;
-                animation.__raw = ''require('mini.indentscope').gen_animation.none()'';
+                animation.__raw =
+                  "require('mini.indentscope').gen_animation.none()";
               };
-              options = {
-                try_as_border = true;
-              };
+              options = { try_as_border = true; };
               symbol = "▏";
             };
             jump = { };
@@ -552,7 +538,8 @@
             };
             signs.item = [ "" "" ];
             signs.section = [ "" "" ];
-            telescope_sorter = /* lua */ ''require("telescope").extensions.fzf.native_fzf_sorter'';
+            telescope_sorter = # lua
+              ''require("telescope").extensions.fzf.native_fzf_sorter'';
           };
         };
         neotest.enable = true;
@@ -683,9 +670,12 @@
             live-grep-args.settings = {
               mappings = {
                 i = {
-                  "<C-i>".__raw = ''require("telescope-live-grep-args.actions").quote_prompt({ postfix = " --iglob " })'';
-                  "<C-k>".__raw = ''require("telescope-live-grep-args.actions").quote_prompt()'';
-                  "<C-space>".__raw = ''require("telescope.actions").to_fuzzy_refine'';
+                  "<C-i>".__raw = ''
+                    require("telescope-live-grep-args.actions").quote_prompt({ postfix = " --iglob " })'';
+                  "<C-k>".__raw = ''
+                    require("telescope-live-grep-args.actions").quote_prompt()'';
+                  "<C-space>".__raw =
+                    ''require("telescope.actions").to_fuzzy_refine'';
                 };
               };
             };
@@ -693,27 +683,82 @@
             undo.enable = true;
           };
           keymaps = {
-            "<leader>'" = { action = "resume"; options = { desc = "Resume last search"; }; };
-            "<leader>," = { action = "buffers"; options = { desc = "Switch buffer"; }; };
-            "<leader>." = { action = "find_files cwd=%:p:h"; options = { desc = "Find file"; }; };
-            "<leader>/" = { action = "live_grep_args"; options = { desc = "Search project"; }; };
-            "<leader><leader>" = { action = "find_files"; options = { desc = "Find file in project"; }; };
-            "<leader>bb" = { action = "buffers"; options = { desc = "Switch buffer"; }; };
-            "<leader>ff" = { action = "find_files cwd=%:p:h"; options = { desc = "Find file"; }; };
-            "<leader>fr" = { action = "oldfiles"; options = { desc = "Recent files"; }; };
-            "<leader>hh" = { action = "help_tags"; options = { desc = "help"; }; };
-            "<leader>hk" = { action = "keymaps"; options = { desc = "key-bindings"; }; };
-            "<leader>hm" = { action = "man_pages sections=ALL"; options = { desc = "man"; }; };
-            "<leader>ht" = { action = "colorscheme enable_preview=true"; options = { desc = "Change Colorscheme"; }; };
-            "<leader>pp" = { action = "projects"; options = { desc = "Switch project"; }; };
-            "<leader>sb" = { action = "current_buffer_fuzzy_find fuzzy=false"; options = { desc = "Search buffer"; }; };
-            "<leader>sd" = { action = "live_grep_args cwd=%:p:h"; options = { desc = "Search current directory"; }; };
-            "<leader>si" = { action = "lsp_document_symbols"; options = { desc = "Jump to symbol"; }; };
-            "<leader>ss" = { action = "current_buffer_fuzzy_find fuzzy=false"; options = { desc = "Search buffer"; }; };
+            "<leader>'" = {
+              action = "resume";
+              options = { desc = "Resume last search"; };
+            };
+            "<leader>," = {
+              action = "buffers";
+              options = { desc = "Switch buffer"; };
+            };
+            "<leader>." = {
+              action = "find_files cwd=%:p:h";
+              options = { desc = "Find file"; };
+            };
+            "<leader>/" = {
+              action = "live_grep_args";
+              options = { desc = "Search project"; };
+            };
+            "<leader><leader>" = {
+              action = "find_files";
+              options = { desc = "Find file in project"; };
+            };
+            "<leader>bb" = {
+              action = "buffers";
+              options = { desc = "Switch buffer"; };
+            };
+            "<leader>ff" = {
+              action = "find_files cwd=%:p:h";
+              options = { desc = "Find file"; };
+            };
+            "<leader>fr" = {
+              action = "oldfiles";
+              options = { desc = "Recent files"; };
+            };
+            "<leader>hh" = {
+              action = "help_tags";
+              options = { desc = "help"; };
+            };
+            "<leader>hk" = {
+              action = "keymaps";
+              options = { desc = "key-bindings"; };
+            };
+            "<leader>hm" = {
+              action = "man_pages sections=ALL";
+              options = { desc = "man"; };
+            };
+            "<leader>ht" = {
+              action = "colorscheme enable_preview=true";
+              options = { desc = "Change Colorscheme"; };
+            };
+            "<leader>pp" = {
+              action = "projects";
+              options = { desc = "Switch project"; };
+            };
+            "<leader>sb" = {
+              action = "current_buffer_fuzzy_find fuzzy=false";
+              options = { desc = "Search buffer"; };
+            };
+            "<leader>sd" = {
+              action = "live_grep_args cwd=%:p:h";
+              options = { desc = "Search current directory"; };
+            };
+            "<leader>si" = {
+              action = "lsp_document_symbols";
+              options = { desc = "Jump to symbol"; };
+            };
+            "<leader>ss" = {
+              action = "current_buffer_fuzzy_find fuzzy=false";
+              options = { desc = "Search buffer"; };
+            };
           };
           settings = {
             pickers = {
-              buffers = { sort_mru = true; sort_lastused = true; theme = "ivy"; };
+              buffers = {
+                sort_mru = true;
+                sort_lastused = true;
+                theme = "ivy";
+              };
               find_files = { theme = "ivy"; };
               oldfiles = { theme = "ivy"; };
             };
@@ -741,21 +786,51 @@
 
         vim-matchup = {
           enable = true;
-          treesitterIntegration.enable = true;
-          treesitterIntegration.includeMatchWords = true;
+          treesitter.enable = true;
+          treesitter.include_match_words = true;
         };
         which-key = {
           enable = true;
           settings.spec = [
-            { __unkeyed-1 = "<leader>b"; desc = "+buffer"; }
-            { __unkeyed-1 = "<leader>c"; desc = "+code"; }
-            { __unkeyed-1 = "<leader>f"; desc = "+file"; }
-            { __unkeyed-1 = "<leader>g"; desc = "+git"; }
-            { __unkeyed-1 = "<leader>h"; desc = "+help"; icon = "󰋖"; }
-            { __unkeyed-1 = "<leader>o"; desc = "+open"; icon = "󰌧"; }
-            { __unkeyed-1 = "<leader>p"; desc = "+project"; icon = ""; }
-            { __unkeyed-1 = "<leader>s"; desc = "+search"; }
-            { __unkeyed-1 = "<leader>x"; desc = "+diagnostics"; }
+            {
+              __unkeyed-1 = "<leader>b";
+              desc = "+buffer";
+            }
+            {
+              __unkeyed-1 = "<leader>c";
+              desc = "+code";
+            }
+            {
+              __unkeyed-1 = "<leader>f";
+              desc = "+file";
+            }
+            {
+              __unkeyed-1 = "<leader>g";
+              desc = "+git";
+            }
+            {
+              __unkeyed-1 = "<leader>h";
+              desc = "+help";
+              icon = "󰋖";
+            }
+            {
+              __unkeyed-1 = "<leader>o";
+              desc = "+open";
+              icon = "󰌧";
+            }
+            {
+              __unkeyed-1 = "<leader>p";
+              desc = "+project";
+              icon = "";
+            }
+            {
+              __unkeyed-1 = "<leader>s";
+              desc = "+search";
+            }
+            {
+              __unkeyed-1 = "<leader>x";
+              desc = "+diagnostics";
+            }
           ];
         };
         wtf.enable = true;
@@ -767,9 +842,7 @@
             use_ya_for_events_reading = true;
             use_yazi_client_id_flag = true;
 
-            highlight_groups = {
-              hovered_buffer = null;
-            };
+            highlight_groups = { hovered_buffer = null; };
 
             floating_window_scaling_factor = 0.8;
           };
