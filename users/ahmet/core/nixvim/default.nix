@@ -113,36 +113,6 @@
         vim.keymap.set('n', '[E', "<cmd>cfirst<cr>zv", { silent = true, desc = "first qf item" })
         vim.keymap.set('n', ']E', "<cmd>clast<cr>zv", { silent = true, desc = "last qf item" })
 
-        select_dir_for_grep = function(prompt_bufnr)
-          local action_state = require("telescope.actions.state")
-          local fb = require("telescope").extensions.file_browser
-          local lga = require("telescope").extensions.live_grep_args
-
-          fb.file_browser({
-            files = false,
-            depth = false,
-            attach_mappings = function(prompt_bufnr)
-              require("telescope.actions").select_default:replace(function()
-                local entry_path = action_state.get_selected_entry().Path
-                local dir = entry_path:is_dir() and entry_path or entry_path:parent()
-                local relative = dir:make_relative(vim.fn.getcwd())
-                local absolute = dir:absolute()
-
-                lga.live_grep_args({
-                  results_title = relative .. "/",
-                  cwd = absolute
-                })
-              end)
-
-              return true
-            end,
-          })
-        end
-
-        nnoremap("<leader>*",  function() require('telescope-live-grep-args.shortcuts').grep_word_under_cursor() end, { desc = 'Search for symbol in project' } )
-        nnoremap("<leader>sD", function() select_dir_for_grep() end, { desc = 'Search other directory' })
-        nnoremap("<leader>sS", function() require('telescope.builtin').current_buffer_fuzzy_find( { default_text = vim.fn.expand('<cword>'), fuzzy = false } ) end, { desc = 'Search buffer for thing at point' } )
-
         nnoremap("<leader>ot", function() Snacks.terminal.toggle() end, { desc = 'Toggle terminal (horizontal)' } )
         nnoremap("<leader>of", function() Snacks.terminal.toggle(nil, { win = {position = "float"}} ) end, { desc = 'Toggle terminal (floating)' } )
         nnoremap("<leader>oT", function() Snacks.terminal.toggle(nil, { win = {position = "right"}} ) end, { desc = 'Toggle terminal (vertical)' } )
@@ -218,76 +188,144 @@
       # };
 
       plugins = {
-        colorizer.enable = true;
-        cmake-tools.enable = true;
-        cmp = {
+        blink-cmp = {
           enable = true;
           settings = {
-            snippet = {
-              expand = # lua
-                ''
-                  function(args)
-                    require('luasnip').lsp_expand(args.body)
-                  end
-                '';
+            keymap = {
+              "<C-b>" = [
+                "scroll_documentation_up"
+                "fallback"
+              ];
+              "<C-e>" = [
+                "hide"
+              ];
+              "<C-f>" = [
+                "scroll_documentation_down"
+                "fallback"
+              ];
+              "<C-n>" = [
+                "select_next"
+                "fallback"
+              ];
+              "<C-p>" = [
+                "select_prev"
+                "fallback"
+              ];
+              "<C-space>" = [
+                "show"
+                "show_documentation"
+                "hide_documentation"
+              ];
+              "<CR>" = [
+                "accept"
+                "fallback"
+              ];
+              "<C-y>" = [
+                "select_and_accept"
+              ];
+              "<Down>" = [
+                "select_next"
+                "fallback"
+              ];
+              "<S-Tab>" = [
+                "select_prev"
+                "fallback"
+              ];
+              "<Tab>" = [
+                "select_next"
+                "fallback"
+              ];
+              "<Up>" = [
+                "select_prev"
+                "fallback"
+              ];
             };
-            completion = { completeopt = "menu,menuone,noinsert"; };
-            mapping = {
-              # Scroll the documentation window [b]ack / [f]orward
-              "<C-b>" = "cmp.mapping.scroll_docs(-4)";
-              "<C-f>" = "cmp.mapping.scroll_docs(4)";
-
-              "<CR>" = "cmp.mapping.confirm { select = true }";
-
-              "<C-n>" = "cmp.mapping.select_next_item()";
-              "<C-p>" = "cmp.mapping.select_prev_item()";
-
-              "<Tab>" = ''
-                cmp.mapping(function(fallback)
-                  if cmp.visible() then
-                    cmp.select_next_item()
-                  elseif require("luasnip").expand_or_jumpable() then
-                    require("luasnip").expand_or_jump()
-                  else
-                    fallback()
-                  end
-                end, { "i", "s" })
-              '';
-              "<S-Tab>" = ''
-                cmp.mapping(function(fallback)
-                  if cmp.visible() then
-                    cmp.select_prev_item()
-                  elseif require("luasnip").jumpable(-1) then
-                      require("luasnip").jump(-1)
-                  else
-                      fallback()
-                  end
-                end, { "i", "s" })
-              '';
-              # Manually trigger a completion from nvim-cmp.
-              #  Generally you don't need this, because nvim-cmp will display
-              #  completions whenever it has completion options available.
-              # "<C-Space>" = "cmp.mapping.complete {}";
-            };
-            # WARNING: If plugins.cmp.autoEnableSources Nixivm will automatically enable the
-            # corresponding source plugins. This will work only when this option is set to a list.
-            # If you use a raw lua string, you will need to explicitly enable the relevant source
-            # plugins in your nixvim configuration.
-            sources = [
-              { name = "nvim_lsp"; }
-              { name = "luasnip"; }
-              { name = "buffer"; }
-              { name = "nvim_lua"; }
-              { name = "path"; }
-            ];
           };
         };
+        colorizer.enable = true;
+        cmake-tools.enable = true;
         compiler.enable = true;
         dap.enable = true;
         debugprint.enable = true;
         diffview.enable = true;
         direnv.enable = true;
         friendly-snippets.enable = true;
+        fzf-lua = {
+          enable = true;
+          keymaps = {
+            "<leader>'" = {
+              action = "resume";
+              options = { desc = "Resume last search"; };
+            };
+            "<leader>," = {
+              action = "buffers";
+              options = { desc = "Switch buffer"; };
+            };
+            "<leader>." = {
+              action = "files";
+              options = { desc = "Find file"; };
+              settings = { cwd = "%:p:h"; };
+            };
+            "<leader>/" = {
+              action = "live_grep";
+              options = { desc = "Search project"; };
+            };
+            "<leader><leader>" = {
+              action = "files";
+              options = { desc = "Find file in project"; };
+            };
+            "<leader>bb" = {
+              action = "buffers";
+              options = { desc = "Switch buffer"; };
+            };
+            "<leader>ff" = {
+              action = "files";
+              options = { desc = "Find file"; };
+              settings = { cwd = "%:p:h"; };
+            };
+            "<leader>fr" = {
+              action = "oldfiles";
+              options = { desc = "Recent files"; };
+            };
+            "<leader>hh" = {
+              action = "help_tags";
+              options = { desc = "help"; };
+            };
+            "<leader>hk" = {
+              action = "keymaps";
+              options = { desc = "key-bindings"; };
+            };
+            "<leader>hm" = {
+              action = "man_pages";
+              options = { desc = "man"; };
+            };
+            "<leader>ht" = {
+              action = "colorschemes";
+              options = { desc = "Change Colorscheme"; };
+            };
+            # "<leader>pp" = {
+            #   action = "projects";
+            #   options = { desc = "Switch project"; };
+            # };
+            "<leader>sb" = {
+              action = "blines";
+              options = { desc = "Search buffer"; };
+            };
+            "<leader>sd" = {
+              action = "live_grep_args";
+              options = { desc = "Search current directory"; };
+              settings = { cwd = "%:p:h"; };
+            };
+            "<leader>si" = {
+              action = "lsp_document_symbols";
+              options = { desc = "Jump to symbol"; };
+            };
+            "<leader>ss" = {
+              action = "blines";
+              options = { desc = "Search buffer"; };
+            };
+          };
+        };
         git-conflict.enable = true;
         gitblame.enable = true;
         gitblame.settings.virtual_text_column = 121;
@@ -357,8 +395,6 @@
                 "man"
                 "neo-tree"
                 "gitcommit"
-                "TelescopePrompt"
-                "TelescopeResults"
                 "''"
               ];
             };
@@ -532,14 +568,9 @@
             disable_hint = true;
             disable_signs = false;
             graph_style = "unicode";
-            integrations = {
-              diffview = true;
-              telescope = true;
-            };
+            integrations = { diffview = true; };
             signs.item = [ "" "" ];
             signs.section = [ "" "" ];
-            telescope_sorter = # lua
-              ''require("telescope").extensions.fzf.native_fzf_sorter'';
           };
         };
         neotest.enable = true;
@@ -600,7 +631,6 @@
         precognition.settings.startVisible = false;
         project-nvim = {
           enable = true;
-          enableTelescope = true;
           settings = {
             manual_mode = true;
             patterns = [
@@ -617,7 +647,6 @@
         };
         rainbow-delimiters.enable = true;
         refactoring.enable = true;
-        refactoring.enableTelescope = true;
         render-markdown.enable = true;
         rustaceanvim.enable = true;
         smart-splits.enable = true;
@@ -660,110 +689,6 @@
           w = "w";
         };
         tagbar.enable = true;
-        telescope = {
-          enable = true;
-          extensions = {
-            file-browser.enable = true;
-            frecency.enable = true;
-            fzf-native.enable = true;
-            live-grep-args.enable = true;
-            live-grep-args.settings = {
-              mappings = {
-                i = {
-                  "<C-i>".__raw = ''
-                    require("telescope-live-grep-args.actions").quote_prompt({ postfix = " --iglob " })'';
-                  "<C-k>".__raw = ''
-                    require("telescope-live-grep-args.actions").quote_prompt()'';
-                  "<C-space>".__raw =
-                    ''require("telescope.actions").to_fuzzy_refine'';
-                };
-              };
-            };
-            ui-select.enable = true;
-            undo.enable = true;
-          };
-          keymaps = {
-            "<leader>'" = {
-              action = "resume";
-              options = { desc = "Resume last search"; };
-            };
-            "<leader>," = {
-              action = "buffers";
-              options = { desc = "Switch buffer"; };
-            };
-            "<leader>." = {
-              action = "find_files cwd=%:p:h";
-              options = { desc = "Find file"; };
-            };
-            "<leader>/" = {
-              action = "live_grep_args";
-              options = { desc = "Search project"; };
-            };
-            "<leader><leader>" = {
-              action = "find_files";
-              options = { desc = "Find file in project"; };
-            };
-            "<leader>bb" = {
-              action = "buffers";
-              options = { desc = "Switch buffer"; };
-            };
-            "<leader>ff" = {
-              action = "find_files cwd=%:p:h";
-              options = { desc = "Find file"; };
-            };
-            "<leader>fr" = {
-              action = "oldfiles";
-              options = { desc = "Recent files"; };
-            };
-            "<leader>hh" = {
-              action = "help_tags";
-              options = { desc = "help"; };
-            };
-            "<leader>hk" = {
-              action = "keymaps";
-              options = { desc = "key-bindings"; };
-            };
-            "<leader>hm" = {
-              action = "man_pages sections=ALL";
-              options = { desc = "man"; };
-            };
-            "<leader>ht" = {
-              action = "colorscheme enable_preview=true";
-              options = { desc = "Change Colorscheme"; };
-            };
-            "<leader>pp" = {
-              action = "projects";
-              options = { desc = "Switch project"; };
-            };
-            "<leader>sb" = {
-              action = "current_buffer_fuzzy_find fuzzy=false";
-              options = { desc = "Search buffer"; };
-            };
-            "<leader>sd" = {
-              action = "live_grep_args cwd=%:p:h";
-              options = { desc = "Search current directory"; };
-            };
-            "<leader>si" = {
-              action = "lsp_document_symbols";
-              options = { desc = "Jump to symbol"; };
-            };
-            "<leader>ss" = {
-              action = "current_buffer_fuzzy_find fuzzy=false";
-              options = { desc = "Search buffer"; };
-            };
-          };
-          settings = {
-            pickers = {
-              buffers = {
-                sort_mru = true;
-                sort_lastused = true;
-                theme = "ivy";
-              };
-              find_files = { theme = "ivy"; };
-              oldfiles = { theme = "ivy"; };
-            };
-          };
-        };
         # tmux-navigator.enable = true;
         todo-comments.enable = true;
 
