@@ -239,6 +239,20 @@
             "<leader>si" = { action = "lsp_document_symbols"; options = { desc = "Jump to symbol"; }; };
             "<leader>ss" = { action = "blines"; options = { desc = "Search buffer"; }; };
           };
+          settings = {
+            oldfiles = { include_current_session = true; };
+            previewers = { builtin = { syntax_limit_b = 1024 * 100; }; };
+            grep = {
+              rg_glob = true;
+              rg_glob_fn.__raw = ''
+                function(query, opts)
+                  local regex, flags = query:match("^(.-)%s%-%-(.*)$")
+                  return (regex or query), flags
+                end
+              '';
+            };
+            keymap = { fzf = { "ctrl-q" = "select-all+accept"; }; };
+          };
         };
         git-conflict.enable = true;
         gitblame.enable = true;
