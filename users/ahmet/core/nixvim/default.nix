@@ -222,6 +222,7 @@
             "<leader>," = { action = "buffers"; options = { desc = "Switch buffer"; }; };
             "<leader>." = { action = "files"; options = { desc = "Find file"; }; settings = { cwd = "%:p:h"; }; };
             "<leader>/" = { action = "live_grep"; options = { desc = "Search project"; }; };
+            "<leader>*" = { action = "live_grep"; options = { desc = "Search for symbol in project"; }; settings = { search.__raw = "vim.fn.expand('<cword>')"; }; };
             "<leader><leader>" = { action = "files"; options = { desc = "Find file in project"; }; };
             "<leader>bb" = { action = "buffers"; options = { desc = "Switch buffer"; }; };
             "<leader>ff" = { action = "files"; options = { desc = "Find file"; }; settings = { cwd = "%:p:h"; }; };
