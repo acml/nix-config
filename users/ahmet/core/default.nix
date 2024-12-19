@@ -68,7 +68,6 @@
     nix-index.enable = true;
     yazi = {
       enable = true;
-      catppuccin.enable = false;
       settings = {
         manager = {
           ratio = [ 1 2 5 ];
@@ -106,7 +105,8 @@
     enable = true;
     flavor = "mocha"; # "latte" "frappe" "macchiato" "mocha"
     accent = "teal"; # "blue" "flamingo" "green" "lavender" "maroon" "mauve" "peach" "pink" "red" "rosewater" "sapphire" "sky" "teal" "yellow"
-    pointerCursor.enable = false;
+    cursors.enable = false;
+    yazi.enable = false;
   };
 
   systemd.user.startServices = "sd-switch";

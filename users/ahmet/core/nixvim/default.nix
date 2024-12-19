@@ -192,53 +192,18 @@
           enable = true;
           settings = {
             keymap = {
-              "<C-b>" = [
-                "scroll_documentation_up"
-                "fallback"
-              ];
-              "<C-e>" = [
-                "hide"
-              ];
-              "<C-f>" = [
-                "scroll_documentation_down"
-                "fallback"
-              ];
-              "<C-n>" = [
-                "select_next"
-                "fallback"
-              ];
-              "<C-p>" = [
-                "select_prev"
-                "fallback"
-              ];
-              "<C-space>" = [
-                "show"
-                "show_documentation"
-                "hide_documentation"
-              ];
-              "<CR>" = [
-                "accept"
-                "fallback"
-              ];
-              "<C-y>" = [
-                "select_and_accept"
-              ];
-              "<Down>" = [
-                "select_next"
-                "fallback"
-              ];
-              "<S-Tab>" = [
-                "select_prev"
-                "fallback"
-              ];
-              "<Tab>" = [
-                "select_next"
-                "fallback"
-              ];
-              "<Up>" = [
-                "select_prev"
-                "fallback"
-              ];
+              "<C-b>" = [ "scroll_documentation_up" "fallback" ];
+              "<C-e>" = [ "hide" ];
+              "<C-f>" = [ "scroll_documentation_down" "fallback" ];
+              "<C-n>" = [ "select_next" "fallback" ];
+              "<C-p>" = [ "select_prev" "fallback" ];
+              "<C-space>" = [ "show" "show_documentation" "hide_documentation" ];
+              "<CR>" = [ "accept" "fallback" ];
+              "<C-y>" = [ "select_and_accept" ];
+              "<Down>" = [ "select_next" "fallback" ];
+              "<S-Tab>" = [ "select_prev" "fallback" ];
+              "<Tab>" = [ "select_next" "fallback" ];
+              "<Up>" = [ "select_prev" "fallback" ];
             };
           };
         };
@@ -253,77 +218,26 @@
         fzf-lua = {
           enable = true;
           keymaps = {
-            "<leader>'" = {
-              action = "resume";
-              options = { desc = "Resume last search"; };
-            };
-            "<leader>," = {
-              action = "buffers";
-              options = { desc = "Switch buffer"; };
-            };
-            "<leader>." = {
-              action = "files";
-              options = { desc = "Find file"; };
-              settings = { cwd = "%:p:h"; };
-            };
-            "<leader>/" = {
-              action = "live_grep";
-              options = { desc = "Search project"; };
-            };
-            "<leader><leader>" = {
-              action = "files";
-              options = { desc = "Find file in project"; };
-            };
-            "<leader>bb" = {
-              action = "buffers";
-              options = { desc = "Switch buffer"; };
-            };
-            "<leader>ff" = {
-              action = "files";
-              options = { desc = "Find file"; };
-              settings = { cwd = "%:p:h"; };
-            };
-            "<leader>fr" = {
-              action = "oldfiles";
-              options = { desc = "Recent files"; };
-            };
-            "<leader>hh" = {
-              action = "help_tags";
-              options = { desc = "help"; };
-            };
-            "<leader>hk" = {
-              action = "keymaps";
-              options = { desc = "key-bindings"; };
-            };
-            "<leader>hm" = {
-              action = "man_pages";
-              options = { desc = "man"; };
-            };
-            "<leader>ht" = {
-              action = "colorschemes";
-              options = { desc = "Change Colorscheme"; };
-            };
+            "<leader>'" = { action = "resume"; options = { desc = "Resume last search"; }; };
+            "<leader>," = { action = "buffers"; options = { desc = "Switch buffer"; }; };
+            "<leader>." = { action = "files"; options = { desc = "Find file"; }; settings = { cwd = "%:p:h"; }; };
+            "<leader>/" = { action = "live_grep"; options = { desc = "Search project"; }; };
+            "<leader><leader>" = { action = "files"; options = { desc = "Find file in project"; }; };
+            "<leader>bb" = { action = "buffers"; options = { desc = "Switch buffer"; }; };
+            "<leader>ff" = { action = "files"; options = { desc = "Find file"; }; settings = { cwd = "%:p:h"; }; };
+            "<leader>fr" = { action = "oldfiles"; options = { desc = "Recent files"; }; };
+            "<leader>hh" = { action = "help_tags"; options = { desc = "help"; }; };
+            "<leader>hk" = { action = "keymaps"; options = { desc = "key-bindings"; }; };
+            "<leader>hm" = { action = "man_pages"; options = { desc = "man"; }; };
+            "<leader>ht" = { action = "colorschemes"; options = { desc = "Change Colorscheme"; }; };
             # "<leader>pp" = {
             #   action = "projects";
             #   options = { desc = "Switch project"; };
             # };
-            "<leader>sb" = {
-              action = "blines";
-              options = { desc = "Search buffer"; };
-            };
-            "<leader>sd" = {
-              action = "live_grep_args";
-              options = { desc = "Search current directory"; };
-              settings = { cwd = "%:p:h"; };
-            };
-            "<leader>si" = {
-              action = "lsp_document_symbols";
-              options = { desc = "Jump to symbol"; };
-            };
-            "<leader>ss" = {
-              action = "blines";
-              options = { desc = "Search buffer"; };
-            };
+            "<leader>sb" = { action = "blines"; options = { desc = "Search buffer"; }; };
+            "<leader>sd" = { action = "live_grep_args"; options = { desc = "Search current directory"; }; settings = { cwd = "%:p:h"; }; };
+            "<leader>si" = { action = "lsp_document_symbols"; options = { desc = "Jump to symbol"; }; };
+            "<leader>ss" = { action = "blines"; options = { desc = "Search buffer"; }; };
           };
         };
         git-conflict.enable = true;
@@ -387,16 +301,7 @@
           settings = {
             exclude = {
               buftypes = [ "terminal" "nofile" "quickfix" "prompt" ];
-              filetypes = [
-                "lspinfo"
-                "packer"
-                "checkhealth"
-                "help"
-                "man"
-                "neo-tree"
-                "gitcommit"
-                "''"
-              ];
+              filetypes = [ "lspinfo" "packer" "checkhealth" "help" "man" "neo-tree" "gitcommit" "''" ];
             };
             indent = { char = "▏"; };
             scope = {
@@ -717,45 +622,15 @@
         which-key = {
           enable = true;
           settings.spec = [
-            {
-              __unkeyed-1 = "<leader>b";
-              desc = "+buffer";
-            }
-            {
-              __unkeyed-1 = "<leader>c";
-              desc = "+code";
-            }
-            {
-              __unkeyed-1 = "<leader>f";
-              desc = "+file";
-            }
-            {
-              __unkeyed-1 = "<leader>g";
-              desc = "+git";
-            }
-            {
-              __unkeyed-1 = "<leader>h";
-              desc = "+help";
-              icon = "󰋖";
-            }
-            {
-              __unkeyed-1 = "<leader>o";
-              desc = "+open";
-              icon = "󰌧";
-            }
-            {
-              __unkeyed-1 = "<leader>p";
-              desc = "+project";
-              icon = "";
-            }
-            {
-              __unkeyed-1 = "<leader>s";
-              desc = "+search";
-            }
-            {
-              __unkeyed-1 = "<leader>x";
-              desc = "+diagnostics";
-            }
+            { __unkeyed-1 = "<leader>b"; desc = "+buffer"; }
+            { __unkeyed-1 = "<leader>c"; desc = "+code"; }
+            { __unkeyed-1 = "<leader>f"; desc = "+file"; }
+            { __unkeyed-1 = "<leader>g"; desc = "+git"; }
+            { __unkeyed-1 = "<leader>h"; desc = "+help"; icon = "󰋖"; }
+            { __unkeyed-1 = "<leader>o"; desc = "+open"; icon = "󰌧"; }
+            { __unkeyed-1 = "<leader>p"; desc = "+project"; icon = ""; }
+            { __unkeyed-1 = "<leader>s"; desc = "+search"; }
+            { __unkeyed-1 = "<leader>x"; desc = "+diagnostics"; }
           ];
         };
         wtf.enable = true;
