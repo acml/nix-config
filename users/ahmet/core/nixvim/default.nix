@@ -236,9 +236,10 @@
             #   options = { desc = "Switch project"; };
             # };
             "<leader>sb" = { action = "blines"; options = { desc = "Search buffer"; }; };
-            "<leader>sd" = { action = "live_grep_args"; options = { desc = "Search current directory"; }; settings = { cwd = "%:p:h"; }; };
+            "<leader>sd" = { action = "live_grep"; options = { desc = "Search current directory"; }; settings = { cwd = "%:p:h"; }; };
             "<leader>si" = { action = "lsp_document_symbols"; options = { desc = "Jump to symbol"; }; };
-            "<leader>ss" = { action = "blines"; options = { desc = "Search buffer"; }; };
+            "<leader>ss" = { action = "lgrep_curbuf"; options = { desc = "Search buffer"; }; };
+            "<leader>sS" = { action = "lgrep_curbuf"; options = { desc = "Search buffer for thing at point"; }; settings = { search.__raw = "vim.fn.expand('<cword>')"; }; };
           };
           settings = {
             oldfiles = { include_current_session = true; };
