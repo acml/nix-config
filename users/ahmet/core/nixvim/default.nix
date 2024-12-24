@@ -173,7 +173,7 @@
           xsel
         ];
 
-      extraPlugins = with pkgs.vimPlugins; [ go-nvim nvim-biscuits ];
+      extraPlugins = with pkgs.vimPlugins; [ vim-plugin-AnsiEsc go-nvim nvim-biscuits ];
 
       globals.mapleader = " ";
 
