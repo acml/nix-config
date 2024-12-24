@@ -98,15 +98,15 @@
       btop.enable = lib.mkDefault false;
       emacs.enable = lib.mkDefault false;
       kitty.enable = lib.mkDefault false;
+      yazi.enable = lib.mkDefault false;
     };
   };
 
   catppuccin = {
     enable = true;
     flavor = "mocha"; # "latte" "frappe" "macchiato" "mocha"
-    accent = "teal"; # "blue" "flamingo" "green" "lavender" "maroon" "mauve" "peach" "pink" "red" "rosewater" "sapphire" "sky" "teal" "yellow"
+    # accent = "rosewater"; # "blue" "flamingo" "green" "lavender" "maroon" "mauve" "peach" "pink" "red" "rosewater" "sapphire" "sky" "teal" "yellow"
     cursors.enable = false;
-    yazi.enable = false;
   };
 
   systemd.user.startServices = "sd-switch";
