@@ -537,6 +537,7 @@
           };
         };
         notify.enable = true;
+        notify.backgroundColour = "#000000";
         nvim-bqf.enable = true;
         nvim-ufo.enable = true;
         nvim-surround.enable = true;
