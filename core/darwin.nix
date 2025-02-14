@@ -6,6 +6,8 @@
     stylix.darwinModules.stylix
   ];
 
+  ids.gids.nixbld = 350;
+
   environment = {
     shells = with pkgs; [ fish zsh ];
     systemPackages = with pkgs; [
@@ -45,7 +47,7 @@
 
   services = {
     nix-daemon = {
-      enable = true;
+      # enable = true;
       logFile = "/var/log/nix-daemon.log";
     };
     tailscale.enable = true;
