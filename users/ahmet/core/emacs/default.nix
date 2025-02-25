@@ -94,11 +94,11 @@ lib.mkMerge [
           # :tools lookup & :lang org +roam
           sqlite
           wordnet
-          (lib.mkIf isLinux maim) # org-download-clipboard
+          # (lib.mkIf isLinux maim) # org-download-clipboard
           gnuplot # org-plot/gnuplot
           graphviz # org-roam-graph
           # :lang latex & :lang org (latex previews)
-          tectonic
+          # tectonic
 
           # :lang cc
           # ccls
