@@ -475,6 +475,8 @@ the sequences will be lost."
             (:help-echo "Local changes not in upstream")))
           ("Path" 0 magit-repolist-column-path nil))))
 
+;; (setopt magit-format-file-function #'magit-format-file-nerd-icons)
+
 (setq magit-repository-directories '(("~/.nix-config" . 0)
                                      ("~/.nixpkgs" . 0)
                                      ;; ("~/git_pa" . 4)
