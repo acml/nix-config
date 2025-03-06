@@ -76,8 +76,14 @@
     };
     zoxide = {
       enable = true;
+      enableBashIntegration = false;
       options = [ "--cmd cd" ];
     };
+    bash.initExtra =
+      lib.mkOrder 2000 # sh
+        ''
+          eval "$(${lib.getExe pkgs.zoxide} init bash --cmd cd)"
+        '';
   };
 
   stylix = {
