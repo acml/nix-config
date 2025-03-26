@@ -151,7 +151,8 @@
   services.skhd = {
     enable = true;
     skhdConfig = ''
-      cmd - return : open --new -a ghostty.app
+      cmd - return : open -a kitty.app -n
+      # cmd - return : open --new -a ghostty.app
       cmd + alt - return : emacsclient --alternate-editor="" --create-frame
     '';
   };

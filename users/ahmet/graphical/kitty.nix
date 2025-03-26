@@ -1,4 +1,9 @@
-{ lib, hostType, ... }:
+{
+  lib,
+  hostType,
+  pkgs,
+  ...
+}:
 {
   xdg = {
     configFile."kitty/relative_resize.py" = {
@@ -85,22 +90,28 @@
       name = "Iosevka Comfy";
       size = 15.0;
     };
-    settings = {
-      scrollback_lines = 5000;
-      scrollback_pager_history_size = 32768;
-      strip_trailing_spaces = "smart";
-      repaint_delay = 16; # ~60Hz
-      enable_audio_bell = false;
-      update_check_interval = 0;
-      allow_remote_control = true;
-    } // (lib.optionalAttrs (hostType == "darwin")) {
-      listen_on = "unix:/tmp/mykitty";
-      macos_show_window_title_in = "window";
-      macos_colorspace = "default";
-    } // (lib.optionalAttrs (hostType == "linux")) {
-      listen_on = "unix:@mykitty";
-    };
+    settings =
+      {
+        scrollback_lines = 5000;
+        scrollback_pager_history_size = 32768;
+        strip_trailing_spaces = "smart";
+        repaint_delay = 16; # ~60Hz
+        enable_audio_bell = false;
+        update_check_interval = 0;
+        allow_remote_control = true;
+      }
+      // (lib.optionalAttrs (hostType == "darwin")) {
+        listen_on = "unix:/tmp/mykitty";
+        macos_show_window_title_in = "window";
+        macos_colorspace = "default";
+      }
+      // (lib.optionalAttrs (hostType == "linux")) {
+        listen_on = "unix:@mykitty";
+      };
 
-    darwinLaunchOptions = [ "--single-instance" "--directory=~" ];
+    darwinLaunchOptions = [
+      "--single-instance"
+      "--directory=~"
+    ];
   };
 }

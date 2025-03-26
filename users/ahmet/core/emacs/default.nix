@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   inherit (pkgs.stdenv.hostPlatform) isDarwin isLinux;
 
@@ -9,28 +14,27 @@ let
   ALTERNATE_EDITOR = "emacs";
   myEmacs = lib.mkMerge [
     (lib.mkIf isLinux pkgs.emacs30)
-    (lib.mkIf isDarwin (pkgs.emacs30-pgtk.overrideAttrs (old: {
-      patches = (old.patches or [ ]) ++ [
-        # Fix OS window role (needed for window managers like yabai)
-        (pkgs.fetchpatch {
-          url =
-            "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-28/fix-window-role.patch";
-          sha256 = "sha256-+z/KfsBm1lvZTZNiMbxzXQGRTjkCFO4QPlEK35upjsE=";
-        })
-        # Enable rounded window with no decoration
-        (pkgs.fetchpatch {
-          url =
-            "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-30/round-undecorated-frame.patch";
-          sha256 = "sha256-uYIxNTyfbprx5mCqMNFVrBcLeo+8e21qmBE3lpcnd+4=";
-        })
-        # Make Emacs aware of OS-level light/dark mode
-        (pkgs.fetchpatch {
-          url =
-            "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-30/system-appearance.patch";
-          sha256 = "sha256-3QLq91AQ6E921/W9nfDjdOUWR8YVsqBAT/W9c1woqAw=";
-        })
-      ];
-    })))
+    (lib.mkIf isDarwin (
+      pkgs.emacs30-pgtk.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [
+          # Fix OS window role (needed for window managers like yabai)
+          (pkgs.fetchpatch {
+            url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-28/fix-window-role.patch";
+            sha256 = "sha256-+z/KfsBm1lvZTZNiMbxzXQGRTjkCFO4QPlEK35upjsE=";
+          })
+          # Enable rounded window with no decoration
+          (pkgs.fetchpatch {
+            url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-30/round-undecorated-frame.patch";
+            sha256 = "sha256-uYIxNTyfbprx5mCqMNFVrBcLeo+8e21qmBE3lpcnd+4=";
+          })
+          # Make Emacs aware of OS-level light/dark mode
+          (pkgs.fetchpatch {
+            url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-30/system-appearance.patch";
+            sha256 = "sha256-3QLq91AQ6E921/W9nfDjdOUWR8YVsqBAT/W9c1woqAw=";
+          })
+        ];
+      })
+    ))
   ];
 in
 lib.mkMerge [
@@ -46,7 +50,8 @@ lib.mkMerge [
         '';
       };
 
-      packages = with pkgs;
+      packages =
+        with pkgs;
         [
           # fonts
           emacs-all-the-icons-fonts
@@ -82,8 +87,14 @@ lib.mkMerge [
           ## Module dependencies
 
           # :checkers spell
-          (aspellWithDicts
-            (dicts: with dicts; [ en en-computers en-science tr ]))
+          (aspellWithDicts (
+            dicts: with dicts; [
+              en
+              en-computers
+              en-science
+              tr
+            ]
+          ))
 
           # :checkers grammar
           languagetool
@@ -175,7 +186,8 @@ lib.mkMerge [
           poppler_utils
 
           trash-cli
-        ] ++ lib.optionals stdenv.hostPlatform.isLinux [
+        ]
+        ++ lib.optionals stdenv.hostPlatform.isLinux [
           man-pages
           man-pages-posix
 
@@ -188,16 +200,22 @@ lib.mkMerge [
 
       sessionPath = [ "${EMACSDIR}/bin" ];
       sessionVariables = {
-        inherit DOOMDIR DOOMLOCALDIR
+        inherit
+          DOOMDIR
+          DOOMLOCALDIR
           # EDITOR
-          ALTERNATE_EDITOR;
+          ALTERNATE_EDITOR
+          ;
       };
     };
 
     systemd.user.sessionVariables = lib.mkIf isLinux {
-      inherit DOOMDIR DOOMLOCALDIR
+      inherit
+        DOOMDIR
+        DOOMLOCALDIR
         # EDITOR
-        ALTERNATE_EDITOR;
+        ALTERNATE_EDITOR
+        ;
     };
 
     xdg = {
@@ -217,7 +235,8 @@ lib.mkMerge [
       emacs = {
         enable = true;
         package = myEmacs;
-        extraPackages = epkgs:
+        extraPackages =
+          epkgs:
           (with epkgs; [
             djvu
             emacsql

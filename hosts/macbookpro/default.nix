@@ -13,12 +13,14 @@
   #  { name = "docker"; greedy = true; }
   #];
 
-  home-manager.users.ahmet = { config, ... }: {
-    home.sessionPath = [
-      "${config.home.homeDirectory}/.toolbox/bin"
-      "${config.home.homeDirectory}/.local/bin"
-    ];
-  };
+  home-manager.users.ahmet =
+    { config, ... }:
+    {
+      home.sessionPath = [
+        "${config.home.homeDirectory}/.toolbox/bin"
+        "${config.home.homeDirectory}/.local/bin"
+      ];
+    };
 
   nix = {
     gc.automatic = true;
@@ -33,4 +35,6 @@
     uid = 501;
     gid = 20;
   };
+
+  ids.gids.nixbld = 350;
 }

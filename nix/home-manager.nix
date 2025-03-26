@@ -15,10 +15,14 @@ let
       };
 
       home = {
+        packages = [
+          pkgs.wslu
+        ];
         inherit homeDirectory;
         sessionVariables.NIX_PATH = lib.concatStringsSep ":" [
           "nixpkgs=${config.xdg.dataHome}/nixpkgs"
         ];
+        sessionVariables.BROWSER = "wslview";
       };
 
       programs.fish.plugins = [
