@@ -4,6 +4,8 @@
   hostType,
   impermanence,
   nix-index-database,
+  nixvim,
+  catppuccin,
   stylix,
   ...
 }:
@@ -51,8 +53,9 @@
         hostType
         impermanence
         nix-index-database
-        stylix
-        ;
+        nixvim
+        catppuccin
+        stylix;
     };
   };
 
@@ -64,7 +67,7 @@
 
   stylix = {
     enable = true;
-    base16Scheme = "${tinted-schemes}/base16/ayu-dark.yaml";
+    base16Scheme = "${tinted-schemes}/base16/catppuccin-mocha.yaml";
     # We need this otherwise the autoimport clashes with our manual import.
     homeManagerIntegration.autoImport = false;
     # XXX: We fetchurl from the repo because flakes don't support git-lfs assets

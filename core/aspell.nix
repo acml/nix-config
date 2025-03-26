@@ -6,7 +6,7 @@
         en
         en-computers
         en-science
-        pt_BR
+        tr
       ]
     ))
   ];

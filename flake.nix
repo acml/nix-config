@@ -1,5 +1,5 @@
 {
-  description = "lovesegfault's NixOS config";
+  description = "acml's NixOS config";
 
   nixConfig = {
     extra-trusted-substituters = [
@@ -102,6 +102,19 @@
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    nixvim = {
+      # If you are not running an unstable channel of nixpkgs, select the corresponding branch of nixvim.
+      # url = "github:nix-community/nixvim/nixos-23.05";
+      url = "github:nix-community/nixvim";
+      # inputs = {
+      #   nixpkgs.follows = "nixpkgs";
+      #   devshell.follows = "";
+      #   git-hooks.follows = "";
+      #   treefmt-nix.follows = "";
+      # };
+    };
+    catppuccin.url = "github:catppuccin/nix";
+
     git-hooks = {
       url = "github:cachix/git-hooks.nix";
       inputs = {
@@ -156,6 +169,7 @@
         ];
         systems = [
           "aarch64-darwin"
+          "x86_64-darwin"
           "aarch64-linux"
           "x86_64-linux"
         ];

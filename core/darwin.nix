@@ -3,6 +3,7 @@
   lib,
   nix-index-database,
   pkgs,
+  nixvim,
   stylix,
   ...
 }:
@@ -10,6 +11,7 @@
   imports = [
     home-manager.darwinModules.home-manager
     nix-index-database.darwinModules.nix-index
+    nixvim.nixDarwinModules.nixvim
     stylix.darwinModules.stylix
   ];
 
@@ -36,6 +38,7 @@
     ];
     variables = {
       SHELL = lib.getExe pkgs.zsh;
+      EDITOR = "nvim";
     };
     extraSetup = ''
       ln -sv ${pkgs.path} $out/nixpkgs
@@ -43,7 +46,7 @@
   };
 
   homebrew = {
-    enable = true;
+    enable = false;
     onActivation = {
       cleanup = "zap";
       autoUpdate = true;

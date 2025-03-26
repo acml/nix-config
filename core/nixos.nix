@@ -8,6 +8,8 @@
   impermanence,
   lanzaboote,
   nix-index-database,
+  nixvim,
+  catppuccin,
   stylix,
   ...
 }:
@@ -19,6 +21,8 @@
     impermanence.nixosModules.impermanence
     lanzaboote.nixosModules.lanzaboote
     nix-index-database.nixosModules.nix-index
+    nixvim.nixosModules.nixvim
+    catppuccin.nixosModules.catppuccin
     stylix.nixosModules.stylix
     ./resolved.nix
     ./tmux.nix

@@ -43,7 +43,7 @@ let
       map (host: {
         name = "hosts/${host}/${secretName}.age";
         value.publicKeys = [
-          bemeurer
+          ahmet
           hosts.${host}
         ];
       }) (attrNames hosts)

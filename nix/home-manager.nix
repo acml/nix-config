@@ -58,6 +58,8 @@ let
             tinted-schemes
             impermanence
             nix-index-database
+            nixvim
+            catppuccin
             stylix
             ;
         };

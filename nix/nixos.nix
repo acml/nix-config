@@ -36,6 +36,8 @@ let
             lanzaboote
             nix-index-database
             nixos-hardware
+            nixvim
+            catppuccin
             stylix
             ;
         };

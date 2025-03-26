@@ -146,37 +146,43 @@
     };
   };
 
-  security.pam.services.sudo_local.touchIdAuth = true;
+  #security.pam.enableSudoTouchIdAuth = true;
 
   services.skhd = {
     enable = true;
     skhdConfig = ''
       cmd - return : open --new -a ghostty.app
+      cmd + alt - return : emacsclient --alternate-editor="" --create-frame
     '';
   };
 
   system = {
     defaults = {
-      NSGlobalDomain = {
-        AppleInterfaceStyle = "Dark";
-        AppleTemperatureUnit = "Celsius";
-        InitialKeyRepeat = 25;
-        KeyRepeat = 2;
-        NSAutomaticSpellingCorrectionEnabled = false;
-      };
-      finder.QuitMenuItem = true;
-      dock = {
-        autohide = true;
-        autohide-delay = 0.0;
-        autohide-time-modifier = 0.0;
-        mineffect = "scale";
-        orientation = "left";
-        show-recents = false;
+      # NSGlobalDomain = {
+      #   AppleInterfaceStyle = "Dark";
+      #   AppleTemperatureUnit = "Celsius";
+      #   InitialKeyRepeat = 25;
+      #   KeyRepeat = 2;
+      #   NSAutomaticSpellingCorrectionEnabled = false;
+      # };
+      # finder.QuitMenuItem = true;
+      # dock = {
+      #   autohide = true;
+      #   autohide-delay = 0.0;
+      #   autohide-time-modifier = 0.0;
+      #   mineffect = "scale";
+      #   orientation = "left";
+      #   show-recents = false;
+      # };
+      trackpad = {
+        Clicking = true;
+        Dragging = true;
+        TrackpadRightClick = true;
       };
     };
     keyboard = {
       enableKeyMapping = true;
-      remapCapsLockToEscape = true;
+      remapCapsLockToControl = true;
     };
   };
 }
