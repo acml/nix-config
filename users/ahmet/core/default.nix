@@ -15,7 +15,7 @@
     impermanence.nixosModules.home-manager.impermanence
     nix-index-database.hmModules.nix-index
     nixvim.homeManagerModules.nixvim
-    catppuccin.homeManagerModules.catppuccin
+    catppuccin.homeModules.catppuccin
     stylix.homeManagerModules.stylix
 
     ./bash.nix
@@ -88,7 +88,11 @@
       enable = true;
       settings = {
         manager = {
-          ratio = [ 1 2 5 ];
+          ratio = [
+            1
+            2
+            5
+          ];
         };
       };
     };
