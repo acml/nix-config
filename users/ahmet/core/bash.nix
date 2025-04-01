@@ -20,9 +20,6 @@
       # if command -v tmux &> /dev/null && [[ $- == *i* ]] && [[ ! "$TERM" =~ xterm-kitty ]] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$INSIDE_EMACS" ] && [ -z "$MYVIMRC" ] && [ -z "$VIMRUNTIME" ] && [ -z "$TMUX" ]; then
       #   exec tmux new-session -A -s main >/dev/null 2>&1
       # fi
-      if command -v zellij &> /dev/null && [[ $- == *i* ]] && [[ ! "$TERM" =~ xterm-kitty ]] && [ -z "$ZELLIJ" ] && [ -z "$INSIDE_EMACS" ] && [ -z "$MYVIMRC" ] && [ -z "$VIMRUNTIME" ] && [ -z "$TMUX" ]; then
-        eval "$(zellij setup --generate-auto-start bash)"
-      fi
     '';
     profileExtra = ''
       # Temporary fix for WSLg keyboard layout (only change the first line)

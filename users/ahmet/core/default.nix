@@ -98,11 +98,9 @@
     };
     zellij = {
       enable = true;
-      exitShellOnExit = true;
-      enableBashIntegration = true;
-      attachExistingSession = true;
       settings = {
         pane_frames = false;
+        show_startup_tips = false;
       };
     };
     zoxide = {
