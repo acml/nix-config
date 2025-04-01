@@ -28,7 +28,7 @@
     # ./neovim.nix
     ./ssh.nix
     ./starship.nix
-    ./tmux.nix
+    # ./tmux.nix
     ./xdg.nix
     ./zsh.nix
   ];
@@ -94,6 +94,15 @@
             5
           ];
         };
+      };
+    };
+    zellij = {
+      enable = true;
+      exitShellOnExit = true;
+      enableBashIntegration = true;
+      attachExistingSession = true;
+      settings = {
+        pane_frames = false;
       };
     };
     zoxide = {
