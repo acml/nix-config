@@ -74,7 +74,7 @@
 (package! visual-fill-column) ; dependency of nov
 (package! obvious :recipe (:host github :repo "alphapapa/obvious.el"))
 
-(package! org-modern)
+;; (package! org-modern)
 
 ;; Maybe the pdf-tools package is also installed outside of nix, and this is
 ;; conflicting. list-load-path-shadows will show you if you have a package
