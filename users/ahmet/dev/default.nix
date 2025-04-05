@@ -12,6 +12,7 @@
       '';
     };
     packages = with pkgs; [
+      devenv
       git-lfs
       (lib.hiPrio nixpkgs-review)
       nix-update
