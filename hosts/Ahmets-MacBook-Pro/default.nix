@@ -23,7 +23,8 @@
     };
 
   nix = {
-    gc.automatic = true;
+    enable = false;
+    gc.automatic = false;
     # linux-builder.enable = true;
     settings = {
       #  system-features = [ "big-parallel" "gccarch-armv8-a" ];

@@ -109,7 +109,7 @@ in
     hostPlatform = "x86_64-linux";
     homeDirectory = "/home/ahmet";
   };
-  macbookpro = {
+  Ahmets-MacBook-Pro = {
     type = "darwin";
     hostPlatform = "x86_64-darwin";
     pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINz7ynCac4XKZs/5zHPnKC7+dSvaXwqs8NbPQAkJwlZb";

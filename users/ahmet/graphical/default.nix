@@ -36,7 +36,7 @@
   programs = {
     alacritty.enable = true;
     ghostty = {
-      enable = true;
+      enable = false;
       enableBashIntegration = true;
       enableFishIntegration = true;
       enableZshIntegration = true;
