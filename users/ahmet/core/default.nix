@@ -45,7 +45,6 @@
         eza
         fd
         fzf
-        kalker
         neofetch
         nix-closure-size
         nix-output-monitor
