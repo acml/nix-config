@@ -135,6 +135,7 @@
     flavor = "mocha"; # "latte" "frappe" "macchiato" "mocha"
     # accent = "rosewater"; # "blue" "flamingo" "green" "lavender" "maroon" "mauve" "peach" "pink" "red" "rosewater" "sapphire" "sky" "teal" "yellow"
     cursors.enable = false;
+    mako.enable = false;
   };
 
   systemd.user.startServices = "sd-switch";
