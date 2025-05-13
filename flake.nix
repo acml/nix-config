@@ -15,8 +15,6 @@
   };
 
   inputs = {
-    # self.lfs = true;
-
     agenix = {
       url = "github:ryantm/agenix";
       inputs = {
@@ -26,8 +24,6 @@
         systems.follows = "systems";
       };
     };
-
-    base16.url = "github:SenchoPens/base16.nix";
 
     tinted-schemes = {
       url = "github:tinted-theming/schemes";
@@ -128,7 +124,6 @@
     stylix = {
       url = "github:danth/stylix";
       inputs = {
-        base16.follows = "base16";
         flake-compat.follows = "flake-compat";
         flake-utils.follows = "flake-utils";
         home-manager.follows = "home-manager";
