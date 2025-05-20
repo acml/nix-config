@@ -16,7 +16,7 @@
     nix-index-database.hmModules.nix-index
     nixvim.homeManagerModules.nixvim
     catppuccin.homeModules.catppuccin
-    stylix.homeManagerModules.stylix
+    stylix.homeModules.stylix
 
     ./bash.nix
     ./btop.nix
