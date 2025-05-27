@@ -33,6 +33,7 @@
           "${config.home.homeDirectory}/.local/bin"
         ];
       };
+      services.ollama.enable = true;
     };
 
   nix = {
@@ -70,6 +71,8 @@
     uid = 503;
     gid = 20;
   };
+
+  system.primaryUser = "bemeurer";
 
   ids.gids.nixbld = 350;
 }

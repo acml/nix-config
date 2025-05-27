@@ -41,6 +41,10 @@
         greedy = true;
       }
       {
+        name = "claude";
+        greedy = true;
+      }
+      {
         name = "daisydisk";
         greedy = true;
       }
@@ -134,7 +138,6 @@
       }
     ];
     masApps = {
-      "Kaleidoscope" = 1575557335;
       "Keynote" = 409183694;
       "Noizio" = 928871589;
       "Numbers" = 409203825;
