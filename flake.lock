@@ -677,11 +677,25 @@
     },
     "nixpkgs": {
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1744463964,
         "narHash": "sha256-LWqduOgLHCFxiTNYi3Uj5Lgz0SR+Xhw3kr/3Xd0GPTM=",
+||||||| parent of a39706f2 (chore(flake/nixpkgs): 910796ca -> 3e3afe51)
+        "lastModified": 1748693115,
+        "narHash": "sha256-StSrWhklmDuXT93yc3GrTlb0cKSS0agTAxMGjLKAsY8=",
+=======
+        "lastModified": 1749285348,
+        "narHash": "sha256-frdhQvPbmDYaScPFiCnfdh3B/Vh81Uuoo0w5TkWmmjU=",
+>>>>>>> a39706f2 (chore(flake/nixpkgs): 910796ca -> 3e3afe51)
         "owner": "NixOS",
         "repo": "nixpkgs",
+<<<<<<< HEAD
         "rev": "2631b0b7abcea6e640ce31cd78ea58910d31e650",
+||||||| parent of a39706f2 (chore(flake/nixpkgs): 910796ca -> 3e3afe51)
+        "rev": "910796cabe436259a29a72e8d3f5e180fc6dfacc",
+=======
+        "rev": "3e3afe5174c561dee0df6f2c2b2236990146329f",
+>>>>>>> a39706f2 (chore(flake/nixpkgs): 910796ca -> 3e3afe51)
         "type": "github"
       },
       "original": {
