@@ -201,6 +201,8 @@
       # };
 
       plugins = {
+        ansiesc.enable = true;
+        ansiesc.autoLoad = true;
         blink-cmp = {
           enable = true;
           settings = {
