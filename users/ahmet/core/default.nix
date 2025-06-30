@@ -86,7 +86,7 @@
     yazi = {
       enable = true;
       settings = {
-        manager = {
+        mgr = {
           ratio = [
             1
             2
