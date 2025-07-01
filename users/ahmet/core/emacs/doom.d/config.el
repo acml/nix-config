@@ -876,5 +876,9 @@ you're done. This can be called from an external shell script."
           (setq doom-fallback-buffer-name "*scratch*")
           (add-hook 'delete-frame-functions #'cleanup-scratch-frame))))))
 
-;; different configs on different computers
-(load (concat doom-user-dir (system-name) ".el") t)
+;; Load a file with the same name as the computer’s name. Just keep on going if
+;; the requisite file isn't there.
+(load (concat doom-user-dir (car (split-string (system-name) "\\."))) t)
+
+;; Load a file with the name of the OS type ("gnu/linux" → "linux")
+(load (concat doom-user-dir (car (reverse (split-string (symbol-name system-type) "/")))) t)
