@@ -240,6 +240,22 @@ lib.mkMerge [
           (with epkgs; [
             djvu
             emacsql
+            # (melpaBuild {
+            #   ename = "reader";
+            #   pname = "emacs-reader";
+            #   version = "20250630";
+            #   src = pkgs.fetchFromGitea {
+            #     domain = "codeberg.org";
+            #     owner = "divyaranjan";
+            #     repo = "emacs-reader";
+            #     rev = "9d62d26fe4ae63e5cecf57bc399b20f7feefb620"; # replace with 'version' for stable
+            #     hash = "sha256-hkRa52PYfBG090jior3GPOeZyftwmpr2Q7jPKFHsR88=";
+            #   };
+            #   files = ''(:defaults "render-core.so")'';
+            #   nativeBuildInputs = with pkgs; [ pkg-config ];
+            #   buildInputs = with pkgs; [ gcc mupdf gnumake pkg-config ];
+            #   preBuild = "make clean all";
+            # })
             pdf-tools
             treesit-grammars.with-all-grammars
             vterm
