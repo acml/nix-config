@@ -491,6 +491,10 @@ the sequences will be lost."
   :after magit
   :config (magit-todos-mode 1))
 
+(map! :leader
+      (:prefix ("p" . "project")
+       :desc "List project todos" "t" #'magit-todos-list))
+
 (defvar elken/mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
   "Only use `mixed-pitch-mode' for given modes.")
 
