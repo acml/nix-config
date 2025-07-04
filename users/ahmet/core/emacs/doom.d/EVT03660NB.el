@@ -26,10 +26,11 @@
     "Check if a project contains cm12425 files.
 When DIR is specified it checks DIR's project, otherwise
 it acts on the current project."
-    (and (projectile-verify-files '("cp1200" "le_nbg2") dir)
+    (and (projectile-verify-files '("le_nbg2") dir)
          (not (projectile-verify-file "tools" dir))))
 
   (projectile-register-project-type 'cm12425 #'acml/projectile-cm12425-project-p
+                                    :project-file "cp1200"
                                     :compilation-dir "cp1200/cp1242-5/make"
                                     :compile "build_cp_1242-5.bat")
 
@@ -37,14 +38,16 @@ it acts on the current project."
     "Check if a project contains cm12435 files.
 When DIR is specified it checks DIR's project, otherwise
 it acts on the current project."
-    (and (projectile-verify-files '("audis_tools" "cp1200" "le_nbg" "le_nbg2" "tools") dir)
+    (and (projectile-verify-files '("audis_tools" "le_nbg" "le_nbg2" "tools") dir)
          (not (projectile-verify-file "cp1500" dir))))
 
   (projectile-register-project-type 'cm12435 #'acml/projectile-cm12435-project-p
+                                    :project-file "cp1200"
                                     :compilation-dir "cp1200/cp1243-5/csd"
                                     :compile "make -j$(nproc) -s all_targets 2>&1")
 
-  (projectile-register-project-type 'cp1200 '("audis_linux" "audis_tools" "audis_utils" "cp1200" "cp1500" "le_nbg2")
+  (projectile-register-project-type 'cp1200 '("audis_linux" "audis_tools" "audis_utils" "cp1500" "le_nbg2")
+                                    :project-file "cp1200"
                                     :compilation-dir "cp1200/cp1243-1/csd"
                                     :compile "script --quiet --return --log-out build-$(date -Iseconds).log --command \"make -j$(nproc) -s all_targets 2>&1\"")
 
