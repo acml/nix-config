@@ -277,6 +277,10 @@
                         (+ emacs-everywhere-window-y
                            (/ emacs-everywhere-window-height 2)))))
 
+(setq prefix-help-command #'embark-prefix-help-command)
+(after! vertico-multiform
+  (add-to-list 'vertico-multiform-categories '(embark-keybinding grid)))
+
 (use-package! exercism :commands (exercism)
               :config
               (map! (:leader :desc "Exercism" :n "oe" #'exercism))
