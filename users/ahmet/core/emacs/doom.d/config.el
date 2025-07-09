@@ -884,6 +884,10 @@ you're done. This can be called from an external shell script."
           (setq doom-fallback-buffer-name "*scratch*")
           (add-hook 'delete-frame-functions #'cleanup-scratch-frame))))))
 
+(require 'reader-autoloads)
+(require 'reader)
+(evil-set-initial-state 'reader-mode 'emacs)
+
 ;; Load a file with the same name as the computer’s name. Just keep on going if
 ;; the requisite file isn't there.
 (load (concat doom-user-dir (car (split-string (system-name) "\\."))) t)
