@@ -99,6 +99,7 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     nixvim = {
       # If you are not running an unstable channel of nixpkgs, select the corresponding branch of nixvim.

@@ -240,22 +240,27 @@ lib.mkMerge [
           (with epkgs; [
             djvu
             emacsql
-            # (melpaBuild {
-            #   ename = "reader";
-            #   pname = "emacs-reader";
-            #   version = "20250630";
-            #   src = pkgs.fetchFromGitea {
-            #     domain = "codeberg.org";
-            #     owner = "divyaranjan";
-            #     repo = "emacs-reader";
-            #     rev = "9d62d26fe4ae63e5cecf57bc399b20f7feefb620"; # replace with 'version' for stable
-            #     hash = "sha256-hkRa52PYfBG090jior3GPOeZyftwmpr2Q7jPKFHsR88=";
-            #   };
-            #   files = ''(:defaults "render-core.so")'';
-            #   nativeBuildInputs = with pkgs; [ pkg-config ];
-            #   buildInputs = with pkgs; [ gcc mupdf gnumake pkg-config ];
-            #   preBuild = "make clean all";
-            # })
+            (melpaBuild {
+              ename = "reader";
+              pname = "emacs-reader";
+              version = "20250708";
+              src = pkgs.fetchFromGitea {
+                domain = "codeberg.org";
+                owner = "divyaranjan";
+                repo = "emacs-reader";
+                rev = "f8569f1d8c2f77df54c49faee3dea6dd65f712e9"; # replace with 'version' for stable
+                hash = "sha256-w1uI1NVT6deMzt6zz+8E8TMq1sDXtGxPocEG6Mwf6/M=";
+              };
+              files = ''(:defaults "render-core.so")'';
+              nativeBuildInputs = with pkgs; [ pkg-config ];
+              buildInputs = [
+                pkgs.gcc
+                pkgs.unstable.mupdf
+                pkgs.gnumake
+                pkgs.pkg-config
+              ];
+              preBuild = "make clean all";
+            })
             pdf-tools
             treesit-grammars.with-all-grammars
             vterm

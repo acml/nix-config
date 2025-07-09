@@ -21,6 +21,13 @@ localOverlays
       (final: prev: {
         inherit (inputs.nix-fast-build.packages.${final.stdenv.hostPlatform.system}) nix-fast-build;
       })
+      (final: _: {
+        # this allows you to access `pkgs.unstable` anywhere in your config
+        unstable = import inputs.nixpkgs-unstable {
+          inherit (final.stdenv.hostPlatform) system;
+          inherit (final) config;
+        };
+      })
     ]
     ++ (lib.attrValues localOverlays)
   );
