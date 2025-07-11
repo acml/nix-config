@@ -450,7 +450,7 @@ the sequences will be lost."
               (project-main-folder (string-trim (cdr (assoc 'mainFolders parsed-values)) "\"" "\""))
               (project-config (cdr (assoc 'projectConfig parsed-values)))
               (parsed-xml (xml-parse-file (expand-file-name project-config (expand-file-name project-main-folder project-root)))))
-        (let ((magit-repository-directories))
+        (let* ((magit-repository-directories))
           (add-to-list 'magit-repository-directories (cons (expand-file-name (concat project-root project-main-folder)) 0))
           (dolist (node (xml-get-children (car parsed-xml) 'component))
             (let (;; (name (xml-get-attribute node 'name))

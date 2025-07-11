@@ -55,7 +55,7 @@ it acts on the current project."
     "Project compile command."
     (format "%s/csd" (string-trim (cdr (assoc 'mainFolders (parse-file-content (expand-file-name "proj.default.ini" (projectile-project-root))))) "\"" "\"")))
 
-  (projectile-register-project-type 'cp1200dt '("proj.default.ini")
+  (projectile-register-project-type 'git_dt '("proj.default.ini")
                                     :project-file "proj.default.ini"
                                     :compilation-dir #'acml/compilation-dir
                                     :compile "script --quiet --return --log-out build-$(date -Iseconds).log --command \"./docker_make.sh -j$(nproc) -s all_targets 2>&1\""
