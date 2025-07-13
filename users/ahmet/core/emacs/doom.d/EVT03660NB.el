@@ -27,7 +27,7 @@
 When DIR is specified it checks DIR's project, otherwise
 it acts on the current project."
     (and (projectile-verify-files '("le_nbg2") dir)
-         (not (projectile-verify-file "tools" dir))))
+         (not (projectile-verify-files '("proj.default.ini" "tools") dir))))
 
   (projectile-register-project-type 'cm12425 #'acml/projectile-cm12425-project-p
                                     :project-file "cp1200"
@@ -39,14 +39,21 @@ it acts on the current project."
 When DIR is specified it checks DIR's project, otherwise
 it acts on the current project."
     (and (projectile-verify-files '("audis_tools" "le_nbg" "le_nbg2" "tools") dir)
-         (not (projectile-verify-file "cp1500" dir))))
+         (not (projectile-verify-files '("proj.default.ini" "cp1500") dir))))
 
   (projectile-register-project-type 'cm12435 #'acml/projectile-cm12435-project-p
                                     :project-file "cp1200"
                                     :compilation-dir "cp1200/cp1243-5/csd"
                                     :compile "make -j$(nproc) -s all_targets 2>&1")
 
-  (projectile-register-project-type 'cp1200 '("audis_linux" "audis_tools" "audis_utils" "cp1500" "le_nbg2")
+  (defun acml/projectile-cp12431-project-p (&optional dir)
+    "Check if a project contains cm12435 files.
+When DIR is specified it checks DIR's project, otherwise
+it acts on the current project."
+    (and (projectile-verify-files '("audis_linux" "audis_tools" "audis_utils" "cp1500" "le_nbg2") dir)
+         (not (projectile-verify-file "proj.default.ini" dir))))
+
+  (projectile-register-project-type 'cp12431 #'acml/projectile-cp12431-project-p
                                     :project-file "cp1200"
                                     :compilation-dir "cp1200/cp1243-1/csd"
                                     :compile "script --quiet --return --log-out build-$(date -Iseconds).log --command \"make -j$(nproc) -s all_targets 2>&1\"")
