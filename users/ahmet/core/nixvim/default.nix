@@ -554,10 +554,10 @@
           enable = true;
           settings = {
             org_agenda_files = [
-              "~/Documents/**/*"
-              "~/my-orgs/**/*"
+              "~/Documents/org/**/*"
+              "~/Documents/worg/**/*"
             ];
-            org_default_notes_file = "~/Documents/refile.org";
+            org_default_notes_file = "~/Documents/org/notes.org";
           };
         };
         persistence.enable = true;
