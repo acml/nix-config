@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
 
   programs = {
 
@@ -21,7 +22,10 @@
           command = "wincmd L";
           desc = "Make vertical splits for help and man buffers";
           event = [ "FileType" ];
-          pattern = [ "help" "man" ];
+          pattern = [
+            "help"
+            "man"
+          ];
         }
 
         {
@@ -107,7 +111,11 @@
         {
           command = "checktime";
           desc = "Check if buffers changed on editor focus";
-          event = [ "FocusGained" "TermClose" "TermLeave" ];
+          event = [
+            "FocusGained"
+            "TermClose"
+            "TermLeave"
+          ];
         }
 
         {
@@ -147,6 +155,18 @@
           };
         }
 
+        ## https://github.com/bjeanes/dotfiles/blob/main/packages/nvim/plugins/snacks/dashboard.nix
+        {
+          event = [ "User" ];
+          pattern = [
+            "SnacksDashboardOpened"
+          ];
+          callback.__raw = ''
+            function()
+              vim.b.miniindentscope_disable = true
+            end
+          '';
+        }
       ];
     };
   };

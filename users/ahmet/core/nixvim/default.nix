@@ -322,6 +322,7 @@
           settings = {
             exclude = {
               buftypes = [
+                "snacks_dashboard"
                 "terminal"
                 "nofile"
                 "quickfix"
