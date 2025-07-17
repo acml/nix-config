@@ -684,6 +684,62 @@ clicked."
       :desc "Swap Left"  "<" #'+workspace/swap-left
       :desc "Swap Right" ">" #'+workspace/swap-right)
 
+;; ("%b – Doom Emacs")
+;; (setq frame-title-format
+;;     '((:eval
+;;        (let ((project-name (projectile-project-name)))
+;;          (unless (string= "-" project-name)
+;;            (format "[%s]: " project-name))))
+;;       "%b"))
+
+;; https://github.com/blaenk/dots/blob/main/dot_emacs.d/inits/conf/mode-line.el
+;; Construct the buffer identifier for a buffer backed by a file. This is done
+;; by combining: dirname/ + filename, each propertized separately.
+(defun my--mode-line-file-identifier (path &optional max-width)
+  (let* ((path (if (file-remote-p buffer-file-name)
+                   (tramp-file-name-localname (tramp-dissect-file-name buffer-file-name))
+                 path))
+         ;; FIXME
+         ;; This calls f-short on tramp
+         (dirname (file-name-as-directory (abbreviate-file-name (or (file-name-directory path) "./"))))
+         (filename (f-filename path))
+         (propertized-filename
+          (propertize filename 'face 'mode-line-buffer-id)))
+    (if (> (+ (length dirname) (length filename) 2) max-width)
+        propertized-filename
+      (concat
+       (unless (string= dirname "./")
+         (propertize dirname 'face 'mode-line-stem-face))
+       propertized-filename))))
+
+;; Construct the buffer identifier for a regular, simple buffer that is not
+;; backed by a file nor remote.
+(defun my--mode-line-buffer-identifier (&optional max-width)
+  (if buffer-file-name
+      (my--mode-line-file-identifier buffer-file-name max-width)
+    (propertize "%b" 'face 'mode-line-buffer-id)))
+
+(defun my--frame-title-format ()
+  (cond
+   ((and buffer-file-name (file-remote-p buffer-file-name))
+    (let ((tramp-vec (tramp-dissect-file-name buffer-file-name)))
+      (concat
+       (tramp-file-name-host tramp-vec)
+       " — "
+       (abbreviate-file-name (tramp-file-name-localname tramp-vec)))))
+
+   ((and (featurep 'projectile) (projectile-project-p))
+    (concat
+     (projectile-project-name)
+     " — "
+     (if buffer-file-name
+         (f-relative buffer-file-name (projectile-project-root))
+       (buffer-name))))
+
+   (t (my--mode-line-buffer-identifier))))
+
+(setq frame-title-format '(:eval (my--frame-title-format)))
+
 (use-package! proced :commands (proced)
               :init
               (setq proced-auto-update-flag t
