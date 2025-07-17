@@ -314,11 +314,12 @@
       gtk.enable = hostType == "nixos";
       kde.enable = lib.mkDefault false;
       xfce.enable = lib.mkDefault false;
-      nixvim.enable = lib.mkDefault false;
       bat.enable = lib.mkDefault false;
       btop.enable = lib.mkDefault false;
       emacs.enable = lib.mkDefault false;
       kitty.enable = lib.mkDefault false;
+      nixvim.enable = lib.mkDefault false;
+      starship.enable = lib.mkDefault false;
       yazi.enable = lib.mkDefault false;
     };
   };
@@ -329,6 +330,7 @@
     # accent = "rosewater"; # "blue" "flamingo" "green" "lavender" "maroon" "mauve" "peach" "pink" "red" "rosewater" "sapphire" "sky" "teal" "yellow"
     cursors.enable = false;
     mako.enable = false;
+    starship.enable = false;
   };
 
   systemd.user.startServices = "sd-switch";
