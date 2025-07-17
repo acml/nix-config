@@ -140,7 +140,46 @@
             theme = catppuccin_theme,
           })
         '';
+      keymap = {
+        mgr.prepend_keymap = [
+          {
+            on = [ "l" ];
+            run = "plugin bypass smart-enter";
+            desc = "Open a file, or recursively enter child directory, skipping children with only a single subdirectory";
+          }
+          {
+            on = [ "h" ];
+            run = "plugin bypass reverse";
+            desc = "Recursively enter parent directory, skipping parents with only a single subdirectory";
+          }
+          {
+            on = "q";
+            run = "close";
+            desc = "Close the current tab, or quit if it's last";
+          }
+          {
+            on = [ "<C-c>" ];
+            run = "plugin confirm-quit";
+            desc = "Quit the process";
+          }
+          {
+            on = [
+              "c"
+              "m"
+            ];
+            run = "plugin chmod";
+            desc = "Chmod on selected files";
+          }
+          {
+            on = "C";
+            run = "plugin ouch";
+            desc = "Compress with ouch";
+          }
+        ];
+      };
       plugins = with pkgs.yaziPlugins; {
+        inherit bypass;
+        inherit chmod;
         inherit git;
         inherit mediainfo;
         inherit ouch;
@@ -222,11 +261,27 @@
               run = "ouch";
             }
             {
+              mime = "application/vnd.rar";
+              run = "ouch";
+            }
+            {
               mime = "application/x-xz";
               run = "ouch";
             }
             {
               mime = "application/xz";
+              run = "ouch";
+            }
+            {
+              mime = "application/x-zstd";
+              run = "ouch";
+            }
+            {
+              mime = "application/zstd";
+              run = "ouch";
+            }
+            {
+              mime = "application/java-archive";
               run = "ouch";
             }
           ];
@@ -279,4 +334,24 @@
   systemd.user.startServices = "sd-switch";
 
   xdg.configFile."nixpkgs/config.nix".text = "{ allowUnfree = true; }";
+  xdg.configFile."yazi/plugins/confirm-quit.yazi/main.lua".text = ''
+    local count = ya.sync(function() return #cx.tabs end)
+
+    local function entry()
+      if count() < 2 then
+        return ya.emit("quit", {})
+      end
+
+      local yes = ya.confirm {
+        pos = { "center", w = 60, h = 10 },
+        title = "Quit?",
+        content = ui.Text("There are multiple tabs open.\n\nAre you sure you want to quit?"):wrap(ui.Wrap.YES),
+      }
+      if yes then
+        ya.emit("quit", {})
+      end
+    end
+
+    return { entry = entry }
+  '';
 }
