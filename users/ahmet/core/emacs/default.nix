@@ -196,6 +196,8 @@ lib.mkMerge [
           xclip
           xdotool
           xsel
+
+          zip
         ];
 
       sessionPath = [ "${EMACSDIR}/bin" ];
