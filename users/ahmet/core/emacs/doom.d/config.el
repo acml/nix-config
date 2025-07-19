@@ -944,6 +944,11 @@ you're done. This can be called from an external shell script."
 (require 'reader)
 (evil-set-initial-state 'reader-mode 'emacs)
 
+(when (getenv "WAYLAND_DISPLAY")
+  (setq interprogram-paste-function
+        (lambda ()
+          (shell-command-to-string "wl-paste -n | tr -d '\r'"))))
+
 ;; Load a file with the same name as the computer’s name. Just keep on going if
 ;; the requisite file isn't there.
 (load (concat doom-user-dir (car (split-string (system-name) "\\."))) t)
