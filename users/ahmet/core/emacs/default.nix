@@ -192,7 +192,7 @@ lib.mkMerge [
           man-pages-posix
 
           # :app everywhere
-          wl-clipboard
+          # wl-clipboard
           xclip
           xdotool
           xsel
