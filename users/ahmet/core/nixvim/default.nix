@@ -173,7 +173,10 @@
       extraPackages =
         with pkgs;
         [
+          ghostscript
           imagemagick
+          mermaid-cli
+          sqlite
           universal-ctags
         ]
         ++ lib.optionals stdenv.hostPlatform.isLinux [
@@ -610,6 +613,12 @@
           };
           picker = {
             enabled = true;
+            db = {
+              sqlite3_path = "${pkgs.sqlite.out}/lib/libsqlite3.so";
+            };
+            sources.explorer.layout.layout = {
+              position = "right";
+            };
           };
           statuscolumn = {
             left = [

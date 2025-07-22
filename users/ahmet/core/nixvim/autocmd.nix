@@ -127,6 +127,7 @@
             "alpha"
             "checkhealth"
             "dashboard"
+            "snacks_dashboard"
             "fzf"
             "gitcommit"
             "help"

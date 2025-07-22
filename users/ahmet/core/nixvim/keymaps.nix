@@ -223,7 +223,7 @@
         }
         {
           key = "<leader>op";
-          action.__raw = "function() Snacks.picker.explorer({layout = { layout = { position = 'right' } } }) end";
+          action.__raw = "function() Snacks.picker.explorer() end";
           options = {
             desc = "Project sidebar";
           };
