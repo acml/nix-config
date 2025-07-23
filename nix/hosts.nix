@@ -61,11 +61,6 @@ in
     hostPlatform = "x86_64-linux";
     homeDirectory = "/home/bemeurer";
   };
-  hilbert = mkHost {
-    type = "home-manager";
-    hostPlatform = "x86_64-linux";
-    homeDirectory = "/home/bemeurer";
-  };
   jung = mkHost {
     type = "nixos";
     address = "100.80.1.112";
@@ -82,11 +77,6 @@ in
     type = "darwin";
     hostPlatform = "aarch64-darwin";
     pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMYvFEyV+nebaTfrwAULWDmCk0L6O+1OyZc43JnizcIB";
-  };
-  popper = mkHost {
-    type = "home-manager";
-    hostPlatform = "aarch64-linux";
-    homeDirectory = "/home/bemeurer";
   };
   spinoza = mkHost {
     type = "nixos";
