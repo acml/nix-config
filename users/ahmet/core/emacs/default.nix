@@ -183,7 +183,9 @@ lib.mkMerge [
           epub-thumbnailer
           ffmpegthumbnailer
           mediainfo
+          p7zip
           poppler_utils
+          vips
 
           trash-cli
         ]

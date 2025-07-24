@@ -229,7 +229,13 @@
   (setq dirvish-attributes (add-to-list 'dirvish-attributes 'file-size)))
 
 (after! dirvish
-  (setq dirvish-attributes '(file-size nerd-icons subtree-state vc-state collapse)
+  (setq dirvish-attributes (append
+                            ;; The order of these attributes is insignificant, they are always
+                            ;; displayed in the same position.
+                            '(vc-state subtree-state nerd-icons collapse)
+                            ;; Other attributes are displayed in the order they appear in this list.
+                            ;; '(git-msg file-modes file-time file-size)
+                            '(file-size))
         dirvish-header-line-format '(:left (path) :right (free-space))
         dirvish-hide-details '(dired dirvish dirvish-side)
         dirvish-hide-cursor '(dired dirvish dirvish-side)
