@@ -247,13 +247,13 @@ lib.mkMerge [
             (melpaBuild {
               ename = "reader";
               pname = "emacs-reader";
-              version = "20250708";
+              version = "20250725";
               src = pkgs.fetchFromGitea {
                 domain = "codeberg.org";
                 owner = "divyaranjan";
                 repo = "emacs-reader";
-                rev = "a2264388d20a840b07bc57c563c5d11c83e5a5d6"; # replace with 'version' for stable
-                hash = "sha256-RXPMxA6oGDDXZdgebpRlrLUe1Mg9iBO+RdXbFDh0KKg=";
+                rev = "2d95199bbb0f2c488f8d5d1ae8e9dc2de937f430"; # replace with 'version' for stable
+                hash = "sha256-rZ+1PgRS68QN0yXdYyEJafJmbCceaKeDQhT+GfsPiFA=";
               };
               files = ''(:defaults "render-core.so")'';
               nativeBuildInputs = with pkgs; [ pkg-config ];
