@@ -250,8 +250,8 @@ lib.mkMerge [
                 domain = "codeberg.org";
                 owner = "divyaranjan";
                 repo = "emacs-reader";
-                rev = "f8569f1d8c2f77df54c49faee3dea6dd65f712e9"; # replace with 'version' for stable
-                hash = "sha256-w1uI1NVT6deMzt6zz+8E8TMq1sDXtGxPocEG6Mwf6/M=";
+                rev = "a2264388d20a840b07bc57c563c5d11c83e5a5d6"; # replace with 'version' for stable
+                hash = "sha256-RXPMxA6oGDDXZdgebpRlrLUe1Mg9iBO+RdXbFDh0KKg=";
               };
               files = ''(:defaults "render-core.so")'';
               nativeBuildInputs = with pkgs; [ pkg-config ];
