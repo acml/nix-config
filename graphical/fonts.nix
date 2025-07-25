@@ -46,6 +46,7 @@
         '';
       };
     };
+  };
 
   stylix.fonts = {
     sansSerif = {
