@@ -222,12 +222,6 @@
 (defadvice! acml/dirvish-subtree-toggle (fn &rest args)
   :around #'dirvish-subtree-toggle (save-excursion (apply fn args)))
 
-(defadvice! acml/dirvish-side (fn &rest args)
-  :around #'dirvish-side
-  (setq dirvish-attributes (delq 'file-size dirvish-attributes))
-  (apply fn args)
-  (setq dirvish-attributes (add-to-list 'dirvish-attributes 'file-size)))
-
 (after! dirvish
   (setq dirvish-attributes (append
                             ;; The order of these attributes is insignificant, they are always
@@ -236,6 +230,8 @@
                             ;; Other attributes are displayed in the order they appear in this list.
                             ;; '(git-msg file-modes file-time file-size)
                             '(file-size))
+        dirvish-side-attributes '(vc-state nerd-icons collapse ;; file-size
+                                  )
         dirvish-header-line-format '(:left (path) :right (free-space))
         dirvish-hide-details '(dired dirvish dirvish-side)
         dirvish-hide-cursor '(dired dirvish dirvish-side)
