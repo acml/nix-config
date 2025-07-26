@@ -554,6 +554,9 @@ the sequences will be lost."
   ;; needs to be run after other hooks have acted.
   (run-at-time nil nil #'org-appear--set-elements))
 
+(use-package! org-block-capf :after org)
+(add-hook! 'org-mode-hook #'org-block-capf-add-to-completion-at-point-functions)
+
 (use-package! org-noter
   :after org
   :config

@@ -59,6 +59,7 @@
 
 (package! dired-auto-readme :recipe (:host github :repo "amno1/dired-auto-readme"))
 (package! ll-debug)
+(package! org-block-capf :recipe (:host github :repo "xenodium/org-block-capf"))
 (package! org-pretty-table :recipe (:host github :repo "Fuco1/org-pretty-table")) ;; dired-auto-readme dependency
 (package! org-view-mode)                                                          ;; dired-auto-readme dependency
 
