@@ -212,6 +212,13 @@
   :config
   (setq dired-listing-switches (concat dired-listing-switches " --time-style=long-iso")))
 
+(use-package! dired-auto-readme
+  :config
+  (setq dired-auto-readme-separator "\n"))
+
+(use-package! page-break-lines)
+(add-hook! 'dired-auto-readme-mode-hook #'page-break-lines-mode)
+
 (defadvice! acml/dired-auto-readme--enable (fn &rest args)
   :around #'dired-auto-readme--enable
   (let ((visible (dirvish-side--session-visible-p)))
