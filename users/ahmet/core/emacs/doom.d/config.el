@@ -126,10 +126,11 @@
 
 ;; Directional window-selection routines
 (use-package! windmove
-  :hook (after-init . windmove-default-keybindings))
-
-(use-package! windswap
-  :hook (after-init . (lambda () (windswap-default-keybindings 'control 'shift))))
+  :config
+  (windmove-default-keybindings '(shift))
+  (windmove-swap-states-default-keybindings '(shift ctrl))
+  :custom
+  (windmove-wrap-around t))
 
 ;; (add-hook 'org-shiftup-final-hook 'windmove-up)
 ;; (add-hook 'org-shiftleft-final-hook 'windmove-left)
