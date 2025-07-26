@@ -883,11 +883,6 @@ will ensure are ignored")
   (set (make-local-variable 'buffer-face-mode-face) '(:family "IosevkaTerm Nerd Font"))
   (buffer-face-mode t))
 
-(use-package! vundo
-  :bind ("C-x u" . vundo)
-  :config
-  (setq vundo-glyph-alist vundo-unicode-symbols))
-
 (setq which-key-allow-multiple-replacements t)
 (after! which-key
   (pushnew!

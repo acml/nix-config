@@ -89,6 +89,5 @@
 (package! trashed)
 (package! ascii)
 (package! visual-ascii-mode)
-(package! vundo)
 (package! windswap)
 (package! ztree :recipe (:host github :repo "emacsmirror/ztree"))
