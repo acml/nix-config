@@ -44,7 +44,7 @@ it acts on the current project."
   (projectile-register-project-type 'cm12435 #'acml/projectile-cm12435-project-p
                                     :project-file "cp1200"
                                     :compilation-dir "cp1200/cp1243-5/csd"
-                                    :compile "make -j$(nproc) -s all_targets 2>&1")
+                                    :compile "set -o pipefail && unbuffer make -j$(nproc) -s all_targets |& tee build-$(date -Iseconds).log")
 
   (defun acml/projectile-cp12431-project-p (&optional dir)
     "Check if a project contains cm12435 files.
@@ -56,7 +56,7 @@ it acts on the current project."
   (projectile-register-project-type 'cp12431 #'acml/projectile-cp12431-project-p
                                     :project-file "cp1200"
                                     :compilation-dir "cp1200/cp1243-1/csd"
-                                    :compile "script --quiet --return --log-out build-$(date -Iseconds).log --command \"make -j$(nproc) -s all_targets 2>&1\"")
+                                    :compile "set -o pipefail && unbuffer make -j$(nproc) -s all_targets |& tee build-$(date -Iseconds).log")
 
   (defun acml/compilation-dir ()
     "Project compile command."
@@ -65,7 +65,7 @@ it acts on the current project."
   (projectile-register-project-type 'git_dt '("proj.default.ini")
                                     :project-file "proj.default.ini"
                                     :compilation-dir #'acml/compilation-dir
-                                    :compile "script --quiet --return --log-out build-$(date -Iseconds).log --command \"./docker_make.sh -j$(nproc) -s all_targets 2>&1\""
+                                    :compile "set -o pipefail && unbuffer ./docker_make.sh -j$(nproc) -s all_targets |& tee build-$(date -Iseconds).log"
                                     :configure "/usr/bin/git dt checkout -f")
   )
 
