@@ -77,14 +77,14 @@
 
 ;; (package! org-modern)
 
+(package! page-break-lines)
 ;; Maybe the pdf-tools package is also installed outside of nix, and this is
 ;; conflicting. list-load-path-shadows will show you if you have a package
 ;; defined in multiple locations. This will use pdf-tools installed by nix
-(package! page-break-lines)
-(package! pdf-tools :built-in 'prefer)
+;; (package! pdf-tools :built-in 'prefer)
+(package! reader :built-in 'prefer)
 (package! rainbow-mode)
 (package! scopeline)
-;; (package! shrface :recipe (:host github :repo "chenyanming/shrface"))
 (package! turkish)
 
 (package! trashed)

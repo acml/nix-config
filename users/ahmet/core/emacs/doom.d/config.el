@@ -591,12 +591,12 @@ the sequences will be lost."
   (setq org-latex-pdf-process
         '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f")))
 
-(use-package! pdf-occur :commands (pdf-occur pdf-occur-global-minor-mode))
-(use-package! pdf-history :commands (pdf-history-minor-mode))
-(use-package! pdf-links :commands (pdf-links-isearch-link pdf-links-action-perform pdf-links-minor-mode))
-(use-package! pdf-outline :commands (pdf-outline pdf-outline-minor-mode))
-(use-package! pdf-annot :commands (pdf-annot-minor-mode))
-(use-package! pdf-sync :commands (pdf-sync-minor-mode))
+;; (use-package! pdf-occur :commands (pdf-occur pdf-occur-global-minor-mode))
+;; (use-package! pdf-history :commands (pdf-history-minor-mode))
+;; (use-package! pdf-links :commands (pdf-links-isearch-link pdf-links-action-perform pdf-links-minor-mode))
+;; (use-package! pdf-outline :commands (pdf-outline pdf-outline-minor-mode))
+;; (use-package! pdf-annot :commands (pdf-annot-minor-mode))
+;; (use-package! pdf-sync :commands (pdf-sync-minor-mode))
 
 (defun lkn-tab-bar--workspaces ()
   "Return a list of the current workspaces."
@@ -751,7 +751,7 @@ clicked."
 
    (t (my--mode-line-buffer-identifier))))
 
-(setq frame-title-format '(:eval (my--frame-title-format)))
+(setq frame-title-format '((:eval (my--frame-title-format))))
 
 (use-package! proced :commands (proced)
               :init
@@ -948,9 +948,22 @@ you're done. This can be called from an external shell script."
           (setq doom-fallback-buffer-name "*scratch*")
           (add-hook 'delete-frame-functions #'cleanup-scratch-frame))))))
 
-(require 'reader-autoloads)
-(require 'reader)
-(evil-set-initial-state 'reader-mode 'emacs)
+(use-package! reader
+  :commands (reader-mode)
+  :config
+  (require 'reader-autoloads))
+
+(map! :map reader-mode-map
+      :nvm "j" 'reader-scroll-down-or-next-page
+      :nvm "k" 'reader-scroll-up-or-prev-page
+      :nvm "h" 'reader-scroll-left
+      :nvm "l" 'reader-scroll-right
+      :nvm "d" 'reader-next-page
+      :nvm "u" 'reader-previous-page
+      :nvm "g" 'reader-goto-page
+      :nvm "H" 'reader-fit-to-height
+      :nvm "W" 'reader-fit-to-width
+      :nvm "q" 'quit-window)
 
 ;; Load a file with the same name as the computer’s name. Just keep on going if
 ;; the requisite file isn't there.
