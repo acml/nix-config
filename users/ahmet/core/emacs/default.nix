@@ -247,13 +247,13 @@ lib.mkMerge [
             (melpaBuild {
               ename = "reader";
               pname = "emacs-reader";
-              version = "20250730";
+              version = "20250731";
               src = pkgs.fetchFromGitea {
                 domain = "codeberg.org";
                 owner = "divyaranjan";
                 repo = "emacs-reader";
-                rev = "d10199a372e7672e2327e4198efedff5d296e461"; # replace with 'version' for stable
-                hash = "sha256-C8ynFpU6ejCuCe1bE3ZuQO20ojkdBqTiEBLtUHIi/y0=";
+                rev = "11bef370a5"; # replace with 'version' for stable
+                hash = "sha256-LNHzurzjcJq54yEtK6Lke69binD6P3vCj8udwyV0mc0=";
               };
               files = ''(:defaults "render-core.so")'';
               nativeBuildInputs = with pkgs; [ pkg-config ];
@@ -265,7 +265,7 @@ lib.mkMerge [
               ];
               preBuild = "make clean all";
             })
-            # pdf-tools
+            pdf-tools
             treesit-grammars.with-all-grammars
             vterm
           ]);
