@@ -616,8 +616,26 @@
             db = {
               sqlite3_path = "${pkgs.sqlite.out}/lib/libsqlite3.so";
             };
-            sources.explorer.layout.layout = {
-              position = "right";
+            sources = {
+              projects = {
+                dev = [
+                  "~/git_pa"
+                  "~/Projects"
+                ];
+                patterns = [
+                  "proj.default.ini"
+                  ".git"
+                  "_darcs"
+                  ".hg"
+                  ".bzr"
+                  ".svn"
+                  "package.json"
+                  "Makefile"
+                ];
+              };
+              explorer.layout.layout = {
+                position = "right";
+              };
             };
           };
           statuscolumn = {
