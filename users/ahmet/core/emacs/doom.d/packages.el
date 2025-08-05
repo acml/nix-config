@@ -56,7 +56,7 @@
 (package! dts-mode)
 (package! exercism)
 (package! google-c-style)
-
+(package! dwim-shell-command)
 (package! dired-auto-readme :recipe (:host github :repo "amno1/dired-auto-readme"))
 (package! ll-debug)
 (package! org-block-capf :recipe (:host github :repo "xenodium/org-block-capf"))

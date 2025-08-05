@@ -262,6 +262,16 @@
   (setq dirvish-side-display-alist
         '((side . right) (slot . -1))))
 
+(use-package! dwim-shell-command
+  :bind (([remap shell-command] . dwim-shell-command)
+         :map dired-mode-map
+         ([remap dired-do-async-shell-command] . dwim-shell-command)
+         ([remap dired-do-shell-command] . dwim-shell-command)
+         ([remap dired-smart-shell-command] . dwim-shell-command))
+  :config
+  ;; Also make available all the utility functions provided by Xenodium
+  (require 'dwim-shell-commands))
+
 (after! eglot
   (set-eglot-client! '(c-mode c-ts-mode c++-mode c++-ts-mode objc-mode) `("ccls" ,(concat "--init={\"cache\": {\"directory\": \"" (file-truename "~/.cache/ccls") "\"}}")))
   (set-eglot-client! '(nix-mode) '("nil" :initializationOptions (:nil (:nix (:flake (:autoArchive t)))))))
