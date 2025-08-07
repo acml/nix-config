@@ -758,8 +758,8 @@ clicked."
 
 (use-package! scopeline
   :commands (scopeline-mode)
-  :config
-  (add-to-list 'scopeline-targets '(makefile-mode "function_definition" "for_statement" "if_statement" "while_statement"))
+  ;; :config
+  ;; (add-to-list 'scopeline-targets '(makefile-mode "conditional"))
   :init
   (add-hook! 'prog-mode-hook #'scopeline-mode))
 
