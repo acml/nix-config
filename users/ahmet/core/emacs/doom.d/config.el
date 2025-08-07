@@ -449,39 +449,6 @@ the sequences will be lost."
                           'magit-insert-untracked-files
                           nil)
 
-  (defun parse-file-content (file-path)
-    "Parse the content of the file at FILE-PATH and return a list of key-value pairs."
-    (with-temp-buffer
-      (when (file-exists-p file-path)
-        (insert-file-contents file-path)
-        (let ((parsed-values))
-          (goto-char (point-min))
-          (while (re-search-forward "\\(.*?\\) *= *\\(.*\\)" nil t)
-            (let ((key (match-string 1))
-                  (value (match-string 2)))
-              (push (cons (intern key) value) parsed-values)))
-          parsed-values))))
-
-  (defadvice! acml/load-magit-repositories (fn &rest args)
-    :around #'magit-list-repositories
-    (if-let* ((project-root (projectile-project-root))
-              (project-file (expand-file-name "proj.default.ini" project-root))
-              (parsed-values (parse-file-content project-file))
-              (project-main-folder (string-trim (cdr (assoc 'mainFolders parsed-values)) "\"" "\""))
-              (project-config (cdr (assoc 'projectConfig parsed-values)))
-              (parsed-xml (xml-parse-file (expand-file-name project-config (expand-file-name project-main-folder project-root)))))
-        (let* ((magit-repository-directories))
-          (add-to-list 'magit-repository-directories (cons (expand-file-name (concat project-root project-main-folder)) 0))
-          (dolist (node (xml-get-children (car parsed-xml) 'component))
-            (let (;; (name (xml-get-attribute node 'name))
-                  (folder (xml-get-attribute node 'folder))
-                  ;; (tag (xml-get-attribute node 'tag))
-                  ;; (urlref (xml-get-attribute node 'urlref))
-                  )
-              (add-to-list 'magit-repository-directories (cons (expand-file-name (concat project-root folder)) 0))))
-          (apply fn args))
-      (apply fn args)))
-
   (setq magit-repolist-columns
         '(("Name" 24 magit-repolist-column-ident nil)
           ("Version" 58 magit-repolist-column-version
@@ -792,7 +759,7 @@ clicked."
 (use-package! scopeline
   :commands (scopeline-mode)
   :config
-  (add-to-list 'scopeline-targets '(c++-mode "function_definition" "for_statement" "if_statement" "while_statement"))
+  (add-to-list 'scopeline-targets '(makefile-mode "function_definition" "for_statement" "if_statement" "while_statement"))
   :init
   (add-hook! 'prog-mode-hook #'scopeline-mode))
 
