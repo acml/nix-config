@@ -14,7 +14,7 @@
   imports = [
     impermanence.nixosModules.home-manager.impermanence
     nix-index-database.homeModules.nix-index
-    nixvim.homeManagerModules.nixvim
+    nixvim.homeModules.nixvim
     catppuccin.homeModules.catppuccin
     stylix.homeModules.stylix
 

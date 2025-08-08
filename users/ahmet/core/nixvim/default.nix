@@ -391,7 +391,6 @@
         lsp-format.enable = true;
         lsp-format.lspServersToEnable = [ "gopls" ];
         # lsp-lines.enable = true;
-        lspkind.enable = true;
         lspsaga = {
           enable = true;
           codeAction.extendGitSigns = true;
