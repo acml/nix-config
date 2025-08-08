@@ -259,6 +259,7 @@
         colorizer.enable = true;
         cmake-tools.enable = true;
         compiler.enable = true;
+        telescope.enable = true;
         dap.enable = true;
         debugprint.enable = true;
         diffview.enable = true;
@@ -564,6 +565,7 @@
             org_default_notes_file = "~/Documents/org/notes.org";
           };
         };
+        overseer.enable = true;
         persistence.enable = true;
         precognition.enable = true;
         precognition.settings.startVisible = false;
