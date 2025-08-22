@@ -393,8 +393,10 @@
         # lsp-lines.enable = true;
         lspsaga = {
           enable = true;
-          codeAction.extendGitSigns = true;
-          lightbulb.sign = false;
+          settings = {
+            code_action.extend_git_signs = true;
+            lightbulb.sign = false;
+          };
         };
         lualine =
           let
