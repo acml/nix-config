@@ -167,7 +167,8 @@
   :hook (after-init . beginend-global-mode))
 
 ;; WSL specific setting
-(when (and (eq system-type 'gnu/linux) (getenv "WSLENV"))
+(when (and (featurep :system 'linux)
+           (getenv "WSL_DISTRO_NAME"))
   ;; teach Emacs how to open links with your default browser
   (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
         (cmd-args '("/c" "start")))
@@ -405,7 +406,7 @@
 Sequences start with an escape \033 (typically shown as \"^[\")
 and end with \"m\", e.g. this is two sequences
   ^[[46;1mTEXT^[[0m
-where the first sequence says to diplay TEXT as bold with
+where the first sequence says to display TEXT as bold with
 a cyan background and the second sequence turns it off.
 
 This strips the ANSI escape sequences and if the buffer is saved,
@@ -929,6 +930,16 @@ you're done. This can be called from an external shell script."
   :commands (reader-mode)
   :config
   (require 'reader-autoloads))
+
+(when (and (featurep :system 'linux)
+           (display-graphic-p)
+           (getenv "WSL_DISTRO_NAME"))
+  (defun acml-set-keyboard ()
+    (interactive)
+    (start-process "" nil "setxkbmap" "us" "-variant" "colemak"))
+
+  (map! "<f6>" #'acml-set-keyboard)
+  (add-hook! 'emacs-startup-hook #'acml-set-keyboard))
 
 (map! :map reader-mode-map
       :nvm "j" 'reader-scroll-down-or-next-page
