@@ -193,6 +193,12 @@
                                       :completion (:detailedLabel t)
                                       :cache (:directory ,(file-truename "~/.cache/ccls")))))
 
+(defadvice! compile (before ad-compile-smart activate)
+  "Advises `compile' so it sets the argument COMINT to t."
+  (ad-set-arg 1 t))
+
+(add-hook! 'shell-mode-hook #'compilation-shell-minor-mode)
+
 (after! compile
   (setq compilation-scroll-output t))
 
@@ -936,10 +942,18 @@ you're done. This can be called from an external shell script."
            (getenv "WSL_DISTRO_NAME"))
   (defun acml-set-keyboard ()
     (interactive)
-    (start-process "" nil "setxkbmap" "us" "-variant" "colemak"))
+    (start-process "" nil "setxkbmap" "us" "-variant" "colemak")
+    (message "Switched to the Colemak Keyboard Layout"))
 
   (map! "<f6>" #'acml-set-keyboard)
   (add-hook! 'emacs-startup-hook #'acml-set-keyboard))
+
+;; F5 :bind ("<f5>" . ef-themes-toggle)
+;; F6 (map! "<f6>" #'acml-set-keyboard)
+(map! "<f7>" #'projectile-compile-project)
+;; F8
+;; F9
+;; F12
 
 (map! :map reader-mode-map
       :nvm "j" 'reader-scroll-down-or-next-page

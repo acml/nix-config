@@ -167,6 +167,76 @@
         })
 
         require('go').setup()
+
+        local function get_main_folders(filepath)
+          local file = io.open(filepath, "r")
+          if not file then
+            print("Could not open file: " .. filepath)
+            return nil
+          end
+
+          for line in file:lines() do
+            local key, value = line:match("^%s*(.-)%s*=%s*(.-)%s*$")
+            if key == "mainFolders" then
+              file:close()
+              -- Strip surrounding double quotes if present
+              value = value:match('^"(.-)"$') or value
+              return value
+            end
+          end
+
+          file:close()
+          print("mainFolders not found in file.")
+          return nil
+        end
+
+        vim.api.nvim_create_user_command("Make", function(params)
+          -- Example usage
+          local main_folders = get_main_folders("proj.default.ini")
+          local csd = vim.fn.getcwd() .. "/" .. main_folders .. "/csd"
+          print("mainFolders: " .. (main_folders or "not found"))
+          print("cwd: " .. vim.fn.getcwd())
+
+          -- local makeprg = vim.fn.getcwd() .. "/cp1200/cp1243-5_G2/csd/docker_make.sh"
+          -- Insert args at the '$*' in the makeprg
+          local cmd, num_subs = vim.o.makeprg:gsub("%$%*", params.args)
+          if num_subs == 0 then
+            cmd = cmd .. " " .. params.args
+          end
+          local task = require("overseer").new_task({
+            -- cmd = vim.fn.expandcmd(cmd),
+            -- cmd = vim.fn.getcwd() .. "/cp1200/cp1243-5_G2/csd/docker_make.sh" .. " " .. params.args,
+            -- cwd = vim.fn.getcwd() .. "/cp1200/cp1243-5_G2/csd",
+            cmd = csd .. "/docker_make.sh" .. " " .. params.args,
+            -- print("cmd: " .. cmd),
+            -- cwd: /home/ahmet/git_pa/CP1243-5_G2
+            cwd = csd,
+            -- print("cwd: " .. cwd),
+            components = {
+              { "on_output_quickfix", open = not params.bang, open_height = 8 },
+              "default",
+            },
+          })
+          task:start()
+        end, {
+            desc = "Run your makeprg as an Overseer task",
+            nargs = "*",
+            bang = true,
+        })
+        vim.keymap.set({'n', 'i'}, '<F12>', "<Esc>:Make -j$(nproc) -s all_targets", { silent = false, desc = "Compile in project" })
+
+        -- Move by word
+        vim.keymap.set("i", "<M-f>", "<C-o>w", { noremap = true })
+        vim.keymap.set("i", "<M-b>", "<C-o>b", { noremap = true })
+
+        -- Move by character
+        vim.keymap.set("i", "<C-n>", "<Down>", { noremap = true })
+        vim.keymap.set("i", "<C-p>", "<Up>", { noremap = true })
+        vim.keymap.set("i", "<C-b>", "<Left>", { noremap = true })
+        vim.keymap.set("i", "<C-f>", "<Right>", { noremap = true })
+
+        vim.keymap.set("i", "<C-a>", "<C-o>_", { noremap = true })
+        vim.keymap.set("i", "<C-e>", "<C-o>$", { noremap = true })
       '';
 
       extraLuaPackages = ps: [ ps.magick ];
@@ -214,7 +284,10 @@
                 "scroll_documentation_up"
                 "fallback"
               ];
-              "<C-e>" = [ "hide" ];
+              "<C-e>" = [
+                "hide"
+                "fallback"
+              ];
               "<C-f>" = [
                 "scroll_documentation_down"
                 "fallback"

@@ -100,8 +100,7 @@ it acts on the current project."
                                     :project-file "proj.default.ini"
                                     :compilation-dir #'EVT03660NB-compilation-dir
                                     :compile "set -o pipefail && unbuffer ./docker_make.sh -j$(nproc) -s all_targets |& tee build-$(date -Iseconds).log"
-                                    :configure "/usr/bin/git dt checkout -f")
-  )
+                                    :configure "/usr/bin/git dt checkout -f"))
 
 (add-to-list 'auto-mode-alist '("\\.igt" . makefile-mode))
 
