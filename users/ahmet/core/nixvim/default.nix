@@ -223,7 +223,18 @@
             nargs = "*",
             bang = true,
         })
-        vim.keymap.set({'n', 'i'}, '<F12>', "<Esc>:Make -j$(nproc) -s all_targets", { silent = false, desc = "Compile in project" })
+        vim.keymap.set({'n', 'i'}, '<F19>', "<Esc>:Make -j$(nproc) -s all_targets", { silent = false, desc = "Compile in project" })
+
+        vim.api.nvim_create_user_command("OverseerRestartLast", function()
+          local overseer = require("overseer")
+          local tasks = overseer.list_tasks({ recent_first = true })
+          if vim.tbl_isempty(tasks) then
+            vim.notify("No tasks found", vim.log.levels.WARN)
+          else
+            overseer.run_action(tasks[1], "restart")
+          end
+        end, {})
+        vim.keymap.set({'n', 'i'}, '<F7>', "<Esc>:OverseerRestartLast<CR>", { silent = false, desc = "Repeat last command" })
 
         -- Move by word
         vim.keymap.set("i", "<M-f>", "<C-o>w", { noremap = true })

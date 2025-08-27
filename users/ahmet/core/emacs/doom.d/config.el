@@ -950,8 +950,10 @@ you're done. This can be called from an external shell script."
 
 ;; F5 :bind ("<f5>" . ef-themes-toggle)
 ;; F6 (map! "<f6>" #'acml-set-keyboard)
-(map! "<f7>" #'projectile-compile-project)
-;; F8
+(map! "<S-f7>" #'projectile-compile-project)
+(map! "<f7>" #'projectile-repeat-last-command)
+(map! "<f8>" #'next-error)
+(map! "<S-f8>" #'previous-error)
 ;; F9
 ;; F12
 

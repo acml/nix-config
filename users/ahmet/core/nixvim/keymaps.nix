@@ -28,6 +28,20 @@
             desc = "Reselect pasted text";
           };
         }
+        {
+          key = "<F8>";
+          action = "<cmd>cnext<CR>";
+          options = {
+            desc = "next qf item";
+          };
+        }
+        {
+          key = "<F20>";
+          action = "<cmd>cprevious<CR>";
+          options = {
+            desc = "previous qf item";
+          };
+        }
 
         {
           key = "<leader>'";
