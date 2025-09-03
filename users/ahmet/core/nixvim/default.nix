@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 {
 
   imports = [
@@ -513,7 +513,7 @@
             };
           in
           {
-            enable = true;
+            enable = false;
             settings = {
               sections = {
                 # lualine_a = [ "mode" ];
@@ -543,7 +543,7 @@
           enable = true;
           mockDevIcons = true;
           modules = {
-            align = { };
+            basics = { };
             bracketed = { };
             comment = {
               custom_commentstring.__raw = ''
@@ -552,6 +552,7 @@
                 end
               '';
             };
+            files = { };
             icons = { };
             indentscope = {
               draw = {
@@ -567,11 +568,42 @@
             jump = { };
             map = { };
             operators = { };
-            pairs = { };
+            pick = { };
             sessions = { };
             splitjoin = { };
           };
         };
+        mini-align.enable = true;
+        mini-bufremove.enable = true;
+        mini-extra.enable = true;
+        mini-pairs.enable = true;
+        mini-starter.enable = true;
+        mini-starter.settings = {
+          autoopen = true;
+          content_hooks = [
+            (config.lib.nixvim.mkRaw "require('mini.starter').gen_hook.adding_bullet()")
+            (config.lib.nixvim.mkRaw "require('mini.starter').gen_hook.indexing('all', { 'Builtin actions' })")
+            (config.lib.nixvim.mkRaw "require('mini.starter').gen_hook.aligning('center', 'center')")
+          ];
+          evaluate_single = true;
+          header = ''
+                                                                               
+                  ████ ██████           █████      ██                    
+                 ███████████             █████                            
+                 █████████ ███████████████████ ███   ███████████  
+                █████████  ███    █████████████ █████ ██████████████  
+               █████████ ██████████ █████████ █████ █████ ████ █████  
+             ███████████ ███    ███ █████████ █████ █████ ████ █████ 
+            ██████  █████████████████████ ████ █████ █████ ████ ██████
+          '';
+          items = [
+            (config.lib.nixvim.mkRaw "require('mini.starter').sections.builtin_actions()")
+            (config.lib.nixvim.mkRaw "require('mini.starter').sections.recent_files(5, false)")
+            (config.lib.nixvim.mkRaw "require('mini.starter').sections.recent_files(5, true)")
+            (config.lib.nixvim.mkRaw "require('mini.starter').sections.sessions(5, true)")
+          ];
+        };
+        mini-statusline.enable = true;
         neogit = {
           enable = true;
           settings = {
@@ -675,29 +707,8 @@
         render-markdown.enable = true;
         rustaceanvim.enable = true;
         smart-splits.enable = true;
-        snacks.enable = true;
+        snacks.enable = false;
         snacks.settings = {
-          dashboard = {
-            enabled = true;
-            preset.header = ''
-                                                                                 
-                    ████ ██████           █████      ██                    
-                   ███████████             █████                            
-                   █████████ ███████████████████ ███   ███████████  
-                  █████████  ███    █████████████ █████ ██████████████  
-                 █████████ ██████████ █████████ █████ █████ ████ █████  
-               ███████████ ███    ███ █████████ █████ █████ ████ █████ 
-              ██████  █████████████████████ ████ █████ █████ ████ ██████
-            '';
-            sections.__raw = ''
-              {
-                { section = 'header' },
-                { section = 'keys' },
-                { section = 'recent_files', icon = ' ', title = 'Recent Files', indent = 2, padding = {2, 2} },
-                { section = 'projects', icon = ' ', title = 'Projects', indent = 2, padding = 2 },
-              }
-            '';
-          };
           picker = {
             enabled = true;
             db = {
@@ -817,21 +828,21 @@
           ];
         };
         wtf.enable = true;
-        yazi = {
-          enable = true;
-          settings = {
-            open_for_directories = true;
-            enable_mouse_support = true;
-            use_ya_for_events_reading = true;
-            use_yazi_client_id_flag = true;
-
-            highlight_groups = {
-              hovered_buffer = null;
-            };
-
-            floating_window_scaling_factor = 0.8;
-          };
-        };
+        # yazi = {
+        #   enable = true;
+        #   settings = {
+        #     open_for_directories = true;
+        #     enable_mouse_support = true;
+        #     use_ya_for_events_reading = true;
+        #     use_yazi_client_id_flag = true;
+        #
+        #     highlight_groups = {
+        #       hovered_buffer = null;
+        #     };
+        #
+        #     floating_window_scaling_factor = 0.8;
+        #   };
+        # };
       };
     };
   };
