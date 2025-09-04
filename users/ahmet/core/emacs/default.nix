@@ -116,6 +116,8 @@ lib.mkMerge [
           clang-tools
           glslang
 
+          emacs-lsp-booster
+
           # CMake LSP
           cmake
           cmake-language-server
