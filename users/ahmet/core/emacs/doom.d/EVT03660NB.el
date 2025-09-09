@@ -102,7 +102,10 @@ it acts on the current project."
                                     :compile "set -o pipefail && unbuffer ./docker_make.sh -j$(nproc) -s all_targets |& tee build-$(date -Iseconds).log"
                                     :configure "/usr/bin/git dt checkout -f"))
 
-(add-to-list 'auto-mode-alist '("\\.igt" . makefile-mode))
+(setq auto-mode-alist
+      (append '(("\\.igt" . makefile-gmake-mode)
+                ("/GNUoptionsfile\\'" . makefile-gmake-mode))
+              auto-mode-alist))
 
 (provide 'EVT03660NB)
 ;;; EVT03660NB.el ends here
