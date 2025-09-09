@@ -452,6 +452,9 @@ the sequences will be lost."
 
 (after! magit
   (magit-add-section-hook 'magit-status-sections-hook
+                          'magit-insert-worktrees
+                          'magit-insert-status-headers t)
+  (magit-add-section-hook 'magit-status-sections-hook
                           'magit-insert-ignored-files
                           'magit-insert-untracked-files
                           nil)
