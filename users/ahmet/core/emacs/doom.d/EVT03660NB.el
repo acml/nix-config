@@ -107,5 +107,36 @@ it acts on the current project."
                 ("/GNUoptionsfile\\'" . makefile-gmake-mode))
               auto-mode-alist))
 
+(require 'jka-compr)
+(require 'cl-lib)
+
+(defvar my/jka-compr-original-info-list jka-compr-compression-info-list
+  "Backup of the original jka-compr compression info list.")
+
+(defun my/jka-compr-filter-info-list (filename)
+  "Return a filtered compression info list that excludes .lzma for specific files."
+  (if (member (file-name-nondirectory filename)
+              '("Makefile.lzma"))
+      ;; Remove .lzma entry from the list (each entry is a vector)
+      (cl-remove-if (lambda (entry)
+                      (and (vectorp entry)
+                           (string= (aref entry 0) "\\.lzma\\'")))
+                    my/jka-compr-original-info-list)
+    my/jka-compr-original-info-list))
+
+(defun my/jka-compr-open-advice (orig-fun filename &rest args)
+  "Advice around `insert-file-contents` to disable .lzma decompression for specific files."
+  (let ((jka-compr-compression-info-list (my/jka-compr-filter-info-list filename)))
+    (apply orig-fun filename args)))
+
+(advice-add 'insert-file-contents :around #'my/jka-compr-open-advice)
+
+;; (use-package! consult
+;;   :defer t
+;;   :config
+;;   (setq consult-ripgrep-args "rg --null --line-buffered --color=never --max-columns=1000\
+;;         --path-separator / --smart-case --no-heading --with-filename --line-number --search-zip\
+;;         --pre-glob 'Makefile.lzma' --pre 'cat'"))
+
 (provide 'EVT03660NB)
 ;;; EVT03660NB.el ends here
