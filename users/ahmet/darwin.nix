@@ -12,6 +12,8 @@
       # programs.git.extraConfig.gpg.ssh.program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
     };
 
+  system.primaryUser = "ahmet";
+
   users.users.ahmet = {
     createHome = true;
     description = "Ahmet Cemal Özgezer";
