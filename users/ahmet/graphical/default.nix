@@ -15,23 +15,21 @@
   home.packages =
     with pkgs;
     lib.filter (lib.meta.availableOn stdenv.hostPlatform) [
-      discord
-      element-desktop
-      iterm2
-      ledger-live-desktop
+      # discord
+      # element-desktop
+      # iterm2
+      # ledger-live-desktop
       libnotify
-      qalculate-gtk
-      signal-desktop
-      zulip
+      # qalculate-gtk
+      # signal-desktop
+      # zulip
     ]
     ++ lib.optionals (stdenv.hostPlatform.system == "x86_64-linux") [
       prusa-slicer
       spotify
       thunderbird
     ]
-    ++ lib.optionals stdenv.hostPlatform.isLinux [
-      xdg-utils
-    ];
+    ++ lib.optionals stdenv.hostPlatform.isLinux [ xdg-utils ];
 
   programs = {
     alacritty.enable = true;

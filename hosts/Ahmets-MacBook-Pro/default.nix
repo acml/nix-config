@@ -1,3 +1,4 @@
+{ lib, ... }:
 {
   imports = [
     ../../core
@@ -9,9 +10,9 @@
 
   environment.variables.JAVA_HOME = "$(/usr/libexec/java_home)";
 
-  #homebrew.casks = [
-  #  { name = "docker"; greedy = true; }
-  #];
+  homebrew = {
+    enable = lib.mkForce true;
+  };
 
   home-manager.users.ahmet =
     { config, ... }:
