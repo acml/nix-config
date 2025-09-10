@@ -241,34 +241,41 @@ lib.mkMerge [
         package = myEmacs;
         extraPackages =
           epkgs:
-          (with epkgs; [
-            djvu
-            emacsql
-            (melpaBuild {
-              ename = "reader";
-              pname = "emacs-reader";
-              version = "20250827";
-              src = pkgs.fetchFromGitea {
-                domain = "codeberg.org";
-                owner = "divyaranjan";
-                repo = "emacs-reader";
-                rev = "443faa5a08"; # replace with 'version' for stable
-                hash = "sha256-oi+SZe7o2S8ampiLSTpQBKRpf8jVxiiU3zgLFrJR4hc=";
-              };
-              files = ''(:defaults "render-core.so")'';
-              nativeBuildInputs = with pkgs; [ pkg-config ];
-              buildInputs = [
-                pkgs.gcc
-                pkgs.unstable.mupdf
-                pkgs.gnumake
-                pkgs.pkg-config
-              ];
-              preBuild = "make clean all";
-            })
-            pdf-tools
-            treesit-grammars.with-all-grammars
-            vterm
-          ]);
+          (
+            with epkgs;
+            lib.filter (lib.meta.availableOn pkgs.stdenv.hostPlatform) [
+              djvu
+              emacsql
+              treesit-grammars.with-all-grammars
+              vterm
+            ]
+            ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+              pdf-tools
+            ]
+            ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+              (melpaBuild {
+                ename = "reader";
+                pname = "emacs-reader";
+                version = "20250827";
+                src = pkgs.fetchFromGitea {
+                  domain = "codeberg.org";
+                  owner = "divyaranjan";
+                  repo = "emacs-reader";
+                  rev = "443faa5a08"; # replace with 'version' for stable
+                  hash = "sha256-oi+SZe7o2S8ampiLSTpQBKRpf8jVxiiU3zgLFrJR4hc=";
+                };
+                files = ''(:defaults "render-core.so")'';
+                nativeBuildInputs = with pkgs; [ pkg-config ];
+                buildInputs = [
+                  pkgs.gcc
+                  pkgs.unstable.mupdf
+                  pkgs.gnumake
+                  pkgs.pkg-config
+                ];
+                preBuild = "make clean all";
+              })
+            ]
+          );
       };
 
       jq.enable = true; # cli to extract data out of json input
