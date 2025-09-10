@@ -131,12 +131,10 @@ it acts on the current project."
 
 (advice-add 'insert-file-contents :around #'my/jka-compr-open-advice)
 
-;; (use-package! consult
-;;   :defer t
-;;   :config
-;;   (setq consult-ripgrep-args "rg --null --line-buffered --color=never --max-columns=1000\
-;;         --path-separator / --smart-case --no-heading --with-filename --line-number --search-zip\
-;;         --pre-glob 'Makefile.lzma' --pre 'cat'"))
+(defadvice! acml/consult--grep (fn &rest args)
+  :around #'consult--grep
+  (let* ((consult-ripgrep-args (concat consult-ripgrep-args " --pre-glob 'Makefile.lzma' --pre 'cat'")))
+    (apply fn args)))
 
 (provide 'EVT03660NB)
 ;;; EVT03660NB.el ends here
