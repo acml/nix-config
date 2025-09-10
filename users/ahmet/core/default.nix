@@ -51,7 +51,6 @@
         nix-closure-size
         nix-output-monitor
         ouch
-        ripgrep
         rsync
         truecolor-check
       ]
@@ -86,6 +85,12 @@
     };
     gpg.enable = true;
     nix-index.enable = true;
+    ripgrep.enable = true;
+    ripgrep.package = pkgs.ripgrep.override { withPCRE2 = true; };
+    # ripgrep.arguments = [
+    #   "--pre-glob=Makefile.lzma"
+    #   "--pre=cat"
+    # ];
     yazi = {
       enable = true;
       initLua = # lua

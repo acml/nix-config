@@ -72,8 +72,6 @@ lib.mkMerge [
           exercism
 
           ## Doom dependencies
-          (ripgrep.override { withPCRE2 = true; })
-          # ripgrep-all
 
           ## Optional dependencies
           dtach
