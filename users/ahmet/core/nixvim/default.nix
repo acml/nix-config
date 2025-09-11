@@ -236,18 +236,26 @@
         end, {})
         vim.keymap.set({'n', 'i'}, '<F7>', "<Esc>:OverseerRestartLast<CR>", { silent = false, desc = "Repeat last command" })
 
-        -- Move by word
-        vim.keymap.set("i", "<M-f>", "<C-o>w", { noremap = true })
-        vim.keymap.set("i", "<M-b>", "<C-o>b", { noremap = true })
-
+        -- Keybindings shared by insert mode and command mode
         -- Move by character
-        vim.keymap.set("i", "<C-n>", "<Down>", { noremap = true })
-        vim.keymap.set("i", "<C-p>", "<Up>", { noremap = true })
-        vim.keymap.set("i", "<C-b>", "<Left>", { noremap = true })
-        vim.keymap.set("i", "<C-f>", "<Right>", { noremap = true })
+        vim.keymap.set({'c', 'i'}, "<C-b>", "<Left>", { noremap = true })
+        vim.keymap.set({'c', 'i'}, "<C-f>", "<Right>", { noremap = true })
+        -- Move by word
+        vim.keymap.set({'c', 'i'}, "<M-b>", "<S-Left>", { noremap = true })
+        vim.keymap.set({'c', 'i'}, "<M-f>", "<S-Right>", { noremap = true })
 
-        vim.keymap.set("i", "<C-a>", "<C-o>_", { noremap = true })
-        vim.keymap.set("i", "<C-e>", "<C-o>$", { noremap = true })
+        -- Insert mode keybindings
+        -- Move by character
+        vim.keymap.set('i', "<C-n>", "<Down>", { noremap = true })
+        vim.keymap.set('i', "<C-p>", "<Up>", { noremap = true })
+
+        -- Move to line start or end
+        vim.keymap.set('i', "<C-a>", "<C-o>^", { noremap = true })
+        vim.keymap.set('i', "<C-e>", "<C-o>$", { noremap = true })
+
+        -- Command mode keybindings
+        -- Move to line start -- (end is predefened)
+        vim.keymap.set('c', "<C-a>", "<C-b>", { noremap = true })
       '';
 
       extraLuaPackages = ps: [ ps.magick ];
@@ -290,6 +298,14 @@
         blink-cmp = {
           enable = true;
           settings = {
+            cmdline = {
+              keymap = {
+                "<C-e>" = [
+                  "cancel"
+                  "fallback"
+                ];
+              };
+            };
             keymap = {
               "<C-b>" = [
                 "scroll_documentation_up"
