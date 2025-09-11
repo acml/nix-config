@@ -23,15 +23,12 @@
             term_colors = true;
           };
         };
-        # gruvbox.enable = true;
-        # nord.enable = true;
-        # tokyonight.enable = true;
       };
 
       extraConfigLua = ''
 
         -- UFO folding
-        vim.o.fillchars          = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
+        vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
         vim.cmd [[set signcolumn=yes]]
 
         local signs = { Error = "", Warn = "", Hint = "", Info = "" }
@@ -293,8 +290,10 @@
       # };
 
       plugins = {
-        ansiesc.enable = true;
-        ansiesc.autoLoad = true;
+        ansiesc = {
+          enable = true;
+          autoLoad = true;
+        };
         blink-cmp = {
           enable = true;
           settings = {
@@ -357,69 +356,15 @@
           };
         };
         colorizer.enable = true;
-        cmake-tools.enable = true;
-        compiler.enable = true;
+        # cmake-tools.enable = true;
+        # compiler.enable = true;
         telescope.enable = true;
-        dap.enable = true;
+        # dap.enable = true;
         debugprint.enable = true;
         diffview.enable = true;
         direnv.enable = true;
-        friendly-snippets.enable = true;
-        git-conflict.enable = true;
-        gitblame.enable = true;
-        gitblame.settings.virtual_text_column = 121;
-        gitsigns.enable = true;
-        gitsigns.settings.on_attach = # lua
-          ''
-            function(bufnr)
-              local gitsigns = require('gitsigns')
-
-              local function map(mode, l, r, opts)
-                opts = opts or {}
-                opts.buffer = bufnr
-                vim.keymap.set(mode, l, r, opts)
-              end
-
-              -- Navigation
-              map('n', ']h', function()
-                if vim.wo.diff then
-                  vim.cmd.normal({']h', bang = true})
-                else
-                  gitsigns.nav_hunk('next')
-                end
-              end)
-
-              map('n', '[h', function()
-                if vim.wo.diff then
-                  vim.cmd.normal({'[h', bang = true})
-                else
-                  gitsigns.nav_hunk('prev')
-                end
-              end)
-
-              -- Actions
-              map('n', '<leader>ghs', gitsigns.stage_hunk, { desc = 'stage hunk' })
-              map('n', '<leader>ghr', gitsigns.reset_hunk, { desc = 'reset hunk' })
-              map('v', '<leader>ghs', function() gitsigns.stage_hunk {vim.fn.line('.'), vim.fn.line('v')} end, { desc = 'stage hunk' })
-              map('v', '<leader>ghr', function() gitsigns.reset_hunk {vim.fn.line('.'), vim.fn.line('v')} end, { desc = 'reset hunk' })
-              map('n', '<leader>ghS', gitsigns.stage_buffer, { desc = 'stage buffer' })
-              map('n', '<leader>ghu', gitsigns.undo_stage_hunk, { desc = 'undo stage hunk' })
-              map('n', '<leader>ghR', gitsigns.reset_buffer, { desc = 'reset buffer' })
-              map('n', '<leader>ghp', gitsigns.preview_hunk, { desc = 'preview hunk' })
-              map('n', '<leader>ghb', function() gitsigns.blame_line{full=true} end, { desc = 'blame line' })
-              map('n', '<leader>gtb', gitsigns.toggle_current_line_blame, { desc = 'toggle current line blame' })
-              map('n', '<leader>ghd', gitsigns.diffthis, { desc = 'diff this' })
-              map('n', '<leader>ghD', function() gitsigns.diffthis('~') end, { desc = 'diff ~' })
-              map('n', '<leader>gtd', gitsigns.toggle_deleted, { desc = 'toggle deleted' })
-
-              -- Text object
-              map({'o', 'x'}, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
-            end
-          '';
-        grug-far.enable = true;
         helpview.enable = true;
         hmts.enable = true;
-        illuminate.enable = true;
         image.enable = true;
         indent-blankline = {
           enable = true;
@@ -454,9 +399,6 @@
             };
           };
         };
-        lastplace.enable = true;
-        lazy.enable = true;
-        # lint.enable = true;
         lsp = {
           enable = true;
           servers = {
@@ -483,14 +425,11 @@
               enable = true;
               settings.nix.flake.autoArchive = true;
             };
-            # nixd.enable = true;
             taplo.enable = true;
-            ts_ls.enable = true;
           };
         };
         lsp-format.enable = true;
         lsp-format.lspServersToEnable = [ "gopls" ];
-        # lsp-lines.enable = true;
         lspsaga = {
           enable = true;
           settings = {
@@ -554,12 +493,16 @@
               };
             };
           };
-        luasnip.enable = true;
         mini = {
           enable = true;
+          luaConfig.post = # lua
+            ''
+              require('mini.misc').setup_restore_cursor()
+            '';
           mockDevIcons = true;
           modules = {
             align = { };
+            basics = { };
             bracketed = { };
             comment = {
               custom_commentstring.__raw = ''
@@ -567,6 +510,16 @@
                   return require('ts_context_commentstring').calculate_commentstring() or vim.bo.commentstring
                 end
               '';
+            };
+            diff = {
+              view = {
+                style = "sign";
+                signs = {
+                  add = "┃";
+                  change = "┃";
+                  delete = "_";
+                };
+              };
             };
             icons = { };
             indentscope = {
@@ -582,6 +535,7 @@
             };
             jump = { };
             map = { };
+            misc = { };
             operators = { };
             pairs = { };
             sessions = { };
@@ -609,7 +563,6 @@
             ];
           };
         };
-        neotest.enable = true;
         nix.enable = true;
         nix-develop.enable = true;
         noice = {
@@ -754,7 +707,6 @@
             folds.git_hl = true;
           };
         };
-        sniprun.enable = true;
         spider.enable = true;
         spider.keymaps.motions = {
           b = "b";
@@ -762,10 +714,7 @@
           ge = "ge";
           w = "w";
         };
-        tagbar.enable = true;
-        # tmux-navigator.enable = true;
         todo-comments.enable = true;
-
         treesitter = {
           enable = true;
           folding = true;
@@ -775,14 +724,12 @@
             highlight.enable = true;
           };
         };
-        # treesitter-context.enable = true;
         treesitter-textobjects.enable = true;
         trim.enable = true;
         trim.settings.trim_on_write = false;
         trouble.enable = true;
         ts-comments.enable = true;
         ts-context-commentstring.enable = true;
-
         vim-matchup = {
           enable = true;
           treesitter.enable = true;
@@ -832,7 +779,6 @@
             }
           ];
         };
-        wtf.enable = true;
         yazi = {
           enable = true;
           settings = {
