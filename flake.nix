@@ -108,15 +108,14 @@
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     nixvim = {
-      # If you are not running an unstable channel of nixpkgs, select the corresponding branch of nixvim.
-      # url = "github:nix-community/nixvim/nixos-23.05";
       url = "github:nix-community/nixvim";
-      # inputs = {
-      #   nixpkgs.follows = "nixpkgs";
-      #   devshell.follows = "";
-      #   git-hooks.follows = "";
-      #   treefmt-nix.follows = "";
-      # };
+      inputs = {
+        # Optional inputs removed
+        nuschtosSearch.follows = "";
+        # Required inputs
+        flake-parts.follows = "flake-parts";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     catppuccin.url = "github:catppuccin/nix";
 
