@@ -281,7 +281,8 @@
 
 (after! eglot
   (set-eglot-client! '(c-mode c-ts-mode c++-mode c++-ts-mode objc-mode) `("ccls" ,(concat "--init={\"cache\": {\"directory\": \"" (file-truename "~/.cache/ccls") "\"}}")))
-  (set-eglot-client! '(nix-mode) '("nil" :initializationOptions (:nil (:nix (:flake (:autoArchive t)))))))
+  ;; (set-eglot-client! 'nix-mode '("nil" "--stdio" :initializationOptions (:nil (:nix (:flake (:autoArchive t))))))
+  )
 
 ;; Easier to match with a bspwm rule:
 ;;   bspc rule -a 'Emacs:emacs-everywhere' state=floating sticky=on
