@@ -81,7 +81,7 @@ it acts on the current project."
                                     :compile "set -o pipefail && unbuffer make -j$(nproc) -s all_targets |& tee build-$(date -Iseconds).log")
 
   (defun EVT03660NB-projectile-cp12431-project-p (&optional dir)
-    "Check if a project contains cm12435 files.
+    "Check if a project contains cp12431 files.
 When DIR is specified it checks DIR's project, otherwise
 it acts on the current project."
     (and (projectile-verify-files '("audis_linux" "audis_tools" "audis_utils" "cp1500" "le_nbg2") dir)
@@ -135,6 +135,9 @@ it acts on the current project."
   :around #'consult--grep
   (let* ((consult-ripgrep-args (concat consult-ripgrep-args " --pre-glob 'Makefile.lzma' --pre 'cat'")))
     (apply fn args)))
+
+(setq gptel-model 'claude-sonnet-4
+      gptel-backend (gptel-make-gh-copilot "Copilot"))
 
 (provide 'EVT03660NB)
 ;;; EVT03660NB.el ends here
