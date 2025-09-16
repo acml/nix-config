@@ -353,11 +353,43 @@
                 "fallback"
               ];
             };
+            snippets = {
+              preset = "luasnip";
+            };
+            sources.providers = {
+              copilot = {
+                async = true;
+                module = "blink-copilot";
+                name = "copilot";
+                score_offset = 100;
+                # Optional configurations
+                opts = {
+                  max_completions = 3;
+                  max_attempts = 4;
+                  kind = "Copilot";
+                  debounce = 750;
+                  auto_refresh = {
+                    backward = true;
+                    forward = true;
+                  };
+                };
+              };
+            };
+            sources.default = [
+              "lsp"
+              "path"
+              "snippets"
+              "buffer"
+              "copilot"
+            ];
           };
         };
-        colorizer.enable = true;
+        blink-copilot.enable = true;
         # cmake-tools.enable = true;
+        colorizer.enable = true;
         # compiler.enable = true;
+        copilot-chat.enable = true;
+        copilot-lua.enable = true;
         telescope.enable = true;
         # dap.enable = true;
         debugprint.enable = true;
@@ -423,13 +455,17 @@
             marksman.enable = false;
             nil_ls = {
               enable = true;
+              # settings.formatting.command = [ "nixpkgs-fmt" ];
               settings.nix.flake.autoArchive = true;
             };
             taplo.enable = true;
           };
         };
         lsp-format.enable = true;
-        lsp-format.lspServersToEnable = [ "gopls" ];
+        lsp-format.lspServersToEnable = [
+          "gopls"
+          "nil_ls"
+        ];
         lspsaga = {
           enable = true;
           settings = {
@@ -493,6 +529,7 @@
               };
             };
           };
+        luasnip.enable = true;
         mini = {
           enable = true;
           luaConfig.post = # lua
@@ -537,11 +574,11 @@
             map = { };
             misc = { };
             operators = { };
-            pairs = { };
             sessions = { };
             splitjoin = { };
           };
         };
+        mini-pairs.enable = true;
         neogit = {
           enable = true;
           settings = {
@@ -579,28 +616,6 @@
               inc_rename = true;
               long_message_to_split = true;
               lsp_doc_border = true;
-            };
-          };
-        };
-        none-ls = {
-          enable = true;
-          enableLspFormat = true;
-          sources = {
-            diagnostics = {
-              deadnix.enable = true;
-              gitlint.enable = true;
-              golangci_lint.enable = true;
-              # ltrs.enable = true;
-              # luacheck.enable = true;
-              # shellcheck.enable = true;
-              statix.enable = true;
-              # vale.enable = true;
-              # write_good.enable = true;
-            };
-            formatting = {
-              cbfmt.enable = true;
-              nixpkgs_fmt.enable = true;
-              stylua.enable = true;
             };
           };
         };
