@@ -72,13 +72,14 @@
        electric            ; smarter, keyword-based electric-indent
        eww                 ; the internet is gross
        ;;ibuffer           ; interactive buffer management
+       tramp               ; remote files at your arthritic fingertips
        undo                ; persistent, smarter undo for your inevitable mistakes
        vc                  ; version-control and Emacs, sitting in a tree
 
        :term
-       eshell            ; the elisp shell that works everywhere
-       shell             ; simple shell REPL for Emacs
-       term              ; basic terminal emulator for Emacs
+       eshell              ; the elisp shell that works everywhere
+       shell               ; simple shell REPL for Emacs
+       term                ; basic terminal emulator for Emacs
        vterm               ; the best terminal emulation in Emacs
 
        :checkers
@@ -102,7 +103,7 @@
        magit               ; a git porcelain for Emacs
        make                ; run make tasks from Emacs
        ;;pass              ; password manager for nerds
-       ;;pdf                 ; pdf enhancements
+       ;;pdf               ; pdf enhancements
        ;;terraform         ; infrastructure as code
        ;;tmux              ; an API for interacting with tmux
        tree-sitter         ; syntax and parsing, sitting in a tree...
@@ -113,6 +114,7 @@
        (tty +osc)          ; improve the terminal Emacs experience
 
        :lang
+       ;;ada               ; In strong typing we (blindly) trust
        ;;agda              ; types of types of types of types...
        ;;beancount         ; mind the GAAP
        (cc +lsp +tree-sitter)         ; C > C++ == 1
