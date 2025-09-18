@@ -219,6 +219,7 @@ ORIG-FUN is the original function, FILENAME is the file being processed, ARGS ar
     (macher-install)))
 
 (use-package! gptel-magit
+  :after gptel magit
   :config
   (setq gptel-magit-model 'gpt-5
         gptel-magit-backend (gptel-make-gh-copilot "Copilot")))
