@@ -334,10 +334,6 @@
 (after! ace-window
   (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)))
 
-;; (defun acml/ediff-before-setup ()
-;;   (select-frame (make-frame)))
-;; (add-hook 'ediff-before-setup-hook 'acml/ediff-before-setup)
-
 (use-package! ef-themes
   :bind ("<f5>" . ef-themes-toggle)
   :custom
@@ -545,7 +541,7 @@ the sequences will be lost."
   (setq nov-text-width most-positive-fixnum)
   (setq visual-fill-column-center-text t))
 
-(map! (:leader :desc "No comments, it is obvious" :n "to" #'obvious-mode))
+(map! (:leader :desc "Obvious (Toggle Comments)" :n "to" #'obvious-mode))
 
 (use-package! deft
   :after org
@@ -693,13 +689,6 @@ clicked."
 (keymap-set tab-bar-map "<wheel-up>" #'+workspace:switch-previous)
 (keymap-set tab-bar-map "<wheel-down>" #'+workspace:switch-next)
 
-(setq +workspaces-switch-project-function #'dired)
-
-(map! :when (modulep! :ui workspaces)
-      :map doom-leader-workspace-map
-      :desc "Swap Left"  "<" #'+workspace/swap-left
-      :desc "Swap Right" ">" #'+workspace/swap-right)
-
 ;; ("%b – Doom Emacs")
 ;; (setq frame-title-format
 ;;     '((:eval
@@ -755,6 +744,13 @@ clicked."
    (t (my--mode-line-buffer-identifier))))
 
 (setq frame-title-format '((:eval (my--frame-title-format))))
+
+(setq +workspaces-switch-project-function #'dired)
+
+(map! :when (modulep! :ui workspaces)
+      :map doom-leader-workspace-map
+      :desc "Swap Left"  "<" #'+workspace/swap-left
+      :desc "Swap Right" ">" #'+workspace/swap-right)
 
 (use-package! proced :commands (proced)
               :init
