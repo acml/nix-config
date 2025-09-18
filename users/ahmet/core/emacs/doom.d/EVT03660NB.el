@@ -136,8 +136,11 @@ it acts on the current project."
   (let* ((consult-ripgrep-args (concat consult-ripgrep-args " --pre-glob 'Makefile.lzma' --pre 'cat'")))
     (apply fn args)))
 
-(setq gptel-model 'claude-sonnet-4
-      gptel-backend (gptel-make-gh-copilot "Copilot"))
+(use-package! gptel
+  :config
+  (pop gptel--known-backends) ; remove the default ChatGPT backend
+  (setq gptel-model 'claude-sonnet-4
+        gptel-backend (gptel-make-gh-copilot "Copilot")))
 
 (use-package! gptel-magit
   :config

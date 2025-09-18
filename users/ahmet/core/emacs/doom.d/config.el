@@ -502,6 +502,7 @@ the sequences will be lost."
   (setq git-commit-summary-max-length 68))
 
 (use-package! gptel-magit
+  :if (not (string= (system-name) "EVT03660NB"))
   :config
   (setq gptel-magit-model 'google/gemini-2.0-flash-exp:free
         gptel-magit-backend (gptel-make-openai "OpenRouter"
@@ -988,6 +989,7 @@ you're done. This can be called from an external shell script."
       :nvm "q" 'quit-window)
 
 (use-package! gptel
+  :if (not (string= (system-name) "EVT03660NB"))
   :config
   (pop gptel--known-backends) ; remove the default ChatGPT backend
   (setq gptel-include-reasoning 'ignore)
