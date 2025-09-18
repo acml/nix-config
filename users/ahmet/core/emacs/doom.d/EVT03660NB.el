@@ -139,5 +139,10 @@ it acts on the current project."
 (setq gptel-model 'claude-sonnet-4
       gptel-backend (gptel-make-gh-copilot "Copilot"))
 
+(use-package! gptel-magit
+  :config
+  (setq gptel-magit-model 'gpt-5
+        gptel-magit-backend (gptel-make-gh-copilot "Copilot")))
+
 (provide 'EVT03660NB)
 ;;; EVT03660NB.el ends here

@@ -497,6 +497,20 @@ the sequences will be lost."
       (:prefix ("p" . "project")
        :desc "List project todos" "t" #'magit-todos-list))
 
+(use-package! git-commit
+  :config
+  (setq git-commit-summary-max-length 68))
+
+(use-package! gptel-magit
+  :config
+  (setq gptel-magit-model 'google/gemini-2.0-flash-exp:free
+        gptel-magit-backend (gptel-make-openai "OpenRouter"
+                              :host "openrouter.ai"
+                              :endpoint "/api/v1/chat/completions"
+                              :stream t
+                              :key #'gptel-api-key-from-auth-source
+                              :models '(google/gemini-2.0-flash-exp:free))))
+
 (defvar elken/mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
   "Only use `mixed-pitch-mode' for given modes.")
 
@@ -1093,16 +1107,6 @@ you're done. This can be called from an external shell script."
   (gptel-make-gh-copilot "Copilot")
   :hook
   (gptel-post-stream-hook . gptel-auto-scroll))
-
-(use-package! gptel-magit
-  :config
-  (setq gptel-magit-model 'google/gemini-2.0-flash-exp:free
-        gptel-magit-backend (gptel-make-openai "OpenRouter"
-                              :host "openrouter.ai"
-                              :endpoint "/api/v1/chat/completions"
-                              :stream t
-                              :key #'gptel-api-key-from-auth-source
-                              :models '(google/gemini-2.0-flash-exp:free))))
 
 ;; Load a file with the same name as the computer’s name. Just keep on going if
 ;; the requisite file isn't there.
