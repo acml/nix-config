@@ -984,6 +984,25 @@ you're done. This can be called from an external shell script."
       :nvm "W" 'reader-fit-to-width
       :nvm "q" 'quit-window)
 
+(use-package! macher
+  :custom
+  ;; The org UI has structured navigation and nice content folding.
+  (macher-action-buffer-ui 'org)
+
+  :config
+  ;; Adjust buffer positioning to taste.
+  ;; (add-to-list
+  ;;  'display-buffer-alist
+  ;;  '("\\*macher:.*\\*"
+  ;;    (display-buffer-in-side-window)
+  ;;    (side . bottom)))
+  (add-to-list
+   'display-buffer-alist
+   '("\\*macher-patch:.*\\*"
+     (display-buffer-in-side-window)
+     (side . right)))
+  )
+
 (use-package! gptel
   :if (not (string= (system-name) "EVT03660NB"))
   :config
@@ -1103,6 +1122,7 @@ you're done. This can be called from an external shell script."
               google/gemma-3-1b-it
               gpt-4o))
   (gptel-make-gh-copilot "Copilot")
+  (macher-install)
   :hook
   (gptel-post-stream-hook . gptel-auto-scroll))
 

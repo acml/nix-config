@@ -91,3 +91,5 @@
 (package! ascii :recipe (:host github :repo "acml/ascii"))
 (package! visual-ascii-mode)
 (package! ztree :recipe (:host codeberg :repo "fourier/ztree"))
+
+(package! macher :recipe (:host github :repo "kmontag/macher"))
