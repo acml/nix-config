@@ -139,7 +139,7 @@ DIR defaults to current project root."
   (projectile-register-project-type 'cm12435 #'evt03660nb--cm12435-project-p
                                     :project-file "cp1200"
                                     :compilation-dir "cp1200/cp1243-5/csd"
-                                    :compile "set -o pipefail && unbuffer make -j$(nproc) -s all_targets |& tee build-$(date -Iseconds).log")
+                                    :compile "set -o pipefail && unbuffer make -j$(nproc) -s |& tee build-$(date -Iseconds).log")
 
   ;; CP12431 Project Type
   (defun evt03660nb--cp12431-project-p (&optional dir)
@@ -151,7 +151,7 @@ DIR defaults to current project root."
   (projectile-register-project-type 'cp12431 #'evt03660nb--cp12431-project-p
                                     :project-file "cp1200"
                                     :compilation-dir "cp1200/cp1243-1/csd"
-                                    :compile "set -o pipefail && unbuffer make -j$(nproc) -s all_targets |& tee build-$(date -Iseconds).log")
+                                    :compile "set -o pipefail && unbuffer make -j$(nproc) -s |& tee build-$(date -Iseconds).log")
 
   ;; Git DT Project Type
   (defun evt03660nb--git-dt-compilation-dir ()
@@ -163,7 +163,7 @@ DIR defaults to current project root."
   (projectile-register-project-type 'git_dt (list evt03660nb-project-config-file)
                                     :project-file evt03660nb-project-config-file
                                     :compilation-dir #'evt03660nb--git-dt-compilation-dir
-                                    :compile "set -o pipefail && unbuffer ./docker_make.sh -j$(nproc) -s all_targets |& tee build-$(date -Iseconds).log"
+                                    :compile "set -o pipefail && unbuffer ./docker_make.sh -j$(nproc) -s |& tee build-$(date -Iseconds).log"
                                     :configure "/usr/bin/git dt checkout -f"))
 
 ;;; File Type Associations
