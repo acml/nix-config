@@ -155,6 +155,9 @@
       "M-l" #'downcase-dwim
       "M-u" #'upcase-dwim)
 
+(when (fboundp 'repeat-mode)
+  (add-hook 'after-init-hook 'repeat-mode))
+
 (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t)
                     ("^\\*\\(?:Wo\\)?Man " :size 82 :side right :select t :quit t)))
 
