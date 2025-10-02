@@ -991,6 +991,10 @@ you're done. This can be called from an external shell script."
       :nvm "W" 'reader-fit-to-width
       :nvm "q" 'quit-window)
 
+(use-package zone :disabled
+  :config
+  (zone-when-idle (* 60 1)))
+
 (use-package! macher
   :custom
   ;; The org UI has structured navigation and nice content folding.
