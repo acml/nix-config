@@ -262,7 +262,7 @@ lib.mkMerge [
                   owner = "divyaranjan";
                   repo = "emacs-reader";
                   rev = "0b12447140"; # replace with 'version' for stable
-                  hash = "sha256-Ydwg2VREXNxwglD9pnsY05/5PyZIEOQ2ek77FibKFaw=";
+                  hash = "sha256-myVKj6shqd15X/DwPvZC+ZKdyYmKklRZdQYnDiJuBOo=";
                 };
                 files = ''(:defaults "render-core.so")'';
                 nativeBuildInputs = with pkgs; [ pkg-config ];
