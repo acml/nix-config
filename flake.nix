@@ -109,7 +109,7 @@
         nuschtosSearch.follows = "";
         # Required inputs
         flake-parts.follows = "flake-parts";
-        nixpkgs.follows = "nixpkgs";
+        # nixpkgs.follows = "nixpkgs";
       };
     };
     catppuccin.url = "github:catppuccin/nix";
