@@ -14,6 +14,7 @@
 
   programs.kitty = {
     enable = true;
+    package = if pkgs.stdenv.hostPlatform.isDarwin then pkgs.hello else pkgs.kitty;
     extraConfig = ''
       map ctrl+j neighboring_window down
       map ctrl+k neighboring_window up
@@ -90,24 +91,23 @@
       name = "Iosevka Comfy";
       size = 15.0;
     };
-    settings =
-      {
-        scrollback_lines = 5000;
-        scrollback_pager_history_size = 32768;
-        strip_trailing_spaces = "smart";
-        repaint_delay = 16; # ~60Hz
-        enable_audio_bell = false;
-        update_check_interval = 0;
-        allow_remote_control = true;
-      }
-      // (lib.optionalAttrs (hostType == "darwin")) {
-        listen_on = "unix:/tmp/mykitty";
-        macos_show_window_title_in = "window";
-        macos_colorspace = "default";
-      }
-      // (lib.optionalAttrs (hostType == "linux")) {
-        listen_on = "unix:@mykitty";
-      };
+    settings = {
+      scrollback_lines = 5000;
+      scrollback_pager_history_size = 32768;
+      strip_trailing_spaces = "smart";
+      repaint_delay = 16; # ~60Hz
+      enable_audio_bell = false;
+      update_check_interval = 0;
+      allow_remote_control = true;
+    }
+    // (lib.optionalAttrs (hostType == "darwin")) {
+      listen_on = "unix:/tmp/mykitty";
+      macos_show_window_title_in = "window";
+      macos_colorspace = "default";
+    }
+    // (lib.optionalAttrs (hostType == "linux")) {
+      listen_on = "unix:@mykitty";
+    };
 
     darwinLaunchOptions = [
       "--single-instance"

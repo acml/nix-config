@@ -68,6 +68,10 @@
       #   name = "jitsi-meet";
       #   greedy = true;
       # }
+      {
+        name = "kitty";
+        greedy = true;
+      }
       # {
       #   name = "languagetool";
       #   greedy = true;
