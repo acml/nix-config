@@ -104,7 +104,7 @@ in
     hostPlatform = "x86_64-linux";
     homeDirectory = "/home/ahmet";
   };
-  evt03660nb = {
+  evt03943nb = {
     type = "home-manager";
     hostPlatform = "x86_64-linux";
     homeDirectory = "/home/ahmet";

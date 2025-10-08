@@ -34,11 +34,11 @@
       ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
       ;; font string. You generally only need these two:
       doom-font (font-spec :family "Iosevka Comfy" :size (cond ((featurep :system 'macos) 13.0)
-                                                               ((string= (system-name) "EVT03660NB") 10.8)
+                                                               ((string= (system-name) "EVT03943NB") 10.8)
                                                                (t 12.0)))
       doom-big-font (font-spec :family "Iosevka Comfy" :size (if (featurep :system 'macos) 26.0 20.0))
       doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size (cond ((featurep :system 'macos) 13.0)
-                                                                                   ((string= (system-name) "EVT03660NB") 10.8)
+                                                                                   ((string= (system-name) "EVT03943NB") 10.8)
                                                                                    (t 12.0)))
       doom-serif-font (font-spec :family "BlexMono Nerd Font" :size (if (featurep :system 'macos) 13.0 12.0) :weight 'light)
       
@@ -505,7 +505,7 @@ the sequences will be lost."
 
 (use-package! gptel-magit
   :after gptel magit
-  :if (not (string= (system-name) "EVT03660NB"))
+  :if (not (string= (system-name) "EVT03943NB"))
   :config
   (setq gptel-magit-model 'google/gemini-2.0-flash-exp:free
         gptel-magit-backend (gptel-make-openai "OpenRouter"
@@ -1015,7 +1015,7 @@ you're done. This can be called from an external shell script."
   )
 
 (use-package! gptel
-  :if (not (string= (system-name) "EVT03660NB"))
+  :if (not (string= (system-name) "EVT03943NB"))
   :config
   (pop gptel--known-backends) ; remove the default ChatGPT backend
   (setq gptel-include-reasoning 'ignore)

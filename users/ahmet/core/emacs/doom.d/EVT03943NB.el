@@ -1,4 +1,4 @@
-;;; EVT03660NB.el --- Host-specific configuration for EVT03660NB development machine -*- lexical-binding: t; -*-
+;;; EVT03943NB.el --- Host-specific configuration for EVT03943NB development machine -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2022 Ahmet Cemal Özgezer
 ;;
@@ -15,7 +15,7 @@
 ;;
 ;;; Commentary:
 ;;
-;; Host-specific configuration for the EVT03660NB development machine.
+;; Host-specific configuration for the EVT03943NB development machine.
 ;; This module provides:
 ;; - Custom project type definitions for CM12425, CM12435, and CP12431 projects
 ;; - Enhanced Magit repository discovery for multi-repo projects
@@ -224,5 +224,5 @@ ORIG-FUN is the original function, FILENAME is the file being processed, ARGS ar
   (setq gptel-magit-model 'gpt-5
         gptel-magit-backend (gptel-make-gh-copilot "Copilot")))
 
-(provide 'EVT03660NB)
-;;; EVT03660NB.el ends here
+(provide 'EVT03943NB)
+;;; EVT03943NB.el ends here
