@@ -1,25 +1,32 @@
 { lib, pkgs, ... }:
 {
-  programs.git = {
-    enable = true;
+  programs = {
     delta = {
       enable = true;
+      enableGitIntegration = true;
       options = {
         navigate = true;
         # syntax-theme = "Nord";
       };
     };
-    lfs.enable = true;
-    userEmail = "ozgezer@gmail.com";
-    userName = "Ahmet Cemal Özgezer";
-    extraConfig = {
-      # below configuration breaks magit
-      # diff.colorMoved = "default";
-      difftool.prompt = true;
-      github.user = "acml";
-      init.defaultBranch = "main";
-      merge.conflictstyle = "diff3";
-      mergetool.prompt = true;
+    git = {
+      enable = true;
+      lfs.enable = true;
+      settings = {
+        user = {
+          email = "ozgezer@gmail.com";
+          name = "Ahmet Cemal Özgezer";
+        };
+
+        # below configuration breaks magit
+        # diff.colorMoved = "default";
+        difftool.prompt = true;
+        github.user = "acml";
+        init.defaultBranch = "main";
+        merge.conflictstyle = "diff3";
+        mergetool.prompt = true;
+
+      };
     };
   };
 
