@@ -10,6 +10,6 @@
   };
 
   programs = {
-    git.userEmail = lib.mkForce "ahmet.ozgezer@siemens.com";
+    git.settings.user.email = lib.mkForce "ahmet.ozgezer@siemens.com";
   };
 }
