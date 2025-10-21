@@ -435,6 +435,7 @@ the sequences will be lost."
         (ansi-color-apply-on-region beg end t)
         (set-buffer-modified-p modified))
     (ansi-color-apply-on-region (point-min) (point-max) t)))
+
 (add-hook 'find-file-hook #'acml/render-log)
 (defun acml/render-log ()
   (when (and (stringp buffer-file-name)
@@ -959,6 +960,18 @@ you're done. This can be called from an external shell script."
   :config
   (require 'reader-autoloads))
 
+(map! :map reader-mode-map
+      :nvm "j" 'reader-scroll-down-or-next-page
+      :nvm "k" 'reader-scroll-up-or-prev-page
+      :nvm "h" 'reader-scroll-left
+      :nvm "l" 'reader-scroll-right
+      :nvm "d" 'reader-next-page
+      :nvm "u" 'reader-previous-page
+      :nvm "g" 'reader-goto-page
+      :nvm "H" 'reader-fit-to-height
+      :nvm "W" 'reader-fit-to-width
+      :nvm "q" 'quit-window)
+
 (when (and (featurep :system 'linux)
            (display-graphic-p)
            (getenv "WSL_DISTRO_NAME"))
@@ -978,18 +991,6 @@ you're done. This can be called from an external shell script."
 (map! "<S-f8>" #'previous-error)
 ;; F9
 ;; F12
-
-(map! :map reader-mode-map
-      :nvm "j" 'reader-scroll-down-or-next-page
-      :nvm "k" 'reader-scroll-up-or-prev-page
-      :nvm "h" 'reader-scroll-left
-      :nvm "l" 'reader-scroll-right
-      :nvm "d" 'reader-next-page
-      :nvm "u" 'reader-previous-page
-      :nvm "g" 'reader-goto-page
-      :nvm "H" 'reader-fit-to-height
-      :nvm "W" 'reader-fit-to-width
-      :nvm "q" 'quit-window)
 
 (use-package zone :disabled
   :config
