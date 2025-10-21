@@ -203,7 +203,9 @@
 (add-hook! 'shell-mode-hook #'compilation-shell-minor-mode)
 
 (after! compile
-  (setq compilation-scroll-output t))
+  (setq compilation-scroll-output t
+        next-error-message-highlight t))
+(add-hook! 'next-error-hook #'recenter)
 
 (use-package! daemons
   :commands (daemons daemons-disable daemons-enable daemons-reload daemons-restart daemons-start daemons-status daemons-stop)
@@ -341,7 +343,7 @@
   (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)))
 
 (use-package! ef-themes
-  :bind ("<f5>" . ef-themes-toggle)
+  ;; :bind ("<f5>" . ef-themes-toggle)
   :custom
   (ef-themes-to-toggle '(ef-eagle ef-dark))
   (ef-themes-variable-pitch-ui t)
@@ -443,8 +445,8 @@ the sequences will be lost."
     (acml/hide-dos-eol)
     (acml/ansi-color)))
 
-(setq-default left-fringe-width 8
-              right-fringe-width 8)
+;; (setq-default left-fringe-width 8
+;;               right-fringe-width 8)
 
 ;;; :tools magit
 (add-hook! 'magit-mode-hook
@@ -539,7 +541,8 @@ the sequences will be lost."
         modus-themes-mixed-fonts t
         modus-themes-variable-pitch-ui t
         modus-themes-custom-auto-reload t)
-  :bind ("<f5>" . modus-themes-toggle))
+  ;; :bind ("<f5>" . modus-themes-toggle)
+  )
 
 (use-package! nov
   :mode ("\\.epub\\'" . nov-mode)
@@ -980,16 +983,15 @@ you're done. This can be called from an external shell script."
     (start-process "" nil "setxkbmap" "us" "-variant" "colemak")
     (message "Switched to the Colemak Keyboard Layout"))
 
-  (map! "<f6>" #'acml-set-keyboard)
+  (map! "<f9>" #'acml-set-keyboard)
   (add-hook! 'emacs-startup-hook #'acml-set-keyboard))
 
-;; F5 :bind ("<f5>" . ef-themes-toggle)
-;; F6 (map! "<f6>" #'acml-set-keyboard)
-(map! "<S-f7>" #'projectile-compile-project)
-(map! "<f7>" #'projectile-repeat-last-command)
-(map! "<f8>" #'next-error)
-(map! "<S-f8>" #'previous-error)
-;; F9
+(map! "<f5>" #'projectile-run-project)
+(map! "<f6>" #'previous-error)
+(map! "<f7>" #'next-error)
+(map! "<S-f8>" #'projectile-compile-project)
+(map! "<f8>" #'projectile-repeat-last-command)
+;; (map! "<f9>" #'acml-set-keyboard)
 ;; F12
 
 (use-package zone :disabled
