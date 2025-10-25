@@ -182,9 +182,6 @@
               config = {
                 allowUnfree = true;
                 allowAliases = true;
-                permittedInsecurePackages = [
-                  "electron-32.3.3"
-                ];
               };
             };
 
