@@ -16,14 +16,14 @@
       #   name = "aldente";
       #   greedy = true;
       # }
-      {
-        name = "alt-tab";
-        greedy = true;
-      }
-      {
-        name = "amethyst";
-        greedy = true;
-      }
+      # {
+      #   name = "alt-tab";
+      #   greedy = true;
+      # }
+      # {
+      #   name = "amethyst";
+      #   greedy = true;
+      # }
       {
         name = "appcleaner";
         greedy = true;
@@ -73,7 +73,7 @@
         greedy = true;
       }
       # {
-      #   name = "languagetool";
+      #   name = "languagetool-desktop";
       #   greedy = true;
       # }
       # {
@@ -96,10 +96,10 @@
       #   name = "parallels";
       #   greedy = true;
       # }
-      {
-        name = "raycast";
-        greedy = true;
-      }
+      # {
+      #   name = "raycast";
+      #   greedy = true;
+      # }
       # {
       #   name = "roon";
       #   greedy = true;
