@@ -184,7 +184,7 @@ lib.mkMerge [
           ffmpegthumbnailer
           mediainfo
           p7zip
-          poppler_utils
+          poppler-utils
           vips
 
           trash-cli
