@@ -9,9 +9,8 @@
     packages = with pkgs; [
       dejavu_fonts
       noto-fonts
-      # noto-fonts-cjk-sans
-      # noto-fonts-cjk-serif
-      noto-fonts-extra
+      noto-fonts-cjk-sans
+      noto-fonts-cjk-serif
       unifont
     ];
   }
@@ -60,7 +59,7 @@
       name = "Hack Nerd Font";
     };
     emoji = {
-      package = pkgs.noto-fonts-emoji;
+      package = pkgs.noto-fonts-color-emoji;
       name = "Noto Color Emoji";
     };
   };
