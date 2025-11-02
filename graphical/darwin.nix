@@ -24,10 +24,10 @@
       #   name = "amethyst";
       #   greedy = true;
       # }
-      {
-        name = "appcleaner";
-        greedy = true;
-      }
+      # {
+      #   name = "appcleaner";
+      #   greedy = true;
+      # }
       # {
       #   name = "balenaetcher";
       #   greedy = true;
@@ -46,6 +46,10 @@
       # }
       # {
       #   name = "daisydisk";
+      #   greedy = true;
+      # }
+      # {
+      #   name = "element";
       #   greedy = true;
       # }
       # {
@@ -113,6 +117,10 @@
       #   greedy = true;
       # }
       # {
+      #   name = "tailscale-app";
+      #   greedy = true;
+      # }
+      # {
       #   name = "topnotch";
       #   greedy = true;
       # }
@@ -141,7 +149,7 @@
     };
   };
 
-  #security.pam.enableSudoTouchIdAuth = true;
+  # security.pam.services.sudo_local.touchIdAuth = true;
 
   services.skhd = {
     enable = true;

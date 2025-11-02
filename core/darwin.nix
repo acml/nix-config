@@ -59,7 +59,7 @@
 
   services = {
     nix-daemon.logFile = "/var/log/nix-daemon.log";
-    tailscale.enable = true;
+    tailscale.enable = lib.mkForce false; # enabled through homebrew
   };
 
   system = {
