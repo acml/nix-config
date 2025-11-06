@@ -91,6 +91,8 @@
     #   "--pre-glob=Makefile.lzma"
     #   "--pre=cat"
     # ];
+    ssh.enable = true;
+    ssh.package = pkgs.openssh;
     yazi = {
       enable = true;
       initLua = # lua

@@ -5,6 +5,7 @@
   home = {
     uid = 1000;
     packages = with pkgs; [
+      git-dt
       xorg.setxkbmap
     ];
   };

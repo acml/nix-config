@@ -13,9 +13,10 @@
     };
     packages = with pkgs; [
       devenv
-      git-lfs
+      # git-lfs
       (lib.hiPrio nixpkgs-review)
       nix-update
+      perl # direnv (shasum)
       tmate
       upterm
     ];
