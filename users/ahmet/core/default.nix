@@ -92,7 +92,7 @@
     #   "--pre=cat"
     # ];
     ssh.enable = true;
-    ssh.package = pkgs.openssh;
+    ssh.package = pkgs.openssh_gssapi;
     yazi = {
       enable = true;
       initLua = # lua
