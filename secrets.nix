@@ -7,7 +7,7 @@ let
     listToAttrs
     ;
 
-  bemeurer = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIQgTWfmR/Z4Szahx/uahdPqvEP/e/KQ1dKUYLenLuY2";
+  ahmet = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIQgTWfmR/Z4Szahx/uahdPqvEP/e/KQ1dKUYLenLuY2";
 
   hosts =
     let
@@ -23,19 +23,20 @@ let
 
   secrets = with hosts; {
     "services/acme.age" = [
+      hegel
       jung
       plato
     ];
     "services/oauth2.age" = [
+      hegel
       jung
       plato
     ];
-    "services/pihole.age" = [ ];
     "services/github-runner.age" = [ jung ];
-    "users/bemeurer/password.age" = attrValues hosts;
+    "users/ahmet/password.age" = attrValues hosts;
   };
 
-  secrets' = mapAttrs (_: v: { publicKeys = [ bemeurer ] ++ v; }) secrets;
+  secrets' = mapAttrs (_: v: { publicKeys = [ ahmet ] ++ v; }) secrets;
 
   allHostSecret =
     secretName:

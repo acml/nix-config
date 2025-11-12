@@ -6,9 +6,11 @@
   ...
 }:
 {
-  imports = [
-    nixos-hardware.nixosModules.common-cpu-amd
-    nixos-hardware.nixosModules.common-cpu-amd-pstate
+  imports = with nixos-hardware.nixosModules; [
+    common-cpu-amd
+    common-cpu-amd-pstate
+    common-gpu-amd
+    common-pc-ssd
 
     ../../core
 
@@ -18,46 +20,31 @@
     ../../hardware/nvidia.nix
     ../../hardware/secureboot.nix
 
+    ../../services/blocky.nix
+    ../../services/grafana.nix
+    ../../services/nginx.nix
+    ../../services/oauth2.nix
+    ../../services/prometheus.nix
+
     ../../users/bemeurer
 
+    ./boot.nix
     ./disko.nix
     ./state.nix
-    # ./kexec
   ];
 
-  age.secrets = {
-    rootPassword.file = ./password.age;
-  };
-
   boot = {
-    initrd = {
-      availableKernelModules = [
-        "xhci_pci"
-        "ahci"
-        "nvme"
-        "sd_mod"
-      ];
-      systemd = {
-        enable = true;
-        services.rollback = {
-          description = "Rollback root filesystem to a pristine state on boot";
-          wantedBy = [ "initrd.target" ];
-          after = [ "zfs-import-zroot.service" ];
-          before = [ "sysroot.mount" ];
-          path = with pkgs; [ zfs_unstable ];
-          unitConfig.DefaultDependencies = "no";
-          serviceConfig.Type = "oneshot";
-          script = ''
-            zfs rollback -r zroot/local/root@blank && echo "  >> >> rollback complete << <<"
-          '';
-        };
-      };
-    };
     kernelModules = [ "kvm-amd" ];
     kernelPackages = pkgs.linuxPackages_latest;
     lanzaboote.pkiBundle = lib.mkForce "/var/lib/sbctl";
     tmp.useTmpfs = true;
     zfs.package = pkgs.zfs_unstable;
+  };
+
+  console = {
+    font = "ter-v28n";
+    keyMap = "us";
+    packages = with pkgs; [ terminus_font ];
   };
 
   environment.systemPackages = with pkgs; [
@@ -68,7 +55,6 @@
 
   hardware.enableRedistributableFirmware = true;
 
-  home-manager.verbose = true;
   home-manager.users.bemeurer = {
     imports = [
       ../../users/bemeurer/music
@@ -78,10 +64,6 @@
   networking = {
     hostId = "65618eec";
     hostName = "hegel";
-    firewall = {
-      # allowedTCPPorts = [ 32400 ];
-      # allowedUDPPorts = [ 32400 ];
-    };
     nftables.enable = true;
   };
 
@@ -91,6 +73,8 @@
       options = "-d";
     };
     settings = {
+      download-buffer-size = 268435456; # 256MiB
+      max-jobs = lib.mkForce 12;
       max-substitution-jobs = 32;
       system-features = [
         "benchmark"
@@ -101,6 +85,8 @@
       ];
     };
   };
+
+  powerManagement.cpuFreqGovernor = "performance";
 
   security = {
     pam.loginLimits = [
@@ -126,6 +112,19 @@
   };
 
   services = {
+    chrony = {
+      enable = true;
+      servers = [
+        "time.nist.gov"
+        "time.cloudflare.com"
+        "time.google.com"
+        "tick.usnogps.navy.mil"
+      ];
+      extraConfig = ''
+        allow 10.0.0.0/24
+      '';
+    };
+    nginx.resolver.addresses = [ "127.0.0.1:5335" ];
     fwupd.enable = true;
     smartd.enable = true;
     zfs = {
@@ -138,6 +137,7 @@
         interval = "weekly";
       };
     };
+    unbound.settings.server.access-control = [ "10.0.0.0/24 allow" ];
   };
 
   systemd.network.networks = {
@@ -151,9 +151,16 @@
 
   time.timeZone = "America/New_York";
 
-  users = {
-    users.root.hashedPasswordFile = config.age.secrets.rootPassword.path;
+  users.groups.media = {
+    gid = 999;
+    members = [
+      "bemeurer"
+      config.services.syncthing.user
+    ];
   };
+
+  age.secrets.rootPassword.file = ./password.age;
+  users.users.root.hashedPasswordFile = config.age.secrets.rootPassword.path;
 
   virtualisation = {
     containers = {

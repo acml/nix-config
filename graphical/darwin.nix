@@ -1,8 +1,8 @@
 {
   homebrew = {
-    # taps = [
-    #   "1password/tap"
-    # ];
+    taps = [
+      # "1password/tap"
+    ];
     casks = [
       # {
       #   name = "1password";
@@ -18,10 +18,6 @@
       # }
       # {
       #   name = "alt-tab";
-      #   greedy = true;
-      # }
-      # {
-      #   name = "amethyst";
       #   greedy = true;
       # }
       # {
@@ -66,10 +62,6 @@
       # }
       # {
       #   name = "google-chrome";
-      #   greedy = true;
-      # }
-      # {
-      #   name = "jitsi-meet";
       #   greedy = true;
       # }
       {
@@ -132,13 +124,10 @@
       #   name = "zoom";
       #   greedy = true;
       # }
-      # {
-      #   name = "zulip";
-      #   greedy = true;
-      # }
     ];
     masApps = {
       # "Keynote" = 409183694;
+      # "Magnet" = 441258766;
       # "Noizio" = 928871589;
       # "Numbers" = 409203825;
       # "Pages" = 409201541;
@@ -149,7 +138,7 @@
     };
   };
 
-  # security.pam.services.sudo_local.touchIdAuth = true;
+  security.pam.services.sudo_local.touchIdAuth = true;
 
   services.skhd = {
     enable = true;

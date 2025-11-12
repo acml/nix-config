@@ -97,16 +97,11 @@ with config.networking;
         datasources = [
           {
             name = "Blocky Query Log";
-            type = "postgres";
-            url = "/run/postgresql";
+            type = "mysql";
+            url = "/run/mysqld/mysqld.sock";
             user = "grafana";
-            jsonData = {
-              database = "blocky";
-              sslmode = "disable";
-              postgresVersion = 1700; # PostgreSQL 17
-              timescaledb = false;
-            };
             orgId = 1;
+            jsonData.database = "blocky";
           }
         ];
         deleteDatasources = [
@@ -128,13 +123,6 @@ with config.networking;
   };
 
   systemd.services = {
-    # XXX: I do not remember why this was here, but at some point it started
-    # failing because $PSQL was gone from the postStart script. Upon commenting
-    # this out, things seem to work fine, but i'm leaving this here for future
-    # me (or you?).
-    # postgresql.postStart = lib.mkAfter ''
-    #   $PSQL -tAc 'GRANT pg_read_all_data TO grafana'
-    # '';
     blocky = {
       after = [
         "unbound.service"
