@@ -224,5 +224,9 @@ ORIG-FUN is the original function, FILENAME is the file being processed, ARGS ar
   (setq gptel-magit-model 'gpt-5
         gptel-magit-backend (gptel-make-gh-copilot "Copilot")))
 
+(after! dirvish
+  (setq dirvish-quick-access-entries
+        (append dirvish-quick-access-entries '(("c" "/smb:z004cvhz%ad001.siemens.net@tristkfilesrv:/Data/008_Projects/CP1200/" "CP1200")))))
+
 (provide 'EVT03943NB)
 ;;; EVT03943NB.el ends here

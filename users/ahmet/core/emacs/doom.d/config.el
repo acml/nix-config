@@ -259,6 +259,7 @@
                                       (format "  %s " (nerd-icons-codicon "nf-cod-root_folder"))
                                       (format " %s " (nerd-icons-faicon "nf-fa-angle_right")))
         dirvish-quick-access-entries '(("h" "~/"                          "Home")
+                                       ("b" "~/Documents/"                "Documents")
                                        ("d" "~/Downloads/"                "Downloads")
                                        ("m" "/mnt/"                       "Drives")
                                        ("n" "~/.nix-config/"              "Nix")
