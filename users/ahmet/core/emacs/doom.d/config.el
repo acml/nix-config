@@ -264,7 +264,8 @@
                                        ("m" "/mnt/"                       "Drives")
                                        ("n" "~/.nix-config/"              "Nix")
                                        ("p" "~/Projects/"                 "Projects")
-                                       ("t" "~/.local/share/Trash/files/" "TrashCan"))
+                                       ("t" "~/.local/share/Trash/files/" "TrashCan")
+                                       ("w" "~/Work/"                     "Work"))
         dirvish-subtree-prefix "  "
         dirvish-subtree-state-style 'nerd)
   ;; (dirvish-peek-mode)
@@ -487,7 +488,6 @@ the sequences will be lost."
 
 (setq magit-repository-directories '(("~/.nix-config" . 0)
                                      ("~/.nixpkgs" . 0)
-                                     ;; ("~/git_pa" . 4)
                                      ("~/Projects" . 3))
       magit-save-repository-buffers nil
       ;; Don't restore the wconf after quitting magit, it's jarring
@@ -779,7 +779,9 @@ clicked."
                                        projectile-root-top-down-recurring)
    projectile-enable-caching t
    projectile-enable-cmake-presets t
-   projectile-project-search-path '(("~/git_pa" . 2) ("~/Projects" . 3)))
+   projectile-project-search-path '(("~/.nix-config/" . 0)
+                                    ("~/Projects" . 3)
+                                    ("~/Work" . 2)))
   (projectile-register-project-type 'acml/exercism-lua '(".exercism" ".busted" "HELP.md" "README.md")
                                     :project-file '("?*.lua")
                                     :test "busted -v"
