@@ -89,10 +89,6 @@
       #   greedy = true;
       # }
       # {
-      #   name = "parallels";
-      #   greedy = true;
-      # }
-      # {
       #   name = "raycast";
       #   greedy = true;
       # }
@@ -143,8 +139,7 @@
   services.skhd = {
     enable = true;
     skhdConfig = ''
-      cmd - return : open -a kitty.app -n
-      # cmd - return : open --new -a ghostty.app
+      cmd - return : open --new -a kitty.app
       cmd + alt - return : emacsclient --alternate-editor="" --create-frame
     '';
   };
