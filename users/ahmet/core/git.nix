@@ -1,4 +1,3 @@
-{ lib, pkgs, ... }:
 {
   programs = {
     delta = {
@@ -25,7 +24,6 @@
         init.defaultBranch = "main";
         merge.conflictstyle = "diff3";
         mergetool.prompt = true;
-
       };
     };
   };

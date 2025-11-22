@@ -28,6 +28,7 @@
     # ./neovim.nix
     ./ssh.nix
     ./starship.nix
+    ./television.nix
     # ./tmux.nix
     ./xdg.nix
     ./zsh.nix
@@ -38,24 +39,18 @@
 
   home = {
     username = "ahmet";
-    stateVersion = "23.05";
+    stateVersion = "25.11";
     packages =
       with pkgs;
-      [
+      lib.filter (lib.meta.availableOn stdenv.hostPlatform) [
         expect
-        eza
-        fd
-        fzf
         mediainfo
-        neofetch
+        mosh
         nix-closure-size
         nix-output-monitor
         ouch
         rsync
         truecolor-check
-      ]
-      ++ lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [
-        mosh
       ];
     shellAliases = {
       cat = "bat";
@@ -83,7 +78,12 @@
       enable = true;
       extraPackages = with pkgs.bat-extras; [ batman ];
     };
+    eza.enable = true;
+    fastfetch.enable = true;
+    fd.enable = true;
+    fzf.enable = true;
     gpg.enable = true;
+    jq.enable = true;
     nix-index.enable = true;
     ripgrep.enable = true;
     ripgrep.package = pkgs.ripgrep.override { withPCRE2 = true; };
@@ -318,6 +318,7 @@
       hash = "sha256-n8EQgzKEOIG6Qq7og7CNqMMFliWM5vfi2zNILdpmUfI=";
     };
     targets = {
+      fzf.enable = lib.mkDefault false;
       gnome.enable = hostType == "nixos";
       gtk.enable = hostType == "nixos";
       kde.enable = lib.mkDefault false;

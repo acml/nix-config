@@ -1,43 +1,4 @@
 let
-  audioDefaults = {
-    "application/ogg" = "org.gnome.Lollypop.desktop";
-    "application/vnd.apple.mpegurl" = "org.gnome.Lollypop.desktop";
-    "application/x-ogg" = "org.gnome.Lollypop.desktop";
-    "application/x-ogm-audio" = "org.gnome.Lollypop.desktop";
-    "application/xspf+xml" = "org.gnome.Lollypop.desktop";
-    "audio/aac" = "org.gnome.Lollypop.desktop";
-    "audio/ac3" = "org.gnome.Lollypop.desktop";
-    "audio/flac" = "org.gnome.Lollypop.desktop";
-    "audio/m4a" = "org.gnome.Lollypop.desktop";
-    "audio/mp3" = "org.gnome.Lollypop.desktop";
-    "audio/mp4" = "org.gnome.Lollypop.desktop";
-    "audio/mpeg" = "org.gnome.Lollypop.desktop";
-    "audio/mpegurl" = "org.gnome.Lollypop.desktop";
-    "audio/ogg" = "org.gnome.Lollypop.desktop";
-    "audio/vnd.rn-realaudio" = "org.gnome.Lollypop.desktop";
-    "audio/vorbis" = "org.gnome.Lollypop.desktop";
-    "audio/x-aac" = "org.gnome.Lollypop.desktop";
-    "audio/x-flac" = "org.gnome.Lollypop.desktop";
-    "audio/x-m4a" = "org.gnome.Lollypop.desktop";
-    "audio/x-mp3" = "org.gnome.Lollypop.desktop";
-    "audio/x-mpeg" = "org.gnome.Lollypop.desktop";
-    "audio/x-mpegurl" = "org.gnome.Lollypop.desktop";
-    "audio/x-ms-wma" = "org.gnome.Lollypop.desktop";
-    "audio/x-musepack" = "org.gnome.Lollypop.desktop";
-    "audio/x-oggflac" = "org.gnome.Lollypop.desktop";
-    "audio/x-opus+ogg" = "org.gnome.Lollypop.desktop";
-    "audio/x-pn-realaudio" = "org.gnome.Lollypop.desktop";
-    "audio/x-scpls" = "org.gnome.Lollypop.desktop";
-    "audio/x-speex" = "org.gnome.Lollypop.desktop";
-    "audio/x-vorbis" = "org.gnome.Lollypop.desktop";
-    "audio/x-vorbis+ogg" = "org.gnome.Lollypop.desktop";
-    "audio/x-wav" = "org.gnome.Lollypop.desktop";
-    "x-content/audio-player" = "org.gnome.Lollypop.desktop";
-  };
-  chatDefaults = {
-    "x-scheme-handler/mailto" = "thunderbird.desktop";
-    "message/rfc822" = "thunderbird.desktop";
-  };
   documentDefaults = {
     "application/vnd.comicbook-rar" = "org.gnome.Evince.desktop";
     "application/vnd.comicbook+zip" = "org.gnome.Evince.desktop";
@@ -74,11 +35,7 @@ let
     "application/vnd.ms-xpsdocument" = "org.gnome.Evince.desktop";
     "application/illustrator" = "org.gnome.Evince.desktop";
   };
-  otherDefaults = {
-    "x-scheme-handler/prusaslicer" = "PrusaSlicerURLProtocol.desktop";
-  };
 in
 {
-  xdg.mimeApps.defaultApplications =
-    audioDefaults // chatDefaults // documentDefaults // otherDefaults;
+  xdg.mimeApps.defaultApplications = documentDefaults;
 }
