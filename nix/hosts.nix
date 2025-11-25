@@ -56,6 +56,12 @@ let
       throw "unknown host type '${type}'";
 in
 {
+  comte = mkHost {
+    type = "nixos";
+    address = "100.124.173.75";
+    hostPlatform = "x86_64-linux";
+    pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILdXiTjpN4zgnC8x9d0LLhWwKLohHkPchuORcus0zWAa";
+  };
   goethe = mkHost {
     type = "home-manager";
     hostPlatform = "x86_64-linux";
