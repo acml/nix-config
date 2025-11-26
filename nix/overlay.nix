@@ -3,11 +3,8 @@
 let
   inherit (inputs.nixpkgs) lib;
 
-  importLocalOverlay =
-    file: lib.composeExtensions (_: _: { __inputs = inputs; }) (import (./overlays + "/${file}"));
-
   localOverlays = lib.mapAttrs' (
-    f: _: lib.nameValuePair (lib.removeSuffix ".nix" f) (importLocalOverlay f)
+    f: _: lib.nameValuePair (lib.removeSuffix ".nix" f) (import (./overlays + "/${f}"))
   ) (builtins.readDir ./overlays);
 
 in
@@ -17,7 +14,6 @@ localOverlays
     [
       inputs.agenix.overlays.default
       inputs.deploy-rs.overlays.default
-      inputs.lovesegfault-vim-config.overlays.default
       (final: prev: {
         inherit (inputs.nix-fast-build.packages.${final.stdenv.hostPlatform.system}) nix-fast-build;
       })
@@ -28,6 +24,19 @@ localOverlays
           inherit (final) config;
         };
       })
+      (
+        final: prev:
+        let
+          nixvimPkgs = inputs.nixvim.legacyPackages.${final.stdenv.hostPlatform.system};
+          nixvimModule = {
+            pkgs = final;
+            module = import ../users/bemeurer/neovim/config.nix;
+          };
+        in
+        {
+          neovim-bemeurer = nixvimPkgs.makeNixvimWithModule nixvimModule;
+        }
+      )
     ]
     ++ (lib.attrValues localOverlays)
   );

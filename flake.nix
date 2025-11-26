@@ -4,13 +4,11 @@
   nixConfig = rec {
     extra-substituters = [
       "https://nix-config.cachix.org?priority=1"
-      "https://vim-config.cachix.org?priority=2"
-      "https://nix-community.cachix.org?priority=3"
+      "https://nix-community.cachix.org?priority=2"
     ];
     extra-trusted-substituters = extra-substituters;
     extra-trusted-public-keys = [
       "nix-config.cachix.org-1:Vd6raEuldeIZpttVQfrUbLvXJHzzzkS0pezXCVVjDG4="
-      "vim-config.cachix.org-1:lebqx8RjL8pKLZIjCURKN91CB60vISuKpJboWSmjRJM="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
     ];
   };
@@ -62,11 +60,6 @@
       inputs.systems.follows = "systems";
     };
 
-    gemoji = {
-      url = "github:github/gemoji";
-      flake = false;
-    };
-
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -101,17 +94,17 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
+    catppuccin.url = "github:catppuccin/nix";
+
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs = {
-        # Optional inputs removed
-        nuschtosSearch.follows = "";
-        # Required inputs
         flake-parts.follows = "flake-parts";
-        # nixpkgs.follows = "nixpkgs";
+        nixpkgs.follows = "nixpkgs";
+        nuschtosSearch.follows = "";
+        systems.follows = "systems";
       };
     };
-    catppuccin.url = "github:catppuccin/nix";
 
     git-hooks = {
       url = "github:cachix/git-hooks.nix";
@@ -136,23 +129,6 @@
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    truecolor-check = {
-      url = "git+https://gist.github.com/fdeaf79e921c2f413f44b6f613f6ad53.git";
-      flake = false;
-    };
-
-    lovesegfault-vim-config = {
-      url = "github:lovesegfault/vim-config";
-      inputs = {
-        flake-compat.follows = "flake-compat";
-        flake-parts.follows = "flake-parts";
-        git-hooks.follows = "git-hooks";
-        nixpkgs.follows = "nixpkgs";
-        treefmt-nix.follows = "treefmt-nix";
-        systems.follows = "systems";
-      };
     };
   };
 
