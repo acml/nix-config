@@ -159,7 +159,8 @@
             prefix_string = " ¤ "
           },
           language_config = {
-            nix = { disabled = true }
+            nix = { disabled = true },
+            org = { disabled = true }
           }
         })
 
@@ -692,6 +693,7 @@
                 dev = [
                   "~/git_pa"
                   "~/Projects"
+                  "~/Work"
                 ];
                 patterns = [
                   "proj.default.ini"
