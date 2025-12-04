@@ -1,77 +1,104 @@
 # nix-config [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org) [![ci](https://github.com/lovesegfault/nix-config/actions/workflows/ci.yaml/badge.svg)](https://github.com/lovesegfault/nix-config/actions/workflows/ci.yaml)
 
-This repository holds my NixOS configuration. It is fully reproducible, flakes
-based, and position-independent, meaning there is no moving around of
-`configuration.nix`.
+This repository holds my Nix configurations. It uses the [nixos-unified]
+framework for consistent configuration across NixOS, nix-darwin, and
+home-manager.
 
-Deployment is done using [deploy-rs], see [usage](#usage).
+For the configurations' entry points, see the individual [configurations], as
+well as [flake.nix]. For adding overlays see [overlays](#adding-overlays).
 
-For the configurations' entry points see the individual [hosts], as well as
-[flake.nix]. For adding overlays see [overlays](#Adding-overlays).
-
-Hostnames are picked from my [hostname list][hostnames]
+Hostnames are picked from my [hostname list][hostnames].
 
 ## Structure
 
 ```
 .
-├── core         # Baseline configurations applicable to all machines
-├── dev          # Developer tooling configuration
-├── graphical    # Sway/i3 configuration for the desktop
-├── hardware     # Hardware-specific configuration
-├── hosts        # Machine definitions
-├── nix          # Nix build support files (overlays, deployment code)
-└── users        # Per-user configurations
+├── configurations/          # Host-specific configurations
+│   ├── nixos/              # NixOS hosts
+│   ├── darwin/             # nix-darwin hosts
+│   └── home/               # Standalone home-manager hosts
+├── modules/                 # Reusable modules
+│   ├── nixos/              # NixOS-only modules
+│   ├── darwin/             # Darwin-only modules
+│   ├── home/               # Shared home-manager modules
+│   ├── shared/             # Shared NixOS+Darwin modules
+│   └── flake-parts/        # Flake-level configuration
+├── overlays/               # Nixpkgs overlays
+└── secrets/                # Encrypted secrets (agenix-rekey)
 ```
 
 ## Usage
 
 ### Deploying
 
-#### NixOS
-
-To deploy all hosts:
+The unified `activate` command works for all configuration types:
 
 ```console
-$ deploy
+$ nix run .#activate
 ```
 
-To deploy a specific host:
+This auto-detects your hostname and activates the appropriate configuration.
+
+#### Alternative methods
+
+**NixOS:**
+```console
+$ sudo nixos-rebuild --flake .#<hostname> switch
+```
+
+**Darwin:**
+```console
+$ darwin-rebuild --flake .#<hostname> switch
+```
+
+**Home Manager:**
+```console
+$ home-manager --flake .#<hostname> switch
+```
+
+### Updating inputs
+
+To update the primary flake inputs (nixpkgs, home-manager, nix-darwin):
 
 ```console
-$ deploy .#myHost
-```
-
-#### Darwin
-
-For macOS hosts using `nix-darwin`:
-
-```console 
-$ darwin-rebuild --flake ~/src/nix-config#poincare switch
-```
-
-#### Home Manager
-
-For non-NixOS hosts (i.e. home-manager-only systems such as `beme-glaptop`):
-
-```console
-$ home-manager --flake ~/src/nix-config#myHost switch
+$ nix run .#update
 ```
 
 ### Adding overlays
 
-Overlays should be added as individual nix files to ./nix/overlays with format
+Overlays should be added as individual nix files to `./overlays/` with format:
 
 ```nix
 final: prev: {
-    hello = (prev.hello.overrideAttrs (oldAttrs: { doCheck = false; }));
+  hello = prev.hello.overrideAttrs (oldAttrs: { doCheck = false; });
 }
 ```
 
-For more examples see [./nix/overlays][overlays].
+For more examples see [overlays].
 
-[deploy-rs]: https://github.com/serokell/deploy-rs
-[hosts]: https://github.com/lovesegfault/nix-config/blob/master/hosts
+### Module conventions
+
+- **nixosModules.\*** - NixOS-only modules from `modules/nixos/`
+- **darwinModules.\*** - Darwin-only modules from `modules/darwin/`
+- **homeModules.\*** - Shared home-manager modules from `modules/home/`
+
+Modules are imported via flake outputs:
+
+```nix
+{ flake, ... }:
+let
+  inherit (flake) inputs self;
+in
+{
+  imports = [
+    self.nixosModules.default
+    self.nixosModules.hardware-thinkpad-z13
+  ];
+}
+```
+
+[nixos-unified]: https://github.com/srid/nixos-unified
+[configurations]: https://github.com/lovesegfault/nix-config/tree/master/configurations
 [flake.nix]: https://github.com/lovesegfault/nix-config/blob/master/flake.nix
 [hostnames]: https://gist.github.com/2a059213162c190f125c16a8d4463043
-[overlays]: https://github.com/lovesegfault/nix-config/blob/master/nix/overlays
+[overlays]: https://github.com/lovesegfault/nix-config/tree/master/overlays
