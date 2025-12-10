@@ -236,27 +236,30 @@ in
         };
       };
 
-      # Regenerate workflows for Renovate PRs
+      # Regenerate workflows for Renovate PRs or manual trigger
       ".github/workflows/regenerate-workflows.yaml" = {
         name = "regenerate-workflows";
 
-        on.pull_request.paths = [
-          "modules/flake-parts/actions.nix"
-          "flake.lock"
-        ];
+        on = {
+          pull_request.paths = [
+            "modules/flake-parts/actions.nix"
+            "flake.lock"
+          ];
+          workflow_dispatch = { };
+        };
 
         permissions.contents = "write";
 
         jobs.regenerate = {
           runs-on = "ubuntu-24.04";
-          # Only run for Renovate PRs (pre-commit hook handles local dev)
-          "if" = "github.actor == 'renovate[bot]'";
+          # Only run for Renovate PRs or manual dispatch
+          "if" = "github.actor == 'renovate[bot]' || github.event_name == 'workflow_dispatch'";
           steps = [
             (
               steps.checkout
               // {
                 "with" = {
-                  ref = "\${{ github.head_ref }}";
+                  ref = "\${{ github.head_ref || github.ref_name }}";
                   token = "\${{ secrets.PAT }}";
                 };
               }
