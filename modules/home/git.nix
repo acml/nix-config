@@ -5,7 +5,7 @@
       enableGitIntegration = true;
       options = {
         navigate = true;
-        syntax-theme = "Nord";
+        # syntax-theme = "Nord";
       };
     };
     git = {
@@ -13,12 +13,13 @@
       lfs.enable = true;
       settings = {
         user = {
-          email = "bernardo@meurer.org";
-          name = "Bernardo Meurer";
+          email = "ozgezer@gmail.com";
+          name = "Ahmet Cemal Özgezer";
         };
+        # below configuration breaks magit
         diff.colorMoved = "default";
         difftool.prompt = true;
-        github.user = "lovesegfault";
+        github.user = "acml";
         init.defaultBranch = "main";
         merge.conflictstyle = "diff3";
         mergetool.prompt = true;

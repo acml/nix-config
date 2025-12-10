@@ -40,12 +40,11 @@ in
     ];
     variables = {
       SHELL = lib.getExe pkgs.zsh;
-      EDITOR = "nvim";
     };
   };
 
   homebrew = {
-    enable = false;
+    enable = true;
     onActivation = {
       cleanup = "zap";
       autoUpdate = true;

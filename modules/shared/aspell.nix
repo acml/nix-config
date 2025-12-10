@@ -7,7 +7,7 @@
         en
         en-computers
         en-science
-        tr
+        pt_BR
       ]
     ))
   ];

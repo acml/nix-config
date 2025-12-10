@@ -1,14 +1,14 @@
 {
   home.file.".ssh/config".text = ''
-    Include ~/.ssh/config.host
+    Include config.d/*
 
-    Host *
-      CanonicalizeHostname yes
-      PermitLocalCommand yes
-      CanonicalDomains meurer.org.beta.tailscale.net
+    # Host *
+    #   CanonicalizeHostname yes
+    #   PermitLocalCommand yes
+    #   CanonicalDomains meurer.org.beta.tailscale.net
 
-    Match canonical Host *.meurer.org,*.meurer.org.beta.tailscale.net
-      ForwardAgent yes
+    # Match canonical Host *.meurer.org,*.meurer.org.beta.tailscale.net
+    #   ForwardAgent yes
 
     Match canonical Host *
       ChallengeResponseAuthentication no

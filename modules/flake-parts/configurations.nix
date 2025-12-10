@@ -40,10 +40,13 @@ in
     };
 
     darwinConfigurations = {
+      Ahmets-MacBook-Pro = mkDarwin (self + "/configurations/darwin/Ahmets-MacBook-Pro");
       poincare = mkDarwin (self + "/configurations/darwin/poincare");
     };
 
     homeConfigurations = {
+      darkstar = mkHome "darkstar" "x86_64-linux";
+      evt03943nb = mkHome "evt03943nb" "x86_64-linux";
       goethe = mkHome "goethe" "x86_64-linux";
       hilbert = mkHome "hilbert" "x86_64-linux";
       popper = mkHome "popper" "aarch64-linux";

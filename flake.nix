@@ -1,5 +1,5 @@
 {
-  description = "acml's NixOS config";
+  description = "lovesegfault's NixOS config";
 
   nixConfig = rec {
     extra-substituters = [
@@ -15,7 +15,7 @@
 
   inputs = {
     # Core infrastructure
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
@@ -40,7 +40,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -65,13 +65,12 @@
     };
 
     # Theming
-    catppuccin.url = "github:catppuccin/nix";
     tinted-schemes = {
       url = "github:tinted-theming/schemes";
       flake = false;
     };
     stylix = {
-      url = "github:nix-community/stylix/release-25.11";
+      url = "github:danth/stylix";
       inputs = {
         flake-parts.follows = "flake-parts";
         nixpkgs.follows = "nixpkgs";
@@ -119,7 +118,7 @@
 
     # Editor configuration
     nixvim = {
-      url = "github:nix-community/nixvim/nixos-25.11";
+      url = "github:nix-community/nixvim";
       inputs = {
         flake-parts.follows = "flake-parts";
         nixpkgs.follows = "nixpkgs";

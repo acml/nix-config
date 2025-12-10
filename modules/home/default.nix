@@ -18,10 +18,12 @@ in
     bash
     btop
     dev
+    emacs
     fish
     git
     htop
-    neovim
+    # neovim
+    nixvim
     ssh
     starship
     television
