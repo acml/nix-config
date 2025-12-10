@@ -55,15 +55,24 @@ let
     lib.mapAttrsToList (mkHostInfo "home") (self.homeConfigurations or { })
   );
 
+  # GitHub Actions references - all versions consolidated here for Renovate
+  actions = {
+    alls-green = "re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe"; # v1.2.2
+    cache = "actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830"; # v4.3.0
+    cachix = "cachix/cachix-action@0fc020193b5a1fa3ac4575aa3a7d3aa6a35435ad"; # v16
+    checkout = "actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8"; # v6.0.1
+    nix-installer = "DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a"; # v21
+  };
+
   # Reusable step definitions
   steps = {
     checkout = {
-      uses = "actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8"; # v6
+      uses = actions.checkout;
       "with".persist-credentials = false;
     };
 
     nixInstaller = {
-      uses = "DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a"; # v21
+      uses = actions.nix-installer;
       "with".extra-conf = ''
         accept-flake-config = true
         always-allow-substitutes = true
@@ -73,7 +82,7 @@ let
     };
 
     nixCache = {
-      uses = "actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830"; # v4
+      uses = actions.cache;
       "with" = {
         path = "~/.cache/nix";
         key = "nix-eval-\${{ runner.os }}-\${{ runner.arch }}-\${{ hashFiles('flake.lock') }}";
@@ -82,7 +91,7 @@ let
     };
 
     cachix = {
-      uses = "cachix/cachix-action@0fc020193b5a1fa3ac4575aa3a7d3aa6a35435ad"; # v16
+      uses = actions.cachix;
       "with" = {
         name = "nix-config";
         authToken = "\${{ secrets.CACHIX_AUTH_TOKEN }}";
@@ -129,97 +138,145 @@ in
       runs-on = "ubuntu-24.04";
     };
 
-    workflows.".github/workflows/ci.yaml" = {
-      name = "ci";
+    workflows = {
+      ".github/workflows/ci.yaml" = {
+        name = "ci";
 
-      on = {
-        push.branches = [
-          "master"
-          "try"
+        on = {
+          push.branches = [
+            "master"
+            "try"
+          ];
+          pull_request = { };
+          workflow_dispatch = { };
+        };
+
+        concurrency = {
+          group = "ci-\${{ github.head_ref || github.ref_name }}";
+          cancel-in-progress = "\${{ github.event_name == 'pull_request' }}";
+        };
+
+        # Minimal permissions for security - this workflow only needs to read code
+        permissions = { };
+
+        jobs = {
+          # Flake check on all platforms
+          flake-check = {
+            name = "flake check (\${{ matrix.systems.platform }})";
+            strategy.matrix.systems = checkPlatforms;
+            runs-on = "\${{ matrix.systems.os }}";
+            steps = setupSteps ++ [
+              {
+                name = "nix flake check";
+                run = "nix flake check '${flakeRef}'";
+              }
+              {
+                name = "nix flake show";
+                run = "nix flake show '${flakeRef}'";
+              }
+            ];
+          };
+
+          # Build hosts directly (NixOS + home-manager on any platform)
+          build = {
+            name = "\${{ matrix.attrs.name }} (\${{ matrix.attrs.hostPlatform }})";
+            strategy = {
+              fail-fast = false;
+              matrix.attrs = nixosHosts ++ homeHosts;
+            };
+            runs-on = "\${{ matrix.attrs.runsOn }}";
+            steps = setupSteps ++ [ (steps.nix-fast-build "\${{ matrix.attrs.attr }}") ];
+          };
+
+          # Build linux-builder for nix-darwin hosts (cross-compile on Linux)
+          build-linux-builder = {
+            name = "linux-builder for \${{ matrix.attrs.name }} (\${{ matrix.attrs.equivalentLinuxPlatform }})";
+            "if" = toString (lib.length darwinHosts > 0);
+            strategy = {
+              fail-fast = false;
+              matrix.attrs = darwinHosts;
+            };
+            runs-on = "\${{ matrix.attrs.equivalentLinuxRunner }}";
+            steps = setupSteps ++ [ (steps.nix-fast-build "\${{ matrix.attrs.linuxBuilderAttr }}") ];
+          };
+
+          # Build nix-darwin hosts (after linux-builder)
+          build-darwin-host = {
+            name = "\${{ matrix.attrs.name }} (\${{ matrix.attrs.hostPlatform }})";
+            "if" = toString (lib.length darwinHosts > 0);
+            needs = [ "build-linux-builder" ];
+            strategy = {
+              fail-fast = false;
+              matrix.attrs = darwinHosts;
+            };
+            runs-on = "\${{ matrix.attrs.runsOn }}";
+            steps = setupSteps ++ [ (steps.nix-fast-build "\${{ matrix.attrs.attr }}") ];
+          };
+
+          # Final check job - aggregates all results
+          check = {
+            runs-on = "ubuntu-24.04";
+            needs = [
+              "flake-check"
+              "build"
+              "build-linux-builder"
+              "build-darwin-host"
+            ];
+            "if" = "always()";
+            steps = [
+              {
+                uses = actions.alls-green;
+                "with" = {
+                  jobs = "\${{ toJSON(needs) }}";
+                  allowed-skips = "build-linux-builder, build-darwin-host";
+                };
+              }
+            ];
+          };
+        };
+      };
+
+      # Regenerate workflows for Renovate PRs
+      ".github/workflows/regenerate-workflows.yaml" = {
+        name = "regenerate-workflows";
+
+        on.pull_request.paths = [
+          "modules/flake-parts/actions.nix"
+          "flake.lock"
         ];
-        pull_request = { };
-        workflow_dispatch = { };
-      };
 
-      concurrency = {
-        group = "ci-\${{ github.head_ref || github.ref_name }}";
-        cancel-in-progress = "\${{ github.event_name == 'pull_request' }}";
-      };
+        permissions.contents = "write";
 
-      # Minimal permissions for security - this workflow only needs to read code
-      permissions = { };
-
-      jobs = {
-        # Flake check on all platforms
-        flake-check = {
-          name = "flake check (\${{ matrix.systems.platform }})";
-          strategy.matrix.systems = checkPlatforms;
-          runs-on = "\${{ matrix.systems.os }}";
-          steps = setupSteps ++ [
-            {
-              name = "nix flake check";
-              run = "nix flake check '${flakeRef}'";
-            }
-            {
-              name = "nix flake show";
-              run = "nix flake show '${flakeRef}'";
-            }
-          ];
-        };
-
-        # Build hosts directly (NixOS + home-manager on any platform)
-        build = {
-          name = "\${{ matrix.attrs.name }} (\${{ matrix.attrs.hostPlatform }})";
-          strategy = {
-            fail-fast = false;
-            matrix.attrs = nixosHosts ++ homeHosts;
-          };
-          runs-on = "\${{ matrix.attrs.runsOn }}";
-          steps = setupSteps ++ [ (steps.nix-fast-build "\${{ matrix.attrs.attr }}") ];
-        };
-
-        # Build linux-builder for nix-darwin hosts (cross-compile on Linux)
-        build-linux-builder = {
-          name = "linux-builder for \${{ matrix.attrs.name }} (\${{ matrix.attrs.equivalentLinuxPlatform }})";
-          "if" = toString (lib.length darwinHosts > 0);
-          strategy = {
-            fail-fast = false;
-            matrix.attrs = darwinHosts;
-          };
-          runs-on = "\${{ matrix.attrs.equivalentLinuxRunner }}";
-          steps = setupSteps ++ [ (steps.nix-fast-build "\${{ matrix.attrs.linuxBuilderAttr }}") ];
-        };
-
-        # Build nix-darwin hosts (after linux-builder)
-        build-darwin-host = {
-          name = "\${{ matrix.attrs.name }} (\${{ matrix.attrs.hostPlatform }})";
-          "if" = toString (lib.length darwinHosts > 0);
-          needs = [ "build-linux-builder" ];
-          strategy = {
-            fail-fast = false;
-            matrix.attrs = darwinHosts;
-          };
-          runs-on = "\${{ matrix.attrs.runsOn }}";
-          steps = setupSteps ++ [ (steps.nix-fast-build "\${{ matrix.attrs.attr }}") ];
-        };
-
-        # Final check job - aggregates all results
-        check = {
+        jobs.regenerate = {
           runs-on = "ubuntu-24.04";
-          needs = [
-            "flake-check"
-            "build"
-            "build-linux-builder"
-            "build-darwin-host"
-          ];
-          "if" = "always()";
+          # Only run for Renovate PRs (pre-commit hook handles local dev)
+          "if" = "github.actor == 'renovate[bot]'";
           steps = [
+            (
+              steps.checkout
+              // {
+                "with" = {
+                  ref = "\${{ github.head_ref }}";
+                  token = "\${{ secrets.PAT }}";
+                };
+              }
+            )
+            steps.nixInstaller
+            steps.nixCache
+            steps.cachix
             {
-              uses = "re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe"; # release/v1
-              "with" = {
-                jobs = "\${{ toJSON(needs) }}";
-                allowed-skips = "build-linux-builder, build-darwin-host";
-              };
+              name = "Regenerate workflows";
+              run = "nix run .#render-workflows";
+            }
+            {
+              name = "Amend commit with regenerated workflows";
+              run = ''
+                git config user.name "hatesegfault"
+                git config user.email "bernardo+hatesegfault@meurer.org"
+                git add .github/workflows/
+                git diff --staged --quiet || git commit --amend --no-edit
+                git push --force-with-lease
+              '';
             }
           ];
         };

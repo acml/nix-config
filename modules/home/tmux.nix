@@ -1,98 +1,86 @@
 { pkgs, ... }:
 {
-  home = {
-    packages =
-      with pkgs;
-      lib.optionals stdenv.hostPlatform.isLinux [
-        sysstat
-        tmux-mem-cpu-load
-      ];
-  };
   programs.tmux = {
     enable = true;
+    sensibleOnTop = true;
+    aggressiveResize = true;
     clock24 = true;
-    mouse = true;
+    escapeTime = 0;
+    # Use idempotent new-session to avoid creating duplicate sessions when both
+    # NixOS (/etc/tmux.conf) and home-manager configs are loaded. The -A flag
+    # attaches if the session exists, otherwise creates it.
+    newSession = false;
     plugins = with pkgs.tmuxPlugins; [
-      sensible
-      {
-        plugin = catppuccin;
-        extraConfig = /* tmux */ ''
-          set -g @catppuccin_icon_window_activity "󱅫 "
-          set -g @catppuccin_icon_window_bell "󰂞 "
-          set -g @catppuccin_icon_window_current "󰖯 "
-          set -g @catppuccin_icon_window_last "󰖰 "
-          set -g @catppuccin_icon_window_mark "󰃀 "
-          set -g @catppuccin_icon_window_silent "󰂛 "
-          set -g @catppuccin_icon_window_zoom "󰁌 "
-          # set -g @catppuccin_status_modules_right "application session date_time"
-          set -g @catppuccin_window_right_separator "█"
-          set -g @catppuccin_window_status_enable "yes"
-        '';
-      }
-      # cpu
+      vim-tmux-navigator
     ];
-    prefix = "C-\\\\";
     secureSocket = false;
     terminal = "tmux-256color";
-    extraConfig = /* tmux */ ''
-      set-option -g status-interval 1
-      set-option -g status-position top
+    historyLimit = 30000;
+    keyMode = "vi";
+    prefix = "C-a";
+    extraConfig = ''
+      new-session -A -s 0
 
-      set-option -a terminal-features ",*:RGB"
+      # update the env when attaching to an existing session
+      set -g update-environment -r
 
-      # undercurl support
-      set -as terminal-overrides ',*:Smulx=\E[4::%p1%dm'
-      # underscore colours - needs tmux-3.0
-      set -as terminal-overrides ',*:Setulc=\E[58::2::%p1%{65536}%/%d::%p1%{256}%/%{255}%&%d::%p1%{255}%&%d%;m'
+      set -g set-clipboard on
+      set -ag terminal-overrides ",alacritty*:Tc,foot*:Tc,xterm*:Tc"
 
-      set -g visual-activity off
-      # To enable Yazi's image preview to work correctly in tmux
-      set -gq allow-passthrough on
-      set -ga update-environment TERM
-      set -ga update-environment TERM_PROGRAM
+      set -as terminal-features ",alacritty*:RGB,foot*:RGB,xterm*:RGB"
+      set -as terminal-features ",alacritty*:hyperlinks,foot*:hyperlinks,xterm*:hyperlinks"
+      set -as terminal-features ",alacritty*:usstyle,foot*:usstyle,xterm*:usstyle"
+      set -as terminal-features ",alacritty*:extkeys,foot*:extkeys,xterm*:extkeys"
+      set -as terminal-features ",alacritty*:clipboard,foot*:clipboard,xterm*:clipboard"
+
+
+      # recommended by vim.health
+      set-option -g focus-events on
 
       # automatically renumber windows
       set -g renumber-windows on
 
+      bind C-a last-window
+      bind a send-prefix
       bind R source-file ~/.config/tmux/tmux.conf \; display-message "Config reloaded..."
-      bind '"' split-window -c "#{pane_current_path}"
-      bind % split-window -h -c "#{pane_current_path}"
-      bind c new-window -c "#{pane_current_path}"
 
-      # '@pane-is-vim' is a pane-local option that is set by the plugin on load,
-      # and unset when Neovim exits or suspends; note that this means you'll probably
-      # not want to lazy-load smart-splits.nvim, as the variable won't be set until
-      # the plugin is loaded
+      bind : command-prompt
+      bind r refresh-client
+      bind L clear-history
 
-      # Smart pane switching with awareness of Neovim splits.
-      bind-key -n C-h if -F "#{@pane-is-vim}" 'send-keys C-h'  'select-pane -L'
-      bind-key -n C-j if -F "#{@pane-is-vim}" 'send-keys C-j'  'select-pane -D'
-      bind-key -n C-k if -F "#{@pane-is-vim}" 'send-keys C-k'  'select-pane -U'
-      bind-key -n C-l if -F "#{@pane-is-vim}" 'send-keys C-l'  'select-pane -R'
+      bind space next-window
+      bind bspace previous-window
+      bind enter next-layout
 
-      # Alternatively, if you want to disable wrapping when moving in non-neovim panes, use these bindings
-      # bind-key -n C-h if -F '#{@pane-is-vim}' { send-keys C-h } { if -F '#{pane_at_left}'   "" 'select-pane -L' }
-      # bind-key -n C-j if -F '#{@pane-is-vim}' { send-keys C-j } { if -F '#{pane_at_bottom}' "" 'select-pane -D' }
-      # bind-key -n C-k if -F '#{@pane-is-vim}' { send-keys C-k } { if -F '#{pane_at_top}'    "" 'select-pane -U' }
-      # bind-key -n C-l if -F '#{@pane-is-vim}' { send-keys C-l } { if -F '#{pane_at_right}'  "" 'select-pane -R' }
+      bind v  split-window -h -c "#{pane_current_path}"
+      bind s  split-window -v -c "#{pane_current_path}"
+      bind h  select-pane -L
+      bind j  select-pane -D
+      bind k  select-pane -U
+      bind l  select-pane -R
+      bind \\ split-window -h -c "#{pane_current_path}"
+      bind -  split-window -v -c "#{pane_current_path}"
 
-      # Smart pane resizing with awareness of Neovim splits.
-      bind-key -n M-h if -F "#{@pane-is-vim}" 'send-keys M-h' 'resize-pane -L 3'
-      bind-key -n M-j if -F "#{@pane-is-vim}" 'send-keys M-j' 'resize-pane -D 3'
-      bind-key -n M-k if -F "#{@pane-is-vim}" 'send-keys M-k' 'resize-pane -U 3'
-      bind-key -n M-l if -F "#{@pane-is-vim}" 'send-keys M-l' 'resize-pane -R 3'
+      bind C-o rotate-window
 
-      bind-key -T copy-mode-vi 'C-h' select-pane -L
-      bind-key -T copy-mode-vi 'C-j' select-pane -D
-      bind-key -T copy-mode-vi 'C-k' select-pane -U
-      bind-key -T copy-mode-vi 'C-l' select-pane -R
-      bind-key -T copy-mode-vi 'C-\' select-pane -l
+      bind + select-layout main-horizontal
+      bind = select-layout main-vertical
 
-      set -g status-right "#[bg=#{@thm_flamingo},fg=#{@thm_crust}]#[reverse]#[noreverse]󰊚  "
-      set -ag status-right "#[fg=#{@thm_fg},bg=#{@thm_mantle}] #(tmux-mem-cpu-load) "
-      set -ag status-right "#{E:@catppuccin_status_application}"
-      set -ag status-right "#{E:@catppuccin_status_session}"
-      set -ag status-right "#{E:@catppuccin_status_date_time}"
+      bind a last-pane
+      bind q display-panes
+      bind c new-window
+      bind t next-window
+      bind T previous-window
+
+      bind [ copy-mode
+      bind ] paste-buffer
+
+      set -g base-index 0
+      set-window-option -g automatic-rename
+      setw -g monitor-activity on
+      set -g visual-activity off
+
+      set -g status-right '%a | %Y-%m-%d | %H:%M'
     '';
   };
 }

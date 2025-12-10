@@ -165,4 +165,14 @@ in
     ];
     execer = [ "cannot:${final.systemd}/bin/systemd-run" ];
   };
+
+  ccinit = writeShellApp {
+    name = "ccinit";
+    inputs = with final; [
+      coreutils
+      gawk
+      gnugrep
+    ];
+    fake.external = [ "claude" ];
+  };
 }
