@@ -1,4 +1,12 @@
+{ pkgs, ... }:
 {
+  programs = {
+    ssh = {
+      enable = true;
+      package = pkgs.openssh_gssapi;
+    };
+  };
+
   home.file.".ssh/config".text = ''
     Include config.d/*
 

@@ -29,6 +29,7 @@ in
     television
     tmux
     xdg
+    yazi
     zsh
   ];
 
@@ -62,8 +63,14 @@ in
   programs = {
     atuin = {
       enable = true;
-      settings.auto_sync = false;
       flags = [ "--disable-up-arrow" ];
+      settings = {
+        auto_sync = false;
+        enter_accept = true;
+        show_help = false;
+        update_check = false;
+        workspaces = true;
+      };
     };
     bat = {
       enable = true;
@@ -80,7 +87,10 @@ in
       flake = "git+https://github.com/lovesegfault/nix-config";
     };
     nix-index.enable = true;
-    ripgrep.enable = true;
+    ripgrep = {
+      enable = true;
+      package = pkgs.ripgrep.override { withPCRE2 = true; };
+    };
     zoxide.enable = true;
   };
 

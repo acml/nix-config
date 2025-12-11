@@ -60,6 +60,14 @@ jobs:
           hostPlatform: x86_64-linux
           name: spinoza
           runsOn: ubuntu-24.04
+        - attr: homeConfigurations.darkstar.activationPackage
+          hostPlatform: x86_64-linux
+          name: darkstar
+          runsOn: ubuntu-24.04
+        - attr: homeConfigurations.evt03943nb.activationPackage
+          hostPlatform: x86_64-linux
+          name: evt03943nb
+          runsOn: ubuntu-24.04
         - attr: homeConfigurations.goethe.activationPackage
           hostPlatform: x86_64-linux
           name: goethe
