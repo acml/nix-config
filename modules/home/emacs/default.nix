@@ -115,6 +115,7 @@ lib.mkMerge [
           glslang
 
           emacs-lsp-booster
+          copilot-language-server
 
           # CMake LSP
           cmake

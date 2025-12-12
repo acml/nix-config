@@ -50,6 +50,7 @@
 (package! beginend)
 (package! daemons)
 (package! catppuccin-theme)
+(package! copilot :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el")))
 (package! disk-usage)
 (package! dts-mode)
 (package! exercism)
