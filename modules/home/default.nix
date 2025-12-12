@@ -91,7 +91,10 @@ in
       enable = true;
       package = pkgs.ripgrep.override { withPCRE2 = true; };
     };
-    zoxide.enable = true;
+    zoxide = {
+      enable = true;
+      options = [ "--cmd cd" ];
+    };
   };
 
   stylix.targets = {
