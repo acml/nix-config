@@ -12,6 +12,7 @@
       '';
     };
     packages = with pkgs; [
+      expect # provides unbuffer
       git-lfs
       (lib.hiPrio nixpkgs-review)
       nix-update
