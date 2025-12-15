@@ -10,7 +10,6 @@ jobs:
     steps:
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
       with:
-        fetch-depth: 2
         ref: ${{ github.head_ref || github.ref_name }}
         token: ${{ secrets.PAT }}
     - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a
@@ -20,7 +19,7 @@ jobs:
           always-allow-substitutes = true
           builders-use-substitutes = true
           max-jobs = auto
-    - uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb
+    - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
       with:
         key: nix-eval-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('flake.lock')
           }}
@@ -40,11 +39,6 @@ jobs:
         git add .github/workflows/
         git diff --staged --quiet || git commit --amend --no-edit
         git push --force-with-lease
-    - uses: peter-evans/enable-pull-request-automerge@a660677d5469627102a1c1e11409dd063606628d
-      with:
-        merge-method: rebase
-        pull-request-number: ${{ github.event.pull_request.number }}
-        token: ${{ secrets.PAT }}
     timeout-minutes: 60
 name: regenerate-workflows
 'on':
@@ -55,4 +49,3 @@ name: regenerate-workflows
   workflow_dispatch: {}
 permissions:
   contents: write
-  pull-requests: write

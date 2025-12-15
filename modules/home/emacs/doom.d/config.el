@@ -1157,7 +1157,8 @@ you're done. This can be called from an external shell script."
   (add-to-list 'copilot-indentation-alist '(org-mode 2))
   (add-to-list 'copilot-indentation-alist '(text-mode 2))
   (add-to-list 'copilot-indentation-alist '(clojure-mode 2))
-  (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2)))
+  (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
+  (setq copilot-max-char -1))
 
 ;; Load a file with the same name as the computer’s name. Just keep on going if
 ;; the requisite file isn't there.
