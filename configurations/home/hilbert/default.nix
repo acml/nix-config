@@ -27,6 +27,9 @@ in
   };
 
   programs = {
+    atuin = {
+      settings.auto_sync = lib.mkForce true;
+    };
     bash = {
       bashrcExtra = ''
         if [ -f /etc/bashrc ]; then
@@ -58,6 +61,7 @@ in
       '')
       (lib.mkOrder 99999 ''
         export PATH="/root/.local/state/nix/profile/bin:$PATH"
+        unsetopt EXTENDED_GLOB
       '')
     ];
   };
