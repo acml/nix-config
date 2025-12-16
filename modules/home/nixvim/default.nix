@@ -221,7 +221,7 @@
             nargs = "*",
             bang = true,
         })
-        vim.keymap.set({'n', 'i'}, '<F19>', "<Esc>:Make -j$(nproc) -s", { silent = false, desc = "Compile in project" })
+        vim.keymap.set({'n', 'i'}, '<F20>', "<Esc>:Make -j$(nproc) -s", { silent = false, desc = "Compile in project" })
 
         vim.api.nvim_create_user_command("OverseerRestartLast", function()
           local overseer = require("overseer")
@@ -232,7 +232,7 @@
             overseer.run_action(tasks[1], "restart")
           end
         end, {})
-        vim.keymap.set({'n', 'i'}, '<F7>', "<Esc>:OverseerRestartLast<CR>", { silent = false, desc = "Repeat last command" })
+        vim.keymap.set({'n', 'i'}, '<F8>', "<Esc>:OverseerRestartLast<CR>", { silent = false, desc = "Repeat last command" })
 
         -- Keybindings shared by insert mode and command mode
         -- Move by character
