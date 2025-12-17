@@ -1,12 +1,5 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 {
-
-  imports = [
-    ./autocmd.nix
-    ./keymaps.nix
-    ./options.nix
-  ];
-
   programs = {
 
     nixvim = {
@@ -814,4 +807,12 @@
       };
     };
   };
+
+  imports =
+    with builtins;
+    with lib;
+    map (fn: ./${fn}) (
+      filter (fn: (fn != "default.nix" && !hasSuffix ".md" "${fn}")) (attrNames (readDir ./.))
+    );
+
 }
