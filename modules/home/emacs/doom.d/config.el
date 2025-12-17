@@ -507,13 +507,14 @@ the sequences will be lost."
   :after gptel magit
   :if (not (string= (system-name) "EVT03943NB"))
   :config
-  (setq gptel-magit-model 'google/gemini-2.0-flash-exp:free
-        gptel-magit-backend (gptel-make-openai "OpenRouter"
-                              :host "openrouter.ai"
-                              :endpoint "/api/v1/chat/completions"
-                              :stream t
-                              :key #'gptel-api-key-from-auth-source
-                              :models '(google/gemini-2.0-flash-exp:free))))
+  ;; (setq gptel-magit-model 'google/gemini-2.0-flash-exp:free
+  ;;       gptel-magit-backend (gptel-make-openai "OpenRouter"
+  ;;                             :host "openrouter.ai"
+  ;;                             :endpoint "/api/v1/chat/completions"
+  ;;                             :stream t
+  ;;                             :key #'gptel-api-key-from-auth-source
+  ;;                             :models '(google/gemini-2.0-flash-exp:free)))
+  )
 
 (defvar elken/mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
   "Only use `mixed-pitch-mode' for given modes.")
