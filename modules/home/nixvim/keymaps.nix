@@ -28,14 +28,14 @@ _: {
           };
         }
         {
-          key = "<F8>";
+          key = "<F7>";
           action = "<cmd>cnext<CR>";
           options = {
             desc = "next qf item";
           };
         }
         {
-          key = "<F20>";
+          key = "<F6>";
           action = "<cmd>cprevious<CR>";
           options = {
             desc = "previous qf item";
