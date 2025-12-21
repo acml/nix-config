@@ -247,7 +247,42 @@ lib.mkMerge [
             lib.filter (lib.meta.availableOn pkgs.stdenv.hostPlatform) [
               djvu
               emacsql
-              treesit-grammars.with-all-grammars
+              # treesit-grammars.with-all-grammars
+              (treesit-grammars.with-grammars (
+                grammars: with grammars; [
+                  tree-sitter-bash
+                  tree-sitter-c
+                  tree-sitter-cmake
+                  tree-sitter-cpp
+                  tree-sitter-css
+                  tree-sitter-dockerfile
+                  tree-sitter-elisp
+                  tree-sitter-go
+                  tree-sitter-gomod
+                  tree-sitter-hcl
+                  tree-sitter-html
+                  tree-sitter-java
+                  tree-sitter-javascript
+                  tree-sitter-jsdoc
+                  tree-sitter-json
+                  tree-sitter-json5
+                  tree-sitter-latex
+                  tree-sitter-lua
+                  tree-sitter-make
+                  tree-sitter-nix
+                  tree-sitter-nu
+                  tree-sitter-php
+                  tree-sitter-python
+                  tree-sitter-ruby
+                  tree-sitter-rust
+                  tree-sitter-sql
+                  tree-sitter-toml
+                  tree-sitter-tsx
+                  tree-sitter-typescript
+                  tree-sitter-yaml
+                  tree-sitter-zig
+                ]
+              ))
               vterm
             ]
             ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
