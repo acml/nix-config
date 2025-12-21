@@ -115,7 +115,6 @@ lib.mkMerge [
           glslang
 
           emacs-lsp-booster
-          copilot-language-server
 
           # CMake LSP
           cmake
@@ -245,6 +244,7 @@ lib.mkMerge [
           (
             with epkgs;
             lib.filter (lib.meta.availableOn pkgs.stdenv.hostPlatform) [
+              copilot
               djvu
               emacsql
               # treesit-grammars.with-all-grammars
