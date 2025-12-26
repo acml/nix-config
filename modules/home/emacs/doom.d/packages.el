@@ -90,6 +90,7 @@
 (package! trashed)
 (package! ascii :recipe (:host github :repo "acml/ascii"))
 (package! visual-ascii-mode)
+(package! yazi :recipe (:host github :repo "bommbo/yazi.el"))
 (package! ztree :recipe (:host codeberg :repo "fourier/ztree"))
 
 (package! macher :recipe (:host github :repo "kmontag/macher"))

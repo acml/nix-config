@@ -994,6 +994,8 @@ you're done. This can be called from an external shell script."
 ;; (map! "<f9>" #'acml-set-keyboard)
 ;; F12
 
+(use-package! yazi)
+
 (use-package zone :disabled
   :config
   (zone-when-idle (* 60 1)))
