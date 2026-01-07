@@ -3,33 +3,20 @@
   programs = {
     ssh = {
       enable = true;
+      enableDefaultConfig = false;
       package = pkgs.openssh_gssapi;
+      matchBlocks."*" = {
+        controlMaster = "auto";
+        controlPath = "~/.ssh/ssh-%r@%h:%p";
+        controlPersist = "30m";
+        forwardAgent = false;
+        forwardX11 = false;
+        forwardX11Trusted = false;
+        hashKnownHosts = true;
+        serverAliveCountMax = 5;
+        serverAliveInterval = 60;
+      };
+      extraConfig = "Include config.d/*";
     };
   };
-
-  home.file.".ssh/config".text = ''
-    Include config.d/*
-
-    # Host *
-    #   CanonicalizeHostname yes
-    #   PermitLocalCommand yes
-    #   CanonicalDomains meurer.org.beta.tailscale.net
-
-    # Match canonical Host *.meurer.org,*.meurer.org.beta.tailscale.net
-    #   ForwardAgent yes
-
-    Match canonical Host *
-      ChallengeResponseAuthentication no
-      ControlMaster auto
-      ControlPath ~/.ssh/ssh-%r@%h:%p
-      ControlPersist 30m
-      ForwardAgent no
-      ForwardX11 no
-      ForwardX11Trusted no
-      HashKnownHosts yes
-      ServerAliveCountMax 5
-      ServerAliveInterval 60
-      StrictHostKeyChecking ask
-      VerifyHostKeyDNS yes
-  '';
 }
