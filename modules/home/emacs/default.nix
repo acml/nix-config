@@ -302,11 +302,8 @@ lib.mkMerge [
                 };
                 files = ''(:defaults "render-core.so")'';
                 nativeBuildInputs = with pkgs; [ pkg-config ];
-                buildInputs = [
-                  pkgs.gcc
-                  pkgs.mupdf
-                  pkgs.gnumake
-                  pkgs.pkg-config
+                buildInputs = with pkgs; [
+                  mupdf-headless
                 ];
                 preBuild = "make clean all";
               })
