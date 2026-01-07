@@ -79,9 +79,8 @@
 ;; Maybe the pdf-tools package is also installed outside of nix, and this is
 ;; conflicting. list-load-path-shadows will show you if you have a package
 ;; defined in multiple locations. This will use pdf-tools installed by nix
-(when (featurep :system 'macos)
-  (package! pdf-tools :built-in 'prefer))
-(unless (featurep :system 'macos)
+(if (featurep :system 'macos)
+    (package! pdf-tools :built-in 'prefer)
   (package! reader :built-in 'prefer))
 (package! rainbow-mode)
 (package! scopeline)
