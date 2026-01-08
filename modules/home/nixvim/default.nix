@@ -182,27 +182,17 @@
         end
 
         vim.api.nvim_create_user_command("Make", function(params)
-          -- Example usage
           local main_folders = get_main_folders("proj.default.ini")
           local csd = vim.fn.getcwd() .. "/" .. main_folders .. "/csd"
-          print("mainFolders: " .. (main_folders or "not found"))
-          print("cwd: " .. vim.fn.getcwd())
 
-          -- local makeprg = vim.fn.getcwd() .. "/cp1200/cp1243-5_G2/csd/docker_make.sh"
           -- Insert args at the '$*' in the makeprg
           local cmd, num_subs = vim.o.makeprg:gsub("%$%*", params.args)
           if num_subs == 0 then
             cmd = cmd .. " " .. params.args
           end
           local task = require("overseer").new_task({
-            -- cmd = vim.fn.expandcmd(cmd),
-            -- cmd = vim.fn.getcwd() .. "/cp1200/cp1243-5_G2/csd/docker_make.sh" .. " " .. params.args,
-            -- cwd = vim.fn.getcwd() .. "/cp1200/cp1243-5_G2/csd",
-            cmd = csd .. "/docker_make.sh" .. " " .. params.args,
-            -- print("cmd: " .. cmd),
-            -- cwd: /home/ahmet/git_pa/CP1243-5_G2
+            cmd = "set -o pipefail && mkdir -p log && unbuffer " .. csd .. "/docker_make.sh " .. params.args .. " |& tee log/build-$(date -Iseconds).log",
             cwd = csd,
-            -- print("cwd: " .. cwd),
             components = {
               { "on_output_quickfix", open = not params.bang, open_height = 8 },
               "default",

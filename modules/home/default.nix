@@ -103,6 +103,9 @@ in
     gtk.enable = isIntegrated && pkgs.stdenv.isLinux;
     kde.enable = lib.mkDefault false;
     xfce.enable = lib.mkDefault false;
+    emacs.enable = lib.mkDefault false;
+    nixvim.enable = lib.mkDefault false;
+    starship.enable = lib.mkDefault false;
   };
 
   systemd.user.startServices = "sd-switch";
