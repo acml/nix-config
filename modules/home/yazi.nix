@@ -3,6 +3,13 @@
   programs = {
     yazi = {
       enable = true;
+      extraPackages = with pkgs; [
+        ffmpeg
+        imagemagick
+        mediainfo
+        ouch
+        trash-cli
+      ];
       initLua = # lua
         ''
           require("git"):setup()
@@ -55,6 +62,7 @@
           require("yatline-githead"):setup({
             theme = catppuccin_theme,
           })
+          require("recycle-bin"):setup()
         '';
       keymap = {
         mgr.prepend_keymap = [
@@ -74,11 +82,6 @@
             desc = "Close the current tab, or quit if it's last";
           }
           {
-            on = [ "<C-c>" ];
-            run = "plugin confirm-quit";
-            desc = "Quit the process";
-          }
-          {
             on = [
               "c"
               "m"
@@ -91,6 +94,30 @@
             run = "plugin ouch";
             desc = "Compress with ouch";
           }
+          {
+            on = [
+              "g"
+              "p"
+            ];
+            run = "cd ~/Projects";
+            desc = "Cd to ~/Projects";
+          }
+          {
+            on = [
+              "g"
+              "w"
+            ];
+            run = "cd ~/Work";
+            desc = "Cd to ~/Work";
+          }
+          {
+            on = [
+              "R"
+              "b"
+            ];
+            run = "plugin recycle-bin";
+            desc = "Open Recycle Bin menu";
+          }
         ];
       };
       plugins = with pkgs.yaziPlugins; {
@@ -99,6 +126,7 @@
         inherit git;
         inherit mediainfo;
         inherit ouch;
+        inherit recycle-bin;
         inherit yatline;
         inherit yatline-catppuccin;
         inherit yatline-githead;
