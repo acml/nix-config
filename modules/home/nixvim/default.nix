@@ -257,7 +257,7 @@
 
       extraPlugins = with pkgs.vimPlugins; [
         vim-plugin-AnsiEsc
-        go-nvim
+        # go-nvim
         nvim-biscuits
       ];
 
@@ -380,7 +380,7 @@
         diffview.enable = true;
         direnv.enable = true;
         helpview.enable = true;
-        hmts.enable = true;
+        hmts.enable = false;
         image.enable = true;
         indent-blankline = {
           enable = true;
@@ -638,7 +638,7 @@
             ];
           };
         };
-        rainbow-delimiters.enable = true;
+        rainbow-delimiters.enable = false;
         refactoring.enable = true;
         render-markdown.enable = true;
         rustaceanvim.enable = true;
@@ -716,7 +716,7 @@
         };
         todo-comments.enable = true;
         treesitter = {
-          enable = true;
+          enable = false;
           folding.enable = true;
           nixvimInjections = true;
           settings = {
@@ -724,15 +724,15 @@
             highlight.enable = true;
           };
         };
-        treesitter-textobjects.enable = true;
+        treesitter-textobjects.enable = false;
         trim.enable = true;
         trim.settings.trim_on_write = false;
         trouble.enable = true;
-        ts-comments.enable = true;
-        ts-context-commentstring.enable = true;
+        ts-comments.enable = false;
+        ts-context-commentstring.enable = false;
         vim-matchup = {
           enable = true;
-          treesitter.enable = true;
+          treesitter.enable = false;
           treesitter.include_match_words = true;
         };
         which-key = {

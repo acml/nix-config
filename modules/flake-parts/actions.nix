@@ -59,7 +59,7 @@ let
   actions = {
     alls-green = "re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe"; # v1.2.2
     automerge = "peter-evans/enable-pull-request-automerge@a660677d5469627102a1c1e11409dd063606628d"; # v3.0.0
-    cache = "actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb"; # v5.0.1
+    cache = "actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7"; # v5.0.2
     cachix = "cachix/cachix-action@0fc020193b5a1fa3ac4575aa3a7d3aa6a35435ad"; # v16
     checkout = "actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8"; # v6.0.1
     nix-installer = "DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a"; # v21
@@ -189,31 +189,6 @@ in
             steps = setupSteps ++ [ (steps.nix-fast-build "\${{ matrix.attrs.attr }}") ];
           };
 
-          # Build linux-builder for nix-darwin hosts (cross-compile on Linux)
-          build-linux-builder = {
-            name = "linux-builder for \${{ matrix.attrs.name }} (\${{ matrix.attrs.equivalentLinuxPlatform }})";
-            "if" = toString (lib.length darwinHosts > 0);
-            strategy = {
-              fail-fast = false;
-              matrix.attrs = darwinHosts;
-            };
-            runs-on = "\${{ matrix.attrs.equivalentLinuxRunner }}";
-            steps = setupSteps ++ [ (steps.nix-fast-build "\${{ matrix.attrs.linuxBuilderAttr }}") ];
-          };
-
-          # Build nix-darwin hosts (after linux-builder)
-          build-darwin-host = {
-            name = "\${{ matrix.attrs.name }} (\${{ matrix.attrs.hostPlatform }})";
-            "if" = toString (lib.length darwinHosts > 0);
-            needs = [ "build-linux-builder" ];
-            strategy = {
-              fail-fast = false;
-              matrix.attrs = darwinHosts;
-            };
-            runs-on = "\${{ matrix.attrs.runsOn }}";
-            steps = setupSteps ++ [ (steps.nix-fast-build "\${{ matrix.attrs.attr }}") ];
-          };
-
           # Final check job - aggregates all results
           check = {
             runs-on = "ubuntu-24.04";
@@ -234,7 +209,31 @@ in
               }
             ];
           };
-        };
+        }
+        // (lib.optionalAttrs (lib.length darwinHosts > 0) {
+          # Build linux-builder for nix-darwin hosts (cross-compile on Linux)
+          build-linux-builder = {
+            name = "linux-builder for \${{ matrix.attrs.name }} (\${{ matrix.attrs.equivalentLinuxPlatform }})";
+            strategy = {
+              fail-fast = false;
+              matrix.attrs = darwinHosts;
+            };
+            runs-on = "\${{ matrix.attrs.equivalentLinuxRunner }}";
+            steps = setupSteps ++ [ (steps.nix-fast-build "\${{ matrix.attrs.linuxBuilderAttr }}") ];
+          };
+
+          # Build nix-darwin hosts (after linux-builder)
+          build-darwin-host = {
+            name = "\${{ matrix.attrs.name }} (\${{ matrix.attrs.hostPlatform }})";
+            needs = [ "build-linux-builder" ];
+            strategy = {
+              fail-fast = false;
+              matrix.attrs = darwinHosts;
+            };
+            runs-on = "\${{ matrix.attrs.runsOn }}";
+            steps = setupSteps ++ [ (steps.nix-fast-build "\${{ matrix.attrs.attr }}") ];
+          };
+        });
       };
 
       # Regenerate workflows for Renovate PRs or manual trigger

@@ -21,7 +21,7 @@ jobs:
           always-allow-substitutes = true
           builders-use-substitutes = true
           max-jobs = auto
-    - uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb
+    - uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
       with:
         key: nix-eval-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('flake.lock')
           }}
@@ -82,7 +82,6 @@ jobs:
           runsOn: ubuntu-22.04-arm
     timeout-minutes: 60
   build-darwin-host:
-    if: '1'
     name: ${{ matrix.attrs.name }} (${{ matrix.attrs.hostPlatform }})
     needs:
     - build-linux-builder
@@ -98,7 +97,7 @@ jobs:
           always-allow-substitutes = true
           builders-use-substitutes = true
           max-jobs = auto
-    - uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb
+    - uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
       with:
         key: nix-eval-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('flake.lock')
           }}
@@ -126,7 +125,6 @@ jobs:
           runsOn: macos-15
     timeout-minutes: 60
   build-linux-builder:
-    if: '1'
     name: linux-builder for ${{ matrix.attrs.name }} (${{ matrix.attrs.equivalentLinuxPlatform
       }})
     runs-on: ${{ matrix.attrs.equivalentLinuxRunner }}
@@ -141,7 +139,7 @@ jobs:
           always-allow-substitutes = true
           builders-use-substitutes = true
           max-jobs = auto
-    - uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb
+    - uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
       with:
         key: nix-eval-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('flake.lock')
           }}
@@ -196,7 +194,7 @@ jobs:
           always-allow-substitutes = true
           builders-use-substitutes = true
           max-jobs = auto
-    - uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb
+    - uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
       with:
         key: nix-eval-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('flake.lock')
           }}
