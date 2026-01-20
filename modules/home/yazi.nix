@@ -4,11 +4,20 @@
     yazi = {
       enable = true;
       extraPackages = with pkgs; [
-        ffmpeg
-        imagemagick
+        _7zz-rar # for archive extraction and preview, requires non-standalone version
+        fd # for file searching
+        ffmpeg # for video thumbnails
+        fzf # for quick file subtree navigation, >= 0.53.0
+        imagemagick # for Font, HEIC, and JPEG XL preview, >= 7.1.1
+        jq # for JSON preview
         mediainfo
         ouch
+        poppler # for PDF preview
+        resvg # for SVG preview
+        ripgrep.override
+        { withPCRE2 = true; } # for file content searching
         trash-cli
+        zoxide # for historical directories navigation, requires fzf
       ];
       initLua = # lua
         ''
