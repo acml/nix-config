@@ -106,6 +106,7 @@ in
     emacs.enable = lib.mkDefault false;
     nixvim.enable = lib.mkDefault false;
     starship.enable = lib.mkDefault false;
+    yazi.enable = lib.mkDefault false;
   };
 
   systemd.user.startServices = "sd-switch";

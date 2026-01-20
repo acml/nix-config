@@ -78,6 +78,10 @@
         tinted-schemes.follows = "tinted-schemes";
       };
     };
+    yazi-flavors = {
+      url = "github:yazi-rs/flavors";
+      flake = false;
+    };
 
     # Disk management
     disko = {

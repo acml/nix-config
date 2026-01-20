@@ -627,7 +627,8 @@
         "stylix": "stylix",
         "systems": "systems",
         "tinted-schemes": "tinted-schemes",
-        "treefmt-nix": "treefmt-nix"
+        "treefmt-nix": "treefmt-nix",
+        "yazi-flavors": "yazi-flavors"
       }
     },
     "rust-overlay": {
@@ -804,6 +805,22 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "yazi-flavors": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1768756605,
+        "narHash": "sha256-xGnebGuSOZpQl/QhuZkwgrjfAlfbEtruA9UVe030mZM=",
+        "owner": "yazi-rs",
+        "repo": "flavors",
+        "rev": "ca6165818bb84d46af5fd8f95bedd2b1c395890a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yazi-rs",
+        "repo": "flavors",
         "type": "github"
       }
     }
