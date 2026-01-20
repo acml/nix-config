@@ -157,7 +157,7 @@
           }
         })
 
-        require('go').setup()
+        -- require('go').setup()
 
         local function get_main_folders(filepath)
           local file = io.open(filepath, "r")
