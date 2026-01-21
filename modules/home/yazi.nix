@@ -14,8 +14,7 @@
         ouch
         poppler # for PDF preview
         resvg # for SVG preview
-        ripgrep.override
-        { withPCRE2 = true; } # for file content searching
+        (ripgrep.override { withPCRE2 = true; }) # for file content searching
         trash-cli
         zoxide # for historical directories navigation, requires fzf
       ];
