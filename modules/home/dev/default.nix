@@ -12,6 +12,7 @@
       '';
     };
     packages = with pkgs; [
+      devenv
       expect # provides unbuffer
       git-lfs
       (lib.hiPrio nixpkgs-review)
