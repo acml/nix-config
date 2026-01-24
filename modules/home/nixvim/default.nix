@@ -380,7 +380,7 @@
         diffview.enable = true;
         direnv.enable = true;
         helpview.enable = true;
-        hmts.enable = false;
+        hmts.enable = true;
         image.enable = true;
         indent-blankline = {
           enable = true;
@@ -638,7 +638,7 @@
             ];
           };
         };
-        rainbow-delimiters.enable = false;
+        rainbow-delimiters.enable = true;
         refactoring.enable = true;
         render-markdown.enable = true;
         rustaceanvim.enable = true;
@@ -716,7 +716,8 @@
         };
         todo-comments.enable = true;
         treesitter = {
-          enable = false;
+          enable = true;
+          package = pkgs.vimPlugins.nvim-treesitter-legacy;
           folding.enable = true;
           nixvimInjections = true;
           settings = {
@@ -724,15 +725,15 @@
             highlight.enable = true;
           };
         };
-        treesitter-textobjects.enable = false;
+        # treesitter-textobjects.enable = true;
         trim.enable = true;
         trim.settings.trim_on_write = false;
         trouble.enable = true;
-        ts-comments.enable = false;
-        ts-context-commentstring.enable = false;
+        ts-comments.enable = true;
+        ts-context-commentstring.enable = true;
         vim-matchup = {
           enable = true;
-          treesitter.enable = false;
+          treesitter.enable = true;
           treesitter.include_match_words = true;
         };
         which-key = {
