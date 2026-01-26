@@ -1028,10 +1028,8 @@ you're done. This can be called from an external shell script."
     :key #'gptel-api-key-from-auth-source
     :stream t)
   (setq
-   gptel-model 'gemini-2.0-flash-exp
-   gptel-backend (gptel-make-gemini "Gemini"
-                   :key #'gptel-api-key-from-auth-source
-                   :stream t))
+   gptel-model 'gpt-4.1
+   gptel-backend (gptel-make-gh-copilot "Copilot"))
   (gptel-make-kagi "Kagi"
     :key #'gptel-api-key-from-auth-source)
   (gptel-make-openai "Groq"
