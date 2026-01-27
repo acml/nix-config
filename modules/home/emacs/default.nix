@@ -292,20 +292,23 @@ lib.mkMerge [
               (melpaBuild {
                 ename = "reader";
                 pname = "emacs-reader";
-                version = "20251226";
+                version = "20260116";
                 src = pkgs.fetchFromGitea {
                   domain = "codeberg.org";
                   owner = "divyaranjan";
                   repo = "emacs-reader";
-                  rev = "00ddf8d4c3"; # replace with 'version' for stable
-                  hash = "sha256-goZQyLeWalHTIBDtw9TQGmrKBXx7oDiROoKG6YZXd2k=";
+                  rev = "3f4af37bbe"; # replace with 'version' for stable
+                  hash = "sha256-gEmqu8Uo2zKA1wy0kA3McsEAwnOK/oJl1XpbPR334M8=";
                 };
                 files = ''(:defaults "render-core.so")'';
                 nativeBuildInputs = with pkgs; [ pkg-config ];
                 buildInputs = with pkgs; [
                   mupdf-headless
                 ];
-                preBuild = "make clean all";
+                preBuild = ''
+                  export EMACSLOADPATH=".:$EMACSLOADPATH"
+                  make clean all CC=$CC USE_PKGCONFIG=yes
+                '';
               })
             ]
           );

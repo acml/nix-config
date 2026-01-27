@@ -542,14 +542,6 @@ the sequences will be lost."
   ;; :bind ("<f5>" . modus-themes-toggle)
   )
 
-(use-package! nov
-  :mode ("\\.epub\\'" . nov-mode)
-  :hook ((nov-mode . visual-line-mode)
-         (nov-mode . visual-fill-column-mode))
-  :config
-  (setq nov-text-width most-positive-fixnum)
-  (setq visual-fill-column-center-text t))
-
 (map! (:leader :desc "Obvious (Toggle Comments)" :n "to" #'obvious-mode))
 
 (use-package! deft
@@ -959,21 +951,47 @@ you're done. This can be called from an external shell script."
           (add-hook 'delete-frame-functions #'cleanup-scratch-frame))))))
 
 (use-package! reader
-  :commands (reader-mode)
+  :mode (("\\.pdf\\'" . reader-mode)
+         ("\\.epub\\'" . reader-mode)
+         ("\\.mobi\\'" . reader-mode)
+         ("\\.fb2\\'" . reader-mode)
+         ("\\.xps\\'" . reader-mode)
+         ("\\.cbz\\'" . reader-mode)
+         ("\\.odt\\'" . reader-mode)
+         ("\\.docx\\'" . reader-mode)
+         ("\\.pptx\\'" . reader-mode)
+         ("\\.xlsx\\'" . reader-mode))
+  :bind ((:map reader-mode-map
+               ("j" . reader-scroll-down-or-next-page)
+               ("k" . reader-scroll-up-or-prev-page)
+               ("h" . reader-scroll-left)
+               ("l" . reader-scroll-right)
+               ("d" . reader-next-page)
+               ("u" . reader-previous-page)
+               ("P" . reader-goto-page)
+               ("H" . reader-fit-to-height)
+               ("W" . reader-fit-to-width)
+               ("q" . nil)))
   :config
-  (require 'reader-autoloads))
+  ;; Use evil keybindings in reader-mode
+  (evil-set-initial-state 'reader-mode 'normal)
 
-(map! :map reader-mode-map
-      :nvm "j" 'reader-scroll-down-or-next-page
-      :nvm "k" 'reader-scroll-up-or-prev-page
-      :nvm "h" 'reader-scroll-left
-      :nvm "l" 'reader-scroll-right
-      :nvm "d" 'reader-next-page
-      :nvm "u" 'reader-previous-page
-      :nvm "g" 'reader-goto-page
-      :nvm "H" 'reader-fit-to-height
-      :nvm "W" 'reader-fit-to-width
-      :nvm "q" 'quit-window)
+  ;; Evil-friendly navigation (package defaults: n/p for pages, H/W for fit)
+  (map! :map reader-mode-map
+        :n "j" #'reader-scroll-down-or-next-page
+        :n "k" #'reader-scroll-up-or-prev-page
+        :n "h" #'reader-scroll-left
+        :n "l" #'reader-scroll-right
+        :n "gg" #'reader-first-page
+        :n "G" #'reader-last-page
+        :n "+" #'reader-enlarge-size
+        :n "-" #'reader-shrink-size
+        :n "0" #'reader-reset-size
+        :n "W" #'reader-fit-to-width
+        :n "H" #'reader-fit-to-height
+        :n ":" #'reader-goto-page
+        :n "q" #'quit-window
+        :n "Q" #'reader-close-doc))
 
 (when (and (featurep :system 'linux)
            (display-graphic-p)
