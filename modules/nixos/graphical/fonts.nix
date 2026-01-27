@@ -1,5 +1,4 @@
 {
-  hostType,
   lib,
   pkgs,
   ...
@@ -14,7 +13,7 @@
       unifont
     ];
   }
-  // lib.optionalAttrs (hostType == "nixos") {
+  // lib.optionalAttrs pkgs.stdenv.isLinux {
     enableDefaultPackages = false;
     enableGhostscriptFonts = false;
     fontconfig = {
@@ -55,7 +54,7 @@
       name = "IBM Plex Serif";
     };
     monospace =
-      if hostType == "darwin" then
+      if pkgs.stdenv.isDarwin then
         {
           name = "Berkeley Mono Variable";
         }

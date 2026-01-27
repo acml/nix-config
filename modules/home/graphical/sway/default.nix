@@ -48,16 +48,10 @@ in
 
   services.swayidle = {
     enable = true;
-    events = [
-      {
-        event = "before-sleep";
-        command = "${lib.getExe pkgs.swaylock} -f";
-      }
-      {
-        event = "lock";
-        command = "${lib.getExe pkgs.swaylock} -f";
-      }
-    ];
+    events = {
+      "before-sleep" = "${lib.getExe pkgs.swaylock} -f";
+      "lock" = "${lib.getExe pkgs.swaylock} -f";
+    };
     timeouts = [
       {
         timeout = 230;

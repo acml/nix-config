@@ -30,6 +30,9 @@ in
 
   # Host-specific home-manager user config
   home-manager.users.bemeurer.imports = [
+    self.homeModules.graphical
+    self.homeModules.graphical-linux
+    self.homeModules.graphical-sway
     self.homeModules.trusted
     self.homeModules.trusted-graphical
   ];
