@@ -744,7 +744,7 @@ clicked."
 
    (t (my--mode-line-buffer-identifier))))
 
-(setq frame-title-format '((:eval (my--frame-title-format))))
+(setq frame-title-format '(:eval (my--frame-title-format)))
 
 (setq +workspaces-switch-project-function #'dired)
 
