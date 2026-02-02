@@ -15,7 +15,9 @@ with config.networking;
   security.acme.certs."jellyfin.${hostName}.meurer.org" = { };
 
   services = {
-    jellyfin.enable = true;
+    jellyfin = {
+      enable = true;
+    };
     nginx.virtualHosts."jellyfin.${hostName}.meurer.org" = {
       useACMEHost = "jellyfin.${hostName}.meurer.org";
       forceSSL = true;

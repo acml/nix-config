@@ -14,6 +14,7 @@ in
     # Hardware modules from nixos-hardware
     inputs.nixos-hardware.nixosModules.common-cpu-amd
     inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
+    inputs.nixos-hardware.nixosModules.common-gpu-amd
 
     # Internal modules via flake outputs
     self.nixosModules.default
@@ -26,6 +27,7 @@ in
     self.nixosModules.services-oauth2
     self.nixosModules.services-unbound
     self.nixosModules.services-syncthing
+    self.nixosModules.services-jellyfin
 
     # Host-specific files
     ./disko.nix
@@ -231,6 +233,7 @@ in
     groups.media.members = [
       "bemeurer"
       config.services.syncthing.user
+      config.services.jellyfin.user
     ];
   };
 
