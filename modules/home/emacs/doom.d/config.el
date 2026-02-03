@@ -151,9 +151,15 @@
   :desc "Switch to window 8" :n "8" #'winum-select-window-8
   :desc "Switch to window 9" :n "9" #'winum-select-window-9))
 
-(map! "M-c" #'capitalize-dwim
-      "M-l" #'downcase-dwim
-      "M-u" #'upcase-dwim)
+;; Simple is Emacs's built-in miscellaneous package.
+(use-package! simple
+  :config
+  (bind-keys
+   ;; ([remap just-one-space] . cycle-spacing)
+   ([remap upcase-word] . upcase-dwim)
+   ([remap downcase-word] . downcase-dwim)
+   ([remap capitalize-word] . capitalize-dwim)
+   ([remap zap-to-char] . zap-up-to-char)))
 
 (when (fboundp 'repeat-mode)
   (add-hook 'after-init-hook 'repeat-mode))
