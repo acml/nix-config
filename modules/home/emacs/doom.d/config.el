@@ -565,11 +565,6 @@ the sequences will be lost."
 (use-package! org-block-capf :after org)
 (add-hook! 'org-mode-hook #'org-block-capf-add-to-completion-at-point-functions)
 
-(use-package! org-noter
-  :after org
-  :config
-  (setq org-noter-notes-search-path '("~/Documents/org/notes/")))
-
 (setq
  ;; If you use `org' and don't want your org files in the default location below,
  ;; change `org-directory'. It must be set before org loads!
