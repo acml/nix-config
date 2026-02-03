@@ -316,8 +316,9 @@
   (add-to-list 'vertico-multiform-categories '(embark-keybinding grid)))
 
 (use-package! exercism :commands (exercism)
+              :init
+              (map! (:leader :desc "Exercism" :n "ox" #'exercism))
               :config
-              (map! (:leader :desc "Exercism" :n "oe" #'exercism))
               (setq exercism-directory "~/Projects/exercism"))
 
 (after! evil
@@ -1173,6 +1174,26 @@ you're done. This can be called from an external shell script."
   (add-to-list 'copilot-indentation-alist '(clojure-mode 2))
   (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
   (setq copilot-max-char -1))
+
+(use-package! gt
+  ;; :bind (("C-c t" . gt-translate))
+  :init
+  (map! :leader :desc "Translate"
+        "oc" #'gt-translate)
+  :config
+  (setopt gt-langs '(en de tr)
+          gt-buffer-render-evil-leading-key nil
+          gt-buffer-render-follow-p t
+          gt-default-translator (gt-translator
+                                 :taker   (gt-taker :text 'buffer :pick 'paragraph)
+                                 :engines (list (gt-bing-engine))
+                                 :render  (gt-buffer-render)))
+  (with-eval-after-load 'evil
+    (add-hook 'gt-buffer-render-init-hook
+              (lambda ()
+                (toggle-truncate-lines -1)
+                (evil-define-key '(normal visual insert emacs) gt-buffer-render-local-map
+                  "q" 'kill-buffer-and-window)))))
 
 ;; Load a file with the same name as the computer’s name. Just keep on going if
 ;; the requisite file isn't there.
