@@ -137,22 +137,29 @@
 ;; (add-hook 'org-shiftdown-final-hook 'windmove-down)
 ;; (add-hook 'org-shiftright-final-hook 'windmove-right)
 
-;; SPC n to switch to winum-numbered window n
 (map!
  (:leader
-  :desc "Switch to window 0" :n "0" #'treemacs-select-window
-  :desc "Switch to window 1" :n "1" #'winum-select-window-1
-  :desc "Switch to window 2" :n "2" #'winum-select-window-2
-  :desc "Switch to window 3" :n "3" #'winum-select-window-3
-  :desc "Switch to window 4" :n "4" #'winum-select-window-4
-  :desc "Switch to window 5" :n "5" #'winum-select-window-5
-  :desc "Switch to window 6" :n "6" #'winum-select-window-6
-  :desc "Switch to window 7" :n "7" #'winum-select-window-7
-  :desc "Switch to window 8" :n "8" #'winum-select-window-8
-  :desc "Switch to window 9" :n "9" #'winum-select-window-9))
+  :desc "Switch to window 0" :n "0" #'treemacs-select-window))
+
+(use-package winum
+  :after-call doom-switch-window-hook
+  :config
+  ;; (setq winum-scope 'frame-local)
+  ;; (winum-mode +1)
+  (dolist (wn (seq-map 'number-to-string (number-sequence 1 9)))
+    (let ((f (intern (concat "winum-select-window-" wn)))
+          (k (concat "s-" wn)))
+      (map! :n k f)
+      (map! :leader :n wn f
+            :n (concat "w" wn) f)
+      (global-set-key (kbd k) f))))
+
+(after! which-key
+  (push '((nil . "winum-select-window-[1-9]") . t) which-key-replacement-alist)
+  (push '((nil . "buffer-to-window-[1-9]") . t) which-key-replacement-alist))
 
 ;; Simple is Emacs's built-in miscellaneous package.
-(use-package! simple
+(use-package simple
   :config
   (bind-keys
    ;; ([remap just-one-space] . cycle-spacing)
