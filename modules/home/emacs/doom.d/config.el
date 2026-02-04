@@ -137,10 +137,6 @@
 ;; (add-hook 'org-shiftdown-final-hook 'windmove-down)
 ;; (add-hook 'org-shiftright-final-hook 'windmove-right)
 
-(map!
- (:leader
-  :desc "Switch to window 0" :n "0" #'treemacs-select-window))
-
 (use-package winum
   :after-call doom-switch-window-hook
   :config
@@ -153,10 +149,6 @@
       (map! :leader :n wn f
             :n (concat "w" wn) f)
       (global-set-key (kbd k) f))))
-
-(after! which-key
-  (push '((nil . "winum-select-window-[1-9]") . t) which-key-replacement-alist)
-  (push '((nil . "buffer-to-window-[1-9]") . t) which-key-replacement-alist))
 
 ;; Simple is Emacs's built-in miscellaneous package.
 (use-package simple
@@ -797,6 +789,10 @@ clicked."
   :init
   (add-hook! 'prog-mode-hook #'scopeline-mode))
 
+(map!
+ (:leader
+  :desc "Project sidebar" :n "0" #'treemacs-select-window))
+
 (setq +treemacs-git-mode 'deferred
       ;; treemacs-collapse-dirs 5
       ;; treemacs-eldoc-display t
@@ -904,10 +900,13 @@ will ensure are ignored")
 
 (setq which-key-allow-multiple-replacements t)
 (after! which-key
-  (pushnew!
-   which-key-replacement-alist
-   '(("" . "\\`+?evil[-:/]?\\(?:a-\\)?\\(.*\\)") . (nil . " \\1"))
-   '(("\\`g s" . "\\`evilem--?motion-\\(.*\\)") . (nil . " \\1"))))
+  (pushnew! which-key-replacement-alist
+            ;; rename winum-select-window-1 entry to 1..9
+            '(("\\(.*\\)1" . "winum-select-window-1") . ("\\11..9" . "Switch to window 1..9"))
+            ;; hide winum-select-window-[2-9] entries
+            '((nil . "winum-select-window-[2-9]") . t)
+            '(("" . "\\`+?evil[-:/]?\\(?:a-\\)?\\(.*\\)") . (nil . " \\1"))
+            '(("\\`g s" . "\\`evilem--?motion-\\(.*\\)") . (nil . " \\1"))))
 
 ;; text mode directory tree
 (after! ztree
