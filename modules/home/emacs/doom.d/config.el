@@ -1209,7 +1209,7 @@ you're done. This can be called from an external shell script."
 
 ;; Load a file with the same name as the computer’s name. Just keep on going if
 ;; the requisite file isn't there.
-(load (concat doom-user-dir (car (split-string (system-name) "\\."))) t)
+(load! (car (split-string (system-name) "\\.")) nil t)
 
 ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
-(load (concat doom-user-dir (car (reverse (split-string (symbol-name system-type) "/")))) t)
+(load! (car (reverse (split-string (symbol-name system-type) "/"))) nil t)
