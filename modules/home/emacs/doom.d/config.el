@@ -1196,7 +1196,7 @@ you're done. This can be called from an external shell script."
   (map! :leader :desc "Translate"
         "oc" #'gt-translate)
   :config
-  (setopt gt-langs '(en de tr)
+  (setopt gt-langs '(de en tr)
           gt-buffer-render-evil-leading-key nil
           gt-buffer-render-follow-p t
           gt-default-translator (gt-translator
