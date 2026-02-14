@@ -13,9 +13,18 @@ let
   # EDITOR = "emacsclient -tc";
   ALTERNATE_EDITOR = "emacs";
   myEmacs = lib.mkMerge [
-    (lib.mkIf isLinux pkgs.emacs30)
+    (lib.mkIf isLinux (
+      pkgs.emacs30.overrideAttrs (old: {
+        passthru = old.passthru // {
+          treeSitter = true;
+        };
+      })
+    ))
     (lib.mkIf isDarwin (
       pkgs.emacs30-pgtk.overrideAttrs (old: {
+        passthru = old.passthru // {
+          treeSitter = true;
+        };
         patches = (old.patches or [ ]) ++ [
           # Fix OS window role (needed for window managers like yabai)
           (pkgs.fetchpatch {
@@ -247,6 +256,7 @@ lib.mkMerge [
               copilot
               djvu
               emacsql
+              tree-sitter-langs
               treesit-grammars.with-all-grammars
               # (treesit-grammars.with-grammars (
               #   grammars: with grammars; [
