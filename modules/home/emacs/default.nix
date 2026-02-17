@@ -107,6 +107,9 @@ lib.mkMerge [
           languagetool
 
           # :tools editorconfig
+          dockfmt
+
+          # :tools editorconfig
           editorconfig-core-c # per-project style config
 
           # :tools lookup & :lang org +roam
@@ -128,6 +131,9 @@ lib.mkMerge [
           # CMake LSP
           cmake
           cmake-language-server
+
+          #data
+          libxml2 # xmllint
 
           # Nix
           nixfmt
@@ -207,6 +213,8 @@ lib.mkMerge [
           xclip
           xdotool
           xsel
+          xorg.xwininfo
+          xorg.xprop
 
           zip
         ];
