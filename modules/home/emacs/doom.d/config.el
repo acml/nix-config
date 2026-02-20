@@ -354,6 +354,11 @@
   (ef-themes-mixed-fonts t)
   ;; (ef-themes-headings '((0 1.4) (1 1.3) (2 1.2) (3 1.1)))
   :init
+  ;; Remove the border
+  (setq modus-themes-common-palette-overrides
+        '(;; (fringe unspecified)
+          (border-mode-line-active unspecified)
+          (border-mode-line-inactive unspecified)))
   (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t))
 
 (after! expand-region
