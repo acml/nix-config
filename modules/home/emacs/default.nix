@@ -213,8 +213,8 @@ lib.mkMerge [
           xclip
           xdotool
           xsel
-          xorg.xwininfo
-          xorg.xprop
+          xwininfo
+          xprop
 
           zip
         ];

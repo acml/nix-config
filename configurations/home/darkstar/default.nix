@@ -25,7 +25,7 @@ in
     packages = with pkgs; [
       nixVersions.latest
       samba
-      xorg.setxkbmap
+      setxkbmap
     ];
   };
 

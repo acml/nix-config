@@ -18,6 +18,7 @@
         trash-cli
         zoxide # for historical directories navigation, requires fzf
       ];
+      shellWrapperName = "y";
       initLua = # lua
         ''
           require("git"):setup()

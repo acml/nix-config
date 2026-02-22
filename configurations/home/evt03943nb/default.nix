@@ -26,7 +26,7 @@ in
       git-dt
       nixVersions.latest
       samba
-      xorg.setxkbmap
+      setxkbmap
     ];
   };
 
