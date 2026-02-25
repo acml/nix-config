@@ -228,6 +228,9 @@ lib.mkMerge [
           ALTERNATE_EDITOR
           ;
       };
+      shellAliases = {
+        e = "emacs -nw";
+      };
     };
 
     systemd.user.sessionVariables = lib.mkIf isLinux {
