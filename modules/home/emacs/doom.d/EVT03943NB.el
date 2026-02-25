@@ -212,7 +212,7 @@ ORIG-FUN is the original function, FILENAME is the file being processed, ARGS ar
 (use-package! gptel
   :config
   (pop gptel--known-backends) ; remove the default ChatGPT backend
-  (setq gptel-model 'claude-sonnet-4
+  (setq gptel-model 'claude-sonnet-4.6
         gptel-backend (gptel-make-gh-copilot "Copilot"))
   ;; Only call macher-install if it exists
   (when (fboundp 'macher-install)
@@ -221,7 +221,7 @@ ORIG-FUN is the original function, FILENAME is the file being processed, ARGS ar
 (use-package! gptel-magit
   :after gptel magit
   :config
-  (setq gptel-magit-model 'gpt-5
+  (setq gptel-magit-model 'gpt-5.2
         gptel-magit-backend (gptel-make-gh-copilot "Copilot")))
 
 (after! dirvish
