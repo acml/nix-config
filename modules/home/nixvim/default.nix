@@ -373,7 +373,9 @@
         colorizer.enable = true;
         # compiler.enable = true;
         copilot-chat.enable = true;
+        copilot-chat.settings.model = "claude-sonnet-4.6";
         copilot-lua.enable = true;
+        copilot-lua.settings.copilot-model = "claude-sonnet-4.6";
         telescope.enable = true;
         # dap.enable = true;
         debugprint.enable = true;
