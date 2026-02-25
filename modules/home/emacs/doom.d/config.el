@@ -1177,6 +1177,11 @@ you're done. This can be called from an external shell script."
   :hook
   (gptel-post-stream-hook . gptel-auto-scroll))
 
+(use-package! gptel-quick
+  :after gptel
+  :init
+  (map! "<f1>" #'gptel-quick))
+
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
   :bind (:map copilot-completion-map
