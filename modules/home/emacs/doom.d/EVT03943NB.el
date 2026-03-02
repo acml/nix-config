@@ -30,18 +30,18 @@
 
 ;;; Configuration Constants
 
-(defconst evt03660nb-project-config-file "proj.default.ini"
+(defconst evt03943nb-project-config-file "proj.default.ini"
   "Name of the project configuration file.")
 
-(defconst evt03660nb-makefile-extensions '("\\.igt" "/GNUoptionsfile\\'")
+(defconst evt03943nb-makefile-extensions '("\\.igt" "/GNUoptionsfile\\'")
   "File patterns that should use 'makefile-gmake-mode'.")
 
-(defconst evt03660nb-lzma-excluded-files '("Makefile.lzma")
+(defconst evt03943nb-lzma-excluded-files '("Makefile.lzma")
   "Files that should not be decompressed as LZMA.")
 
 ;;; Utility Functions
 
-(defun evt03660nb--parse-ini-file (file-path)
+(defun evt03943nb--parse-ini-file (file-path)
   "Parse INI file at FILE-PATH and return an alist of key-value pairs.
 Returns nil if file doesn't exist or parsing fails."
   (when (and file-path (file-exists-p file-path) (file-readable-p file-path))
@@ -60,26 +60,26 @@ Returns nil if file doesn't exist or parsing fails."
        (message "Error parsing INI file %s: %s" file-path (error-message-string err))
        nil))))
 
-(defun evt03660nb--get-project-main-folder (project-root)
+(defun evt03943nb--get-project-main-folder (project-root)
   "Get the main folder path from project configuration in PROJECT-ROOT.
 Returns nil if configuration is not found or invalid."
-  (when-let* ((config-file (expand-file-name evt03660nb-project-config-file project-root))
-              (parsed-values (evt03660nb--parse-ini-file config-file))
+  (when-let* ((config-file (expand-file-name evt03943nb-project-config-file project-root))
+              (parsed-values (evt03943nb--parse-ini-file config-file))
               (main-folder (cdr (assoc 'mainFolders parsed-values))))
     (string-trim main-folder "\"" "\"")))
 
-(defun evt03660nb--get-project-config-path (project-root)
+(defun evt03943nb--get-project-config-path (project-root)
   "Get the project configuration XML file path from PROJECT-ROOT.
 Returns nil if configuration is not found."
-  (when-let* ((config-file (expand-file-name evt03660nb-project-config-file project-root))
-              (parsed-values (evt03660nb--parse-ini-file config-file))
+  (when-let* ((config-file (expand-file-name evt03943nb-project-config-file project-root))
+              (parsed-values (evt03943nb--parse-ini-file config-file))
               (project-config (cdr (assoc 'projectConfig parsed-values)))
-              (main-folder (evt03660nb--get-project-main-folder project-root)))
+              (main-folder (evt03943nb--get-project-main-folder project-root)))
     (expand-file-name project-config (expand-file-name main-folder project-root))))
 
 ;;; Magit Integration
 
-(defun evt03660nb--collect-magit-repositories (project-root main-folder xml-file)
+(defun evt03943nb--collect-magit-repositories (project-root main-folder xml-file)
   "Collect repository directories from PROJECT-ROOT, MAIN-FOLDER, and XML-FILE.
 Returns a list of directory paths suitable for `magit-repository-directories`."
   (let ((repositories '()))
@@ -99,20 +99,20 @@ Returns a list of directory paths suitable for `magit-repository-directories`."
     repositories))
 
 (after! magit
-  (defadvice! evt03660nb--enhance-magit-repositories (fn &rest args)
+  (defadvice! evt03943nb--enhance-magit-repositories (fn &rest args)
     "Enhance magit repository discovery with multi-repo project support."
     :around #'magit-list-repositories
     (if-let* ((project-root (projectile-project-root))
-              (main-folder (evt03660nb--get-project-main-folder project-root))
-              (xml-file (evt03660nb--get-project-config-path project-root)))
+              (main-folder (evt03943nb--get-project-main-folder project-root))
+              (xml-file (evt03943nb--get-project-config-path project-root)))
         (let ((magit-repository-directories
-               (evt03660nb--collect-magit-repositories project-root main-folder xml-file)))
+               (evt03943nb--collect-magit-repositories project-root main-folder xml-file)))
           (apply fn args))
       (apply fn args))))
 
 ;;; Projectile Integration
 
-(defun evt03660nb--project-has-files-p (required-files excluded-files &optional dir)
+(defun evt03943nb--project-has-files-p (required-files excluded-files &optional dir)
   "Check if project has REQUIRED-FILES but not EXCLUDED-FILES in DIR.
 DIR defaults to current project root."
   (and (apply #'projectile-verify-files required-files (list dir))
@@ -120,55 +120,55 @@ DIR defaults to current project root."
 
 (after! projectile
   ;; CM12425 Project Type
-  (defun evt03660nb--cm12425-project-p (&optional dir)
+  (defun evt03943nb--cm12425-project-p (&optional dir)
     "Check if DIR contains a CM12425 project."
-    (evt03660nb--project-has-files-p '("le_nbg2") '("proj.default.ini" "tools") dir))
+    (evt03943nb--project-has-files-p '("le_nbg2") '("proj.default.ini" "tools") dir))
 
-  (projectile-register-project-type 'cm12425 #'evt03660nb--cm12425-project-p
+  (projectile-register-project-type 'cm12425 #'evt03943nb--cm12425-project-p
                                     :project-file "cp1200"
                                     :compilation-dir "cp1200/cp1242-5/make"
                                     :compile "build_cp_1242-5.bat")
 
   ;; CM12435 Project Type
-  (defun evt03660nb--cm12435-project-p (&optional dir)
+  (defun evt03943nb--cm12435-project-p (&optional dir)
     "Check if DIR contains a CM12435 project."
-    (evt03660nb--project-has-files-p '("audis_tools" "le_nbg" "le_nbg2" "tools")
+    (evt03943nb--project-has-files-p '("audis_tools" "le_nbg" "le_nbg2" "tools")
                                      '("proj.default.ini" "cp1500")
                                      dir))
 
-  (projectile-register-project-type 'cm12435 #'evt03660nb--cm12435-project-p
+  (projectile-register-project-type 'cm12435 #'evt03943nb--cm12435-project-p
                                     :project-file "cp1200"
                                     :compilation-dir "cp1200/cp1243-5/csd"
                                     :compile "set -o pipefail && mkdir -p log && unbuffer make -j$(nproc) -s |& tee log/build-$(date -Iseconds).log")
 
   ;; CP12431 Project Type
-  (defun evt03660nb--cp12431-project-p (&optional dir)
+  (defun evt03943nb--cp12431-project-p (&optional dir)
     "Check if DIR contains a CP12431 project."
-    (evt03660nb--project-has-files-p '("audis_linux" "audis_tools" "audis_utils" "cp1500" "le_nbg2")
+    (evt03943nb--project-has-files-p '("audis_linux" "audis_tools" "audis_utils" "cp1500" "le_nbg2")
                                      '("proj.default.ini")
                                      dir))
 
-  (projectile-register-project-type 'cp12431 #'evt03660nb--cp12431-project-p
+  (projectile-register-project-type 'cp12431 #'evt03943nb--cp12431-project-p
                                     :project-file "cp1200"
                                     :compilation-dir "cp1200/cp1243-1/csd"
                                     :compile "set -o pipefail && mkdir -p log && unbuffer make -j$(nproc) -s |& tee log/build-$(date -Iseconds).log")
 
   ;; Git DT Project Type
-  (defun evt03660nb--git-dt-compilation-dir ()
+  (defun evt03943nb--git-dt-compilation-dir ()
     "Get compilation directory for git_dt projects."
     (when-let* ((project-root (projectile-project-root))
-                (main-folder (evt03660nb--get-project-main-folder project-root)))
+                (main-folder (evt03943nb--get-project-main-folder project-root)))
       (format "%s/csd" main-folder)))
 
-  (projectile-register-project-type 'git_dt (list evt03660nb-project-config-file)
-                                    :project-file evt03660nb-project-config-file
-                                    :compilation-dir #'evt03660nb--git-dt-compilation-dir
+  (projectile-register-project-type 'git_dt (list evt03943nb-project-config-file)
+                                    :project-file evt03943nb-project-config-file
+                                    :compilation-dir #'evt03943nb--git-dt-compilation-dir
                                     :compile "set -o pipefail && mkdir -p log && unbuffer ./docker_make.sh -j$(nproc) -s |& tee log/build-$(date -Iseconds).log"
                                     :configure "/usr/bin/git dt checkout -f"))
 
 ;;; File Type Associations
 
-(dolist (extension evt03660nb-makefile-extensions)
+(dolist (extension evt03943nb-makefile-extensions)
   (add-to-list 'auto-mode-alist (cons extension 'makefile-gmake-mode)))
 
 ;;; Compression Handling
@@ -176,32 +176,32 @@ DIR defaults to current project root."
 (eval-when-compile
   (require 'jka-compr))
 
-(defvar evt03660nb--jka-compr-original-info-list jka-compr-compression-info-list
+(defvar evt03943nb--jka-compr-original-info-list jka-compr-compression-info-list
   "Backup of the original jka-compr compression info list.")
 
-(defun evt03660nb--filter-compression-info-list (filename)
+(defun evt03943nb--filter-compression-info-list (filename)
   "Return filtered compression info list excluding .lzma for specific files.
 FILENAME is the file being processed."
-  (if (member (file-name-nondirectory filename) evt03660nb-lzma-excluded-files)
+  (if (member (file-name-nondirectory filename) evt03943nb-lzma-excluded-files)
       ;; Remove .lzma entry from the list
       (cl-remove-if (lambda (entry)
                       (and (vectorp entry)
                            (string= (aref entry 0) "\\.lzma\\'")))
-                    evt03660nb--jka-compr-original-info-list)
-    evt03660nb--jka-compr-original-info-list))
+                    evt03943nb--jka-compr-original-info-list)
+    evt03943nb--jka-compr-original-info-list))
 
-(defun evt03660nb--compression-advice (orig-fun filename &rest args)
+(defun evt03943nb--compression-advice (orig-fun filename &rest args)
   "Advice around `insert-file-contents` to disable .lzma decompression for specific files.
 ORIG-FUN is the original function, FILENAME is the file being processed, ARGS are additional arguments."
-  (let ((jka-compr-compression-info-list (evt03660nb--filter-compression-info-list filename)))
+  (let ((jka-compr-compression-info-list (evt03943nb--filter-compression-info-list filename)))
     (apply orig-fun filename args)))
 
-(advice-add 'insert-file-contents :around #'evt03660nb--compression-advice)
+(advice-add 'insert-file-contents :around #'evt03943nb--compression-advice)
 
 ;;; Search Integration
 
 (after! consult
-  (defadvice! evt03660nb--enhance-consult-grep (fn &rest args)
+  (defadvice! evt03943nb--enhance-consult-grep (fn &rest args)
     "Enhance consult-grep to handle LZMA files with preprocessing."
     :around #'consult--grep
     (let ((consult-ripgrep-args (concat consult-ripgrep-args " --pre-glob 'Makefile.lzma' --pre 'cat'")))
