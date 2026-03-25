@@ -119,6 +119,7 @@ DIR defaults to current project root."
        (not (apply #'projectile-verify-files excluded-files (list dir)))))
 
 (after! projectile
+  (add-to-list 'projectile-project-root-files-bottom-up "cp1200")
   ;; CM12425 Project Type
   (defun dinm5CG52813LW--cm12425-project-p (&optional dir)
     "Check if DIR contains a CM12425 project."
