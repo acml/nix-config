@@ -1,4 +1,4 @@
-# Home-manager configuration for evt03943nb
+# Home-manager configuration for dinm5CG52813LW
 {
   flake,
   config,
