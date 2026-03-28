@@ -1,6 +1,7 @@
 # Shared home-manager configuration for all platforms
 # External modules (impermanence, nix-index-database, nixvim, stylix) are imported in configurations/
 {
+  config,
   flake,
   lib,
   osConfig ? null,
@@ -38,6 +39,9 @@ in
 
   home = {
     stateVersion = lib.mkDefault "25.11";
+    sessionPath = [
+      "$HOME/.local/bin"
+    ];
     sessionVariables.NIXPKGS_ALLOW_UNFREE = "1";
     packages = lib.filter (lib.meta.availableOn pkgs.stdenv.hostPlatform) (
       with pkgs;
@@ -97,6 +101,8 @@ in
     };
   };
 
+  gtk.gtk4.theme = config.gtk.theme;
+
   stylix.targets = {
     # Only enable GNOME/GTK when integrated with NixOS (not standalone home-manager)
     gnome.enable = isIntegrated && pkgs.stdenv.isLinux;
@@ -108,8 +114,6 @@ in
     starship.enable = lib.mkDefault false;
     yazi.enable = lib.mkDefault false;
   };
-
-  systemd.user.startServices = "sd-switch";
 
   xdg.configFile."nixpkgs/config.nix".text = "{ allowUnfree = true; }";
 }

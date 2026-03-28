@@ -1,7 +1,6 @@
 # NixOS configuration for spinoza
 {
   flake,
-  config,
   lib,
   pkgs,
   ...
@@ -36,8 +35,6 @@ in
     self.homeModules.trusted
     self.homeModules.trusted-graphical
   ];
-
-  # SSH target for remote activation
 
   # Platform
   nixpkgs.hostPlatform = "x86_64-linux";
@@ -147,7 +144,6 @@ in
   networking = {
     hostId = "a8766d75";
     hostName = "spinoza";
-    wireguard.enable = true;
     wireless.iwd = {
       enable = true;
       settings.Rank = {
@@ -158,9 +154,7 @@ in
     };
   };
 
-  nix.settings.max-substitution-jobs = 32;
-
-  security.sudo.wheelNeedsPassword = true;
+  security.sudo-rs.wheelNeedsPassword = true;
 
   services = {
     btrfs.autoScrub = {
@@ -234,7 +228,4 @@ in
   ];
 
   swapDevices = [ { device = "/dev/disk/by-uuid/898fb6e1-bba3-40ce-8f79-8deb2e2d4f37"; } ];
-
-  age.secrets.rootPassword.rekeyFile = ../../../secrets/spinoza-root-password.age;
-  users.users.root.hashedPasswordFile = config.age.secrets.rootPassword.path;
 }

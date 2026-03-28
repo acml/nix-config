@@ -25,7 +25,22 @@ in
     ghostty.terminfo
   ];
 
-  boot.kernelParams = [ "log_buf_len=10M" ];
+  age.secrets.rootPassword.rekeyFile = lib.mkDefault (
+    self + "/secrets/${config.networking.hostName}-root-password.age"
+  );
+
+  boot = {
+    kernelParams = [ "log_buf_len=10M" ];
+    tmp.useTmpfs = lib.mkDefault true;
+  };
+
+  console = {
+    font = lib.mkDefault "ter-v24n";
+    keyMap = lib.mkDefault "us";
+    packages = with pkgs; [ terminus_font ];
+  };
+
+  hardware.enableRedistributableFirmware = lib.mkDefault true;
 
   i18n.defaultLocale = "en_US.UTF-8";
 
@@ -35,10 +50,18 @@ in
       trustedInterfaces = [ "tailscale0" ];
       allowedUDPPorts = [ config.services.tailscale.port ];
     };
+    nftables.enable = lib.mkDefault true;
     useDHCP = false;
     useNetworkd = true;
     wireguard.enable = true;
   };
+
+  nix.settings = {
+    download-buffer-size = lib.mkDefault 268435456; # 256MiB
+    max-substitution-jobs = lib.mkDefault 32;
+  };
+
+  powerManagement.cpuFreqGovernor = lib.mkDefault "performance";
 
   security = {
     pam.services.sudo.u2fAuth = true;
@@ -53,7 +76,11 @@ in
     dbus.implementation = "broker";
     openssh = {
       enable = true;
-      settings.PermitRootLogin = lib.mkDefault "no";
+      settings = {
+        PermitRootLogin = lib.mkDefault "no";
+        PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
+      };
     };
     tailscale.enable = true;
     fwupd.daemonSettings.EspLocation = config.boot.loader.efi.efiSysMountPoint;
@@ -62,6 +89,11 @@ in
   system.stateVersion = lib.mkDefault "25.11";
 
   systemd = {
+    oomd = {
+      enable = true;
+      enableRootSlice = true;
+      enableUserSlices = true;
+    };
     network.wait-online.anyInterface = true;
     services.tailscaled = {
       after = [
@@ -75,5 +107,8 @@ in
     };
   };
 
-  users.mutableUsers = false;
+  users = {
+    mutableUsers = false;
+    users.root.hashedPasswordFile = config.age.secrets.rootPassword.path;
+  };
 }

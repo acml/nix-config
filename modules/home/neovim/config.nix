@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 {
@@ -20,13 +19,7 @@
   luaLoader.enable = true;
 
   globals.clipboard = "osc52";
-  clipboard = {
-    register = "unnamedplus";
-    providers = {
-      wl-copy.enable = pkgs.stdenv.hostPlatform.isLinux;
-      xclip.enable = pkgs.stdenv.hostPlatform.isLinux;
-    };
-  };
+  clipboard.register = "unnamedplus";
 
   colorscheme = "ayu";
 
@@ -69,8 +62,8 @@
     };
     notify.enable = true;
     nvim-autopairs.enable = true;
+    nvim-surround.enable = true;
     render-markdown.enable = true;
-    sleuth.enable = true;
     tmux-navigator.enable = true;
     todo-comments = {
       enable = true;

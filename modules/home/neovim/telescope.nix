@@ -1,9 +1,9 @@
 {
   plugins = {
-    web-devicons.enable = true;
     telescope = {
       enable = true;
       extensions = {
+        fzf-native.enable = true;
         file-browser = {
           enable = true;
           settings.hijack_netrw = true;

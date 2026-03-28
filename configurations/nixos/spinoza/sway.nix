@@ -1,6 +1,10 @@
-{ lib, pkgs, ... }:
+{ pkgs, ... }:
 {
   programs.sway.enable = true;
+
+  # Set via pam_env so GDM-launched sessions inherit it. extraSessionCommands
+  # would bake it into the sway wrapper and break the sandbox config check.
+  environment.sessionVariables.WLR_RENDERER = "vulkan";
 
   home-manager.users.bemeurer = {
     wayland.windowManager.sway = {
@@ -33,8 +37,8 @@
           };
         };
         startup = [
-          { command = "${lib.getExe pkgs.ponymix} -t source mute"; }
-          { command = "${lib.getExe pkgs.ponymix} -t sink mute"; }
+          { command = "${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SOURCE@ 1"; }
+          { command = "${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ 1"; }
         ];
       };
       extraConfig = ''

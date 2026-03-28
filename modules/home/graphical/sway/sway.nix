@@ -8,9 +8,6 @@
   wayland.windowManager.sway = {
     enable = true;
 
-    # https://github.com/nix-community/home-manager/issues/5311
-    checkConfig = false;
-
     config = {
       bars = [ ];
 
@@ -66,8 +63,6 @@
 
       export _JAVA_AWT_WM_NONREPARENTING=1
       export _JAVA_OPTIONS="-Dawt.useSystemAAFontSettings=on -Dswing.aatext=true -Dsun.java2d.xrender=true"
-
-      export WLR_RENDERER=vulkan
     '';
 
     systemd.enable = true;

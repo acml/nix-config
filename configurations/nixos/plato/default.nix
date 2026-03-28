@@ -23,6 +23,7 @@ in
     self.nixosModules.hardware-fast-networking
     self.nixosModules.hardware-no-mitigations
     self.nixosModules.hardware-zfs
+    self.nixosModules.pam-limits
     self.nixosModules.services-nginx
     self.nixosModules.services-oauth2
     self.nixosModules.services-unbound
@@ -36,19 +37,12 @@ in
   ];
 
   # Host-specific home-manager config
-  home-manager = {
-    verbose = true;
-    users.bemeurer.imports = [ self.homeModules.music ];
-  };
-
-  # SSH target for remote activation
+  home-manager.users.bemeurer.imports = [ self.homeModules.music ];
 
   # Platform
   nixpkgs.hostPlatform = "x86_64-linux";
 
   # Host-specific configuration
-  age.secrets.rootPassword.rekeyFile = ../../../secrets/plato-root-password.age;
-
   boot = {
     initrd = {
       availableKernelModules = [
@@ -74,7 +68,6 @@ in
       };
     };
     kernelModules = [ "kvm-amd" ];
-    tmp.useTmpfs = true;
     zfs.requestEncryptionCredentials = lib.mkForce [ ];
   };
 
@@ -86,12 +79,9 @@ in
   # agenix-rekey host pubkey
   age.rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDMExNPuG3+sl9qozno4cTmPEJSH8GGhoaReQsnpFaih";
 
-  hardware.enableRedistributableFirmware = true;
-
   networking = {
     hostId = "e4c9bd10";
     hostName = "plato";
-    nftables.enable = true;
   };
 
   nix = {
@@ -111,29 +101,7 @@ in
     };
   };
 
-  security = {
-    acme.certs."stash.${config.networking.hostName}.meurer.org" = { };
-    pam.loginLimits = [
-      {
-        domain = "*";
-        type = "-";
-        item = "memlock";
-        value = "unlimited";
-      }
-      {
-        domain = "*";
-        type = "-";
-        item = "nofile";
-        value = "1048576";
-      }
-      {
-        domain = "*";
-        type = "-";
-        item = "nproc";
-        value = "unlimited";
-      }
-    ];
-  };
+  security.acme.certs."stash.${config.networking.hostName}.meurer.org" = { };
 
   environment.etc."fail2ban/filter.d/fwdrop.conf".text = ''
     [Definition]
@@ -210,8 +178,6 @@ in
     };
   };
 
-  powerManagement.cpuFreqGovernor = "performance";
-
   systemd.network.networks = {
     eth0 = {
       enable = false;
@@ -221,21 +187,18 @@ in
     eth1 = {
       matchConfig.MACAddress = "6c:b3:11:08:50:54";
       DHCP = "ipv4";
-      address = [ "2a01:4f8:2b02:310::2/64 " ];
+      address = [ "2a01:4f8:2b02:310::2/64" ];
       routes = [ { Gateway = "fe80::1"; } ];
     };
   };
 
   time.timeZone = "Etc/UTC";
 
-  users = {
-    users.root.hashedPasswordFile = config.age.secrets.rootPassword.path;
-    groups.media.members = [
-      "bemeurer"
-      config.services.syncthing.user
-      config.services.jellyfin.user
-    ];
-  };
+  users.groups.media.members = [
+    "bemeurer"
+    config.services.syncthing.user
+    config.services.jellyfin.user
+  ];
 
   virtualisation = {
     containers = {

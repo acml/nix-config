@@ -17,12 +17,23 @@
           name = "Ahmet Cemal Özgezer";
         };
         # below configuration breaks magit
+        branch.sort = "-committerdate";
         diff.colorMoved = "default";
         difftool.prompt = true;
+        fetch.prune = true;
         github.user = "acml";
         init.defaultBranch = "main";
         merge.conflictstyle = "diff3";
         mergetool.prompt = true;
+        push = {
+          autoSetupRemote = true;
+          followTags = true;
+        };
+        rebase = {
+          autoStash = true;
+          updateRefs = true;
+        };
+        rerere.enabled = true;
       };
     };
   };

@@ -18,7 +18,7 @@
       ignoreDups = true;
       ignoreSpace = true;
       path = "${config.xdg.dataHome}/zsh/history";
-      save = 10000;
+      save = 30000;
       share = true;
     };
     plugins = [
@@ -49,9 +49,6 @@
         file = "share/zsh-history-substring-search/zsh-history-substring-search.zsh";
       }
     ];
-    envExtra = ''
-      export LESSHISTFILE="${config.xdg.dataHome}/less_history"
-    '';
     initContent = lib.mkMerge [
       # Workaround for home-manager#2562: completions from home.packages aren't in fpath
       (lib.mkOrder 561 ''

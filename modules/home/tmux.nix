@@ -6,6 +6,7 @@
     aggressiveResize = true;
     clock24 = true;
     escapeTime = 0;
+    focusEvents = true;
     # Use idempotent new-session to avoid creating duplicate sessions when both
     # NixOS (/etc/tmux.conf) and home-manager configs are loaded. The -A flag
     # attaches if the session exists, otherwise creates it.
@@ -33,10 +34,6 @@
       set -as terminal-features ",alacritty*:extkeys,foot*:extkeys,xterm*:extkeys"
       set -as terminal-features ",alacritty*:clipboard,foot*:clipboard,xterm*:clipboard"
 
-
-      # recommended by vim.health
-      set-option -g focus-events on
-
       # automatically renumber windows
       set -g renumber-windows on
 
@@ -46,20 +43,12 @@
 
       bind : command-prompt
       bind r refresh-client
-      bind L clear-history
 
-      bind space next-window
-      bind bspace previous-window
-
-      # C-b C-b for previous window, C-n C-n for next window (no prefix needed)
-      bind -n C-b switch-client -T ctrl-b-table
-      bind -T ctrl-b-table C-b previous-window
-      bind -n C-n switch-client -T ctrl-n-table
-      bind -T ctrl-n-table C-n next-window
-      bind enter next-layout
+      # Alt+h/l for prefix-less window navigation (Ctrl+hjkl is panes via vim-tmux-navigator)
+      bind -n M-h previous-window
+      bind -n M-l next-window
 
       bind v  split-window -h -c "#{pane_current_path}"
-      bind s  split-window -v -c "#{pane_current_path}"
       bind h  select-pane -L
       bind j  select-pane -D
       bind k  select-pane -U
@@ -72,11 +61,9 @@
       bind + select-layout main-horizontal
       bind = select-layout main-vertical
 
-      bind a last-pane
+      bind ';' last-pane
       bind q display-panes
       bind c new-window
-      bind t next-window
-      bind T previous-window
 
       bind [ copy-mode
       bind ] paste-buffer
