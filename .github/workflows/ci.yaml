@@ -68,9 +68,9 @@ jobs:
           hostPlatform: x86_64-linux
           name: darkstar
           runsOn: ubuntu-24.04
-        - attr: homeConfigurations.evt03943nb.activationPackage
+        - attr: homeConfigurations.dinm5CG52813LW.activationPackage
           hostPlatform: x86_64-linux
-          name: evt03943nb
+          name: dinm5CG52813LW
           runsOn: ubuntu-24.04
         - attr: homeConfigurations.goethe.activationPackage
           hostPlatform: x86_64-linux

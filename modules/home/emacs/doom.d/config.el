@@ -44,7 +44,7 @@
 
       fancy-splash-image (funcall
                           (lambda (choices) (elt
-                                        choices (random (length choices))))
+                                             choices (random (length choices))))
                           (directory-files (concat (expand-file-name
                                                     doom-user-dir) "splash")
                                            t "^\\([^.]\\|\\.[^.]\\|\\.\\..\\)" t))
@@ -198,8 +198,8 @@
 
 (after! ccls
   (setq ccls-initialization-options `(:index (:comments 2)
-                                      :completion (:detailedLabel t)
-                                      :cache (:directory ,(file-truename "~/.cache/ccls")))))
+                                             :completion (:detailedLabel t)
+                                             :cache (:directory ,(file-truename "~/.cache/ccls")))))
 
 (defadvice! compile (before ad-compile-smart activate)
   "Advises `compile' so it sets the argument COMINT to t."
@@ -256,7 +256,7 @@
                             ;; '(git-msg file-modes file-time file-size)
                             '(file-size))
         dirvish-side-attributes '(vc-state nerd-icons collapse ;; file-size
-                                  )
+                                           )
         dirvish-header-line-format '(:left (path) :right (free-space))
         dirvish-hide-details '(dired dirvish dirvish-side)
         dirvish-hide-cursor '(dired dirvish dirvish-side)
@@ -508,7 +508,7 @@ the sequences will be lost."
 
 (map! :leader
       (:prefix ("p" . "project")
-       :desc "List project todos" "t" #'magit-todos-list))
+               :desc "List project todos" "t" #'magit-todos-list))
 
 (use-package! git-commit
   :config
@@ -563,15 +563,15 @@ the sequences will be lost."
   (deft-default-extension "org")
   (deft-directory org-roam-directory))
 
-(use-package! org-appear
-  :hook (org-mode . org-appear-mode)
-  :config
-  (setq org-appear-autoemphasis t
-        org-appear-autosubmarkers t
-        org-appear-autolinks nil)
-  ;; for proper first-time setup, `org-appear--set-elements'
-  ;; needs to be run after other hooks have acted.
-  (run-at-time nil nil #'org-appear--set-elements))
+;; (use-package! org-appear
+;;   :hook (org-mode . org-appear-mode)
+;;   :config
+;;   (setq org-appear-autoemphasis t
+;;         org-appear-autosubmarkers t
+;;         org-appear-autolinks nil)
+;;   ;; for proper first-time setup, `org-appear--set-elements'
+;;   ;; needs to be run after other hooks have acted.
+;;   (run-at-time nil nil #'org-appear--set-elements))
 
 (use-package! org-block-capf :after org)
 (add-hook! 'org-mode-hook #'org-block-capf-add-to-completion-at-point-functions)
@@ -632,7 +632,7 @@ the sequences will be lost."
                           'edge-x (+ edge-x (string-pixel-width tab-name) (string-pixel-width tab-id))
                           'face
                           `(:inherit ,face
-                            :weight bold))
+                                     :weight bold))
               (propertize tab-name 'face `,face)
               " ")
              acc)
