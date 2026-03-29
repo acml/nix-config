@@ -45,7 +45,7 @@
        (popup +defaults)   ; tame sudden yet inevitable temporary windows
        ;;smooth-scroll     ; So smooth you won't believe it's not butter
        ;;tabs              ; a tab bar for Emacs
-       (treemacs +lsp)     ; a project drawer, like neotree but cooler
+       treemacs ;+lsp)     ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
        (vc-gutter +diff-hl +pretty) ; vcs diff in the fringe
        vi-tilde-fringe     ; fringe tildes to mark beyond EOB
@@ -92,7 +92,7 @@
        ;;ansible
        ;;biblio            ; Writes a PhD for you (citation needed)
        ;;collab            ; buffers with friends
-       (debugger +lsp)     ; FIXME stepping through code, to help you add bugs
+       debugger ;+lsp)     ; FIXME stepping through code, to help you add bugs
        direnv
        (docker +lsp)
        editorconfig        ; let someone else argue about tabs vs spaces
@@ -100,7 +100,7 @@
        (eval +overlay)     ; run code, run (also, repls)
        (lookup +dictionary +docsets +offline) ; navigate your code and its documentation
        llm                 ; when I said you needed friends, I didn't mean...
-       (lsp +booster +eglot +peek)         ; M-x vscode
+       (lsp +booster +eglot) ;+peek)         ; M-x vscode
        magit               ; a git porcelain for Emacs
        make                ; run make tasks from Emacs
        ;;pass              ; password manager for nerds
