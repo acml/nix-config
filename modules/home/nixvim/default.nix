@@ -16,6 +16,13 @@
             term_colors = true;
           };
         };
+        modus = {
+          enabled = false;
+          settings = {
+            dim_inactive.enabled = true;
+            variant = "tinted";
+          };
+        };
       };
 
       extraConfigLua = ''
@@ -262,6 +269,10 @@
       ];
 
       globals.mapleader = " ";
+
+      opts = {
+        termguicolors = true;
+      };
 
       # performance = {
       #   byteCompileLua = {
