@@ -44,7 +44,7 @@
 
       fancy-splash-image (funcall
                           (lambda (choices) (elt
-                                             choices (random (length choices))))
+                                        choices (random (length choices))))
                           (directory-files (concat (expand-file-name
                                                     doom-user-dir) "splash")
                                            t "^\\([^.]\\|\\.[^.]\\|\\.\\..\\)" t))
