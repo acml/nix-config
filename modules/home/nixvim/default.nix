@@ -20,6 +20,7 @@
           enabled = false;
           settings = {
             dim_inactive.enabled = true;
+            style = "modus_vivendi";
             variant = "tinted";
           };
         };
