@@ -8,13 +8,14 @@ concurrency:
   group: ci-${{ github.head_ref || github.ref_name }}
 jobs:
   build:
+    environment: ci
     name: ${{ matrix.attrs.name }} (${{ matrix.attrs.hostPlatform }})
     runs-on: ${{ matrix.attrs.runsOn }}
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       with:
         persist-credentials: false
-    - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a
+    - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25
       with:
         extra-conf: |-
           accept-flake-config = true
@@ -52,6 +53,10 @@ jobs:
           hostPlatform: x86_64-linux
           name: jung
           runsOn: ubuntu-24.04
+        - attr: nixosConfigurations.keynes.config.system.build.toplevel
+          hostPlatform: x86_64-linux
+          name: keynes
+          runsOn: ubuntu-24.04
         - attr: nixosConfigurations.plato.config.system.build.toplevel
           hostPlatform: x86_64-linux
           name: plato
@@ -86,6 +91,7 @@ jobs:
           runsOn: ubuntu-22.04-arm
     timeout-minutes: 60
   build-darwin-host:
+    environment: ci
     name: ${{ matrix.attrs.name }} (${{ matrix.attrs.hostPlatform }})
     needs:
     - build-linux-builder
@@ -94,7 +100,7 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       with:
         persist-credentials: false
-    - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a
+    - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25
       with:
         extra-conf: |-
           accept-flake-config = true
@@ -129,6 +135,7 @@ jobs:
           runsOn: macos-15
     timeout-minutes: 60
   build-linux-builder:
+    environment: ci
     name: linux-builder for ${{ matrix.attrs.name }} (${{ matrix.attrs.equivalentLinuxPlatform
       }})
     runs-on: ${{ matrix.attrs.equivalentLinuxRunner }}
@@ -136,7 +143,7 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       with:
         persist-credentials: false
-    - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a
+    - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25
       with:
         extra-conf: |-
           accept-flake-config = true
@@ -185,13 +192,14 @@ jobs:
         jobs: ${{ toJSON(needs) }}
     timeout-minutes: 60
   flake-check:
+    environment: ci
     name: flake check (${{ matrix.systems.platform }})
     runs-on: ${{ matrix.systems.os }}
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       with:
         persist-credentials: false
-    - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a
+    - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25
       with:
         extra-conf: |-
           accept-flake-config = true

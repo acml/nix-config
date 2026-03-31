@@ -62,7 +62,7 @@ let
     cache = "actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7"; # v5.0.4
     cachix = "cachix/cachix-action@1eb2ef646ac0255473d23a5907ad7b04ce94065c"; # v17
     checkout = "actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd"; # v6.0.2
-    nix-installer = "DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a"; # v21
+    nix-installer = "DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25"; # v22
   };
 
   # Reusable step definitions
@@ -164,6 +164,7 @@ in
           # Flake check on all platforms
           flake-check = {
             name = "flake check (\${{ matrix.systems.platform }})";
+            environment = "ci";
             strategy.matrix.systems = checkPlatforms;
             runs-on = "\${{ matrix.systems.os }}";
             steps = setupSteps ++ [
@@ -181,6 +182,7 @@ in
           # Build hosts directly (NixOS + home-manager on any platform)
           build = {
             name = "\${{ matrix.attrs.name }} (\${{ matrix.attrs.hostPlatform }})";
+            environment = "ci";
             strategy = {
               fail-fast = false;
               matrix.attrs = nixosHosts ++ homeHosts;
@@ -214,6 +216,7 @@ in
           # Build linux-builder for nix-darwin hosts (cross-compile on Linux)
           build-linux-builder = {
             name = "linux-builder for \${{ matrix.attrs.name }} (\${{ matrix.attrs.equivalentLinuxPlatform }})";
+            environment = "ci";
             strategy = {
               fail-fast = false;
               matrix.attrs = darwinHosts;
@@ -225,6 +228,7 @@ in
           # Build nix-darwin hosts (after linux-builder)
           build-darwin-host = {
             name = "\${{ matrix.attrs.name }} (\${{ matrix.attrs.hostPlatform }})";
+            environment = "ci";
             needs = [ "build-linux-builder" ];
             strategy = {
               fail-fast = false;
@@ -255,6 +259,7 @@ in
 
         jobs.regenerate = {
           runs-on = "ubuntu-24.04";
+          environment = "renovate";
           # Only run for Renovate PRs or manual dispatch
           "if" = "github.actor == 'renovate[bot]' || github.event_name == 'workflow_dispatch'";
           steps = [
