@@ -48,6 +48,7 @@
 ;;(unpin! t)
 
 (package! beginend)
+(package! compile-angel)
 (package! daemons)
 (package! catppuccin-theme)
 (package! disk-usage)
