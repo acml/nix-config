@@ -14,7 +14,7 @@ let
   ALTERNATE_EDITOR = "emacs";
   myEmacs = lib.mkMerge [
     (lib.mkIf isLinux (
-      pkgs.emacs30.overrideAttrs (old: {
+      pkgs.emacs-git.overrideAttrs (old: {
         passthru = old.passthru // {
           treeSitter = true;
         };

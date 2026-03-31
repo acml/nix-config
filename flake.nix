@@ -121,6 +121,11 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
     # Editor configuration
+    emacs-overlay = {
+      url = "github:nix-community/emacs-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs = {
