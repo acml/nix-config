@@ -12,15 +12,10 @@ let
   EMACSDIR = "${config.xdg.configHome}/emacs";
   # EDITOR = "emacsclient -tc";
   ALTERNATE_EDITOR = "emacs";
-  myEmacs = lib.mkMerge [
-    (lib.mkIf isLinux (
-      pkgs.emacs-git.overrideAttrs (old: {
-        passthru = old.passthru // {
-          treeSitter = true;
-        };
-      })
-    ))
-    (lib.mkIf isDarwin (
+
+  # Define the base Emacs package to use
+  emacsPackage =
+    if pkgs.stdenv.isDarwin then
       pkgs.emacs30-pgtk.overrideAttrs (old: {
         passthru = old.passthru // {
           treeSitter = true;
@@ -43,8 +38,86 @@ let
           })
         ];
       })
-    ))
-  ];
+    else
+      pkgs.emacs-git.overrideAttrs (old: {
+        passthru = old.passthru // {
+          treeSitter = true;
+        };
+      });
+  # Common Emacs packages
+  emacsWithPackages = (pkgs.emacsPackagesFor emacsPackage).emacsWithPackages (
+    epkgs:
+    with epkgs;
+    lib.filter (lib.meta.availableOn pkgs.stdenv.hostPlatform) [
+      copilot
+      djvu
+      emacsql
+      tree-sitter-langs
+      treesit-grammars.with-all-grammars
+      # (treesit-grammars.with-grammars (
+      #   grammars: with grammars; [
+      #     tree-sitter-bash
+      #     tree-sitter-c
+      #     tree-sitter-cmake
+      #     tree-sitter-cpp
+      #     tree-sitter-css
+      #     tree-sitter-dockerfile
+      #     tree-sitter-elisp
+      #     tree-sitter-go
+      #     tree-sitter-gomod
+      #     tree-sitter-hcl
+      #     tree-sitter-html
+      #     tree-sitter-java
+      #     tree-sitter-javascript
+      #     tree-sitter-jsdoc
+      #     tree-sitter-json
+      #     tree-sitter-json5
+      #     tree-sitter-latex
+      #     tree-sitter-lua
+      #     tree-sitter-make
+      #     tree-sitter-nix
+      #     tree-sitter-nu
+      #     tree-sitter-php
+      #     tree-sitter-python
+      #     tree-sitter-ruby
+      #     tree-sitter-rust
+      #     tree-sitter-sql
+      #     tree-sitter-toml
+      #     tree-sitter-tsx
+      #     tree-sitter-typescript
+      #     tree-sitter-yaml
+      #     tree-sitter-zig
+      #   ]
+      # ))
+      vterm
+    ]
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+      pdf-tools
+    ]
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+      (melpaBuild {
+        ename = "reader";
+        pname = "emacs-reader";
+        version = "20260116";
+        src = pkgs.fetchFromGitea {
+          domain = "codeberg.org";
+          owner = "divyaranjan";
+          repo = "emacs-reader";
+          rev = "3f4af37bbe"; # replace with 'version' for stable
+          hash = "sha256-gEmqu8Uo2zKA1wy0kA3McsEAwnOK/oJl1XpbPR334M8=";
+        };
+        files = ''(:defaults "render-core.so")'';
+        nativeBuildInputs = with pkgs; [ pkg-config ];
+        buildInputs = with pkgs; [
+          mupdf-headless
+        ];
+        preBuild = ''
+          export EMACSLOADPATH=".:$EMACSLOADPATH"
+          make clean all CC=$CC USE_PKGCONFIG=yes
+        '';
+      })
+    ]
+  );
 in
 lib.mkMerge [
   {
@@ -258,81 +331,7 @@ lib.mkMerge [
     programs = {
       emacs = {
         enable = true;
-        package = myEmacs;
-        extraPackages =
-          epkgs:
-          (
-            with epkgs;
-            lib.filter (lib.meta.availableOn pkgs.stdenv.hostPlatform) [
-              copilot
-              djvu
-              emacsql
-              tree-sitter-langs
-              treesit-grammars.with-all-grammars
-              # (treesit-grammars.with-grammars (
-              #   grammars: with grammars; [
-              #     tree-sitter-bash
-              #     tree-sitter-c
-              #     tree-sitter-cmake
-              #     tree-sitter-cpp
-              #     tree-sitter-css
-              #     tree-sitter-dockerfile
-              #     tree-sitter-elisp
-              #     tree-sitter-go
-              #     tree-sitter-gomod
-              #     tree-sitter-hcl
-              #     tree-sitter-html
-              #     tree-sitter-java
-              #     tree-sitter-javascript
-              #     tree-sitter-jsdoc
-              #     tree-sitter-json
-              #     tree-sitter-json5
-              #     tree-sitter-latex
-              #     tree-sitter-lua
-              #     tree-sitter-make
-              #     tree-sitter-nix
-              #     tree-sitter-nu
-              #     tree-sitter-php
-              #     tree-sitter-python
-              #     tree-sitter-ruby
-              #     tree-sitter-rust
-              #     tree-sitter-sql
-              #     tree-sitter-toml
-              #     tree-sitter-tsx
-              #     tree-sitter-typescript
-              #     tree-sitter-yaml
-              #     tree-sitter-zig
-              #   ]
-              # ))
-              vterm
-            ]
-            ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
-              pdf-tools
-            ]
-            ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
-              (melpaBuild {
-                ename = "reader";
-                pname = "emacs-reader";
-                version = "20260116";
-                src = pkgs.fetchFromGitea {
-                  domain = "codeberg.org";
-                  owner = "divyaranjan";
-                  repo = "emacs-reader";
-                  rev = "3f4af37bbe"; # replace with 'version' for stable
-                  hash = "sha256-gEmqu8Uo2zKA1wy0kA3McsEAwnOK/oJl1XpbPR334M8=";
-                };
-                files = ''(:defaults "render-core.so")'';
-                nativeBuildInputs = with pkgs; [ pkg-config ];
-                buildInputs = with pkgs; [
-                  mupdf-headless
-                ];
-                preBuild = ''
-                  export EMACSLOADPATH=".:$EMACSLOADPATH"
-                  make clean all CC=$CC USE_PKGCONFIG=yes
-                '';
-              })
-            ]
-          );
+        package = emacsWithPackages;
       };
 
       jq.enable = true; # cli to extract data out of json input
@@ -353,7 +352,7 @@ lib.mkMerge [
           # "--alternate-editor=\"\""
         ];
       };
-      package = myEmacs;
+      package = emacsWithPackages;
       socketActivation.enable = true;
     };
   })
