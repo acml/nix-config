@@ -15,7 +15,7 @@ let
 
   # Define the base Emacs package to use
   emacsPackage =
-    if pkgs.stdenv.isDarwin then
+    if isDarwin then
       pkgs.emacs30-pgtk.overrideAttrs (old: {
         passthru = old.passthru // {
           treeSitter = true;
@@ -91,10 +91,10 @@ let
       # ))
       vterm
     ]
-    ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+    ++ lib.optionals isDarwin [
       pdf-tools
     ]
-    ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+    ++ lib.optionals isLinux [
       (melpaBuild {
         ename = "reader";
         pname = "emacs-reader";
@@ -120,23 +120,107 @@ let
   );
 
   # Define language servers and tools to include in PATH for Emacs
-  extraPackages = with pkgs; [
-    # Language Servers
-    # go # Go language
-    # gopls # Go language server
-    # bash-language-server # Bash language server
-    # dockerfile-language-server # Docker language server
-    # intelephense # PHP language server
-    # nodePackages.typescript-language-server # JS/TS language server
-    # vscode-langservers-extracted # CSS/LESS/SASS language server
-    # nodejs # For copilot.el
+  extraPackages =
+    with pkgs;
+    [
+      # Language Servers
+      # go # Go language
+      # gopls # Go language server
+      # bash-language-server # Bash language server
+      # dockerfile-language-server # Docker language server
+      # intelephense # PHP language server
+      # nodePackages.typescript-language-server # JS/TS language server
+      # vscode-langservers-extracted # CSS/LESS/SASS language server
+      # nodejs # For copilot.el
 
-    # Other programs
-    # gnuplot # For use with org mode
-    # phpPackages.php-codesniffer # PHP codestyle checker
-    # openscad # For use with scad and scad preview mode
-    exercism
-  ];
+      # Other programs
+      # gnuplot # For use with org mode
+      # phpPackages.php-codesniffer # PHP codestyle checker
+      # openscad # For use with scad and scad preview mode
+
+      emacs-lsp-booster
+
+      # Optional dependencies
+      dtach
+      exiftool # for image-dired
+      fd # faster projectile indexing
+      graphicsmagick # for image-dired
+      libjpeg # for image-dired
+      unzip
+      zstd # for undo-fu-session/undo-tree compression
+
+      # Module dependencies
+
+      # :checkers grammar
+      languagetool
+
+      # :tools editorconfig
+      dockfmt
+
+      # :tools editorconfig
+      editorconfig-core-c # per-project style config
+
+      # :tools lookup & :lang org +roam
+      sqlite
+      wordnet
+      gnuplot # org-plot/gnuplot
+      graphviz # org-roam-graph
+      # :lang latex & :lang org (latex previews)
+      tectonic
+
+      # :lang cc
+      # ccls
+      clang-tools
+      glslang
+
+      # CMake LSP
+      cmake
+      cmake-language-server
+
+      #data
+      libxml2 # xmllint
+
+      # Nix
+      nixfmt
+      nil
+
+      # Markdown exporting
+      mdl
+      pandoc
+
+      # HTML/CSS/JSON language servers
+      nodePackages.prettier
+      nodePackages.vscode-langservers-extracted
+
+      # Yaml
+      nodePackages.yaml-language-server
+
+      # Bash
+      nodePackages.bash-language-server
+      shellcheck
+      shfmt
+
+      # :lang lua
+      # (lib.mkIf isLinux sumneko-lua-language-server)
+      lua-language-server
+
+      # dirvish previewers
+      epub-thumbnailer
+      ffmpegthumbnailer
+      mediainfo
+      p7zip
+      poppler-utils
+      vips
+
+      zip
+    ]
+    ++ lib.optionals isLinux [
+      maim # org-download-clipboard
+    ]
+    ++ lib.optionals isDarwin [
+      coreutils-prefixed
+      pngpaste
+    ];
 
   # Wrap emacs to add language servers to PATH, keeping user environment clean
   wrappedEmacs = pkgs.symlinkJoin {
@@ -185,23 +269,9 @@ lib.mkMerge [
           nerd-fonts.symbols-only
           nerd-fonts.overpass
 
-          (lib.mkIf isDarwin coreutils-prefixed)
-          (lib.mkIf isDarwin pngpaste)
-
-          # exercism
+          exercism
 
           ## Doom dependencies
-
-          ## Optional dependencies
-          dtach
-          exiftool # for image-dired
-          fd # faster projectile indexing
-          graphicsmagick # for image-dired
-          libjpeg # for image-dired
-          unzip
-          zstd # for undo-fu-session/undo-tree compression
-
-          ## Module dependencies
 
           # :checkers spell
           (aspellWithDicts (
@@ -213,46 +283,6 @@ lib.mkMerge [
             ]
           ))
 
-          # :checkers grammar
-          languagetool
-
-          # :tools editorconfig
-          dockfmt
-
-          # :tools editorconfig
-          editorconfig-core-c # per-project style config
-
-          # :tools lookup & :lang org +roam
-          sqlite
-          wordnet
-          (lib.mkIf isLinux maim) # org-download-clipboard
-          gnuplot # org-plot/gnuplot
-          graphviz # org-roam-graph
-          # :lang latex & :lang org (latex previews)
-          tectonic
-
-          # :lang cc
-          # ccls
-          clang-tools
-          glslang
-
-          emacs-lsp-booster
-
-          # CMake LSP
-          cmake
-          cmake-language-server
-
-          #data
-          libxml2 # xmllint
-
-          # Nix
-          nixfmt
-          nil
-
-          # Markdown exporting
-          mdl
-          pandoc
-
           # Python LSP setup
           # nodePackages.pyright
           # pipenv
@@ -262,22 +292,6 @@ lib.mkMerge [
 
           # JavaScript
           # nodePackages.typescript-language-server
-
-          # HTML/CSS/JSON language servers
-          nodePackages.prettier
-          nodePackages.vscode-langservers-extracted
-
-          # Yaml
-          nodePackages.yaml-language-server
-
-          # Bash
-          nodePackages.bash-language-server
-          shellcheck
-          shfmt
-
-          # :lang lua
-          # (lib.mkIf isLinux sumneko-lua-language-server)
-          lua-language-server
 
           # Rust
           # cargo
@@ -304,14 +318,6 @@ lib.mkMerge [
           # gore
           # gotools
 
-          # dirvish previewers
-          epub-thumbnailer
-          ffmpegthumbnailer
-          mediainfo
-          p7zip
-          poppler-utils
-          vips
-
           trash-cli
         ]
         ++ lib.optionals stdenv.hostPlatform.isLinux [
@@ -325,8 +331,6 @@ lib.mkMerge [
           xsel
           xwininfo
           xprop
-
-          zip
         ];
 
       sessionPath = [ "${EMACSDIR}/bin" ];
