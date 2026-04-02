@@ -118,6 +118,43 @@ let
       })
     ]
   );
+
+  # Define language servers and tools to include in PATH for Emacs
+  extraPackages = with pkgs; [
+    # Language Servers
+    # go # Go language
+    # gopls # Go language server
+    # bash-language-server # Bash language server
+    # dockerfile-language-server # Docker language server
+    # intelephense # PHP language server
+    # nodePackages.typescript-language-server # JS/TS language server
+    # vscode-langservers-extracted # CSS/LESS/SASS language server
+    # nodejs # For copilot.el
+
+    # Other programs
+    # gnuplot # For use with org mode
+    # phpPackages.php-codesniffer # PHP codestyle checker
+    # openscad # For use with scad and scad preview mode
+    exercism
+  ];
+
+  # Wrap emacs to add language servers to PATH, keeping user environment clean
+  wrappedEmacs = pkgs.symlinkJoin {
+    name = "${emacsWithPackages.name}-wrapped";
+    paths = [ emacsWithPackages ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+
+    postBuild = ''
+      # Wrap all emacs binaries with language servers in PATH
+      for bin in $out/bin/*; do
+        wrapProgram "$bin" \
+          --prefix PATH : ${lib.makeBinPath extraPackages}
+      done
+    '';
+
+    # Preserve meta attributes from the original package
+    inherit (emacsWithPackages) meta;
+  };
 in
 lib.mkMerge [
   {
@@ -151,7 +188,7 @@ lib.mkMerge [
           (lib.mkIf isDarwin coreutils-prefixed)
           (lib.mkIf isDarwin pngpaste)
 
-          exercism
+          # exercism
 
           ## Doom dependencies
 
@@ -331,7 +368,7 @@ lib.mkMerge [
     programs = {
       emacs = {
         enable = true;
-        package = emacsWithPackages;
+        package = wrappedEmacs;
       };
 
       jq.enable = true; # cli to extract data out of json input
@@ -352,7 +389,7 @@ lib.mkMerge [
           # "--alternate-editor=\"\""
         ];
       };
-      package = emacsWithPackages;
+      # package = wrappedEmacs;
       socketActivation.enable = true;
     };
   })
