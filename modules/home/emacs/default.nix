@@ -129,7 +129,7 @@ let
       # bash-language-server # Bash language server
       # dockerfile-language-server # Docker language server
       # intelephense # PHP language server
-      # nodePackages.typescript-language-server # JS/TS language server
+      # typescript-language-server # JS/TS language server
       # vscode-langservers-extracted # CSS/LESS/SASS language server
       # nodejs # For copilot.el
 
@@ -189,14 +189,14 @@ let
       pandoc
 
       # HTML/CSS/JSON language servers
-      nodePackages.prettier
-      nodePackages.vscode-langservers-extracted
+      prettier
+      vscode-langservers-extracted
 
       # Yaml
-      nodePackages.yaml-language-server
+      yaml-language-server
 
       # Bash
-      nodePackages.bash-language-server
+      bash-language-server
       shellcheck
       shfmt
 
@@ -284,14 +284,14 @@ lib.mkMerge [
           ))
 
           # Python LSP setup
-          # nodePackages.pyright
+          # pyright
           # pipenv
           # (python3.withPackages (ps: with ps; [
           #   black isort pyflakes pytest
           # ]))
 
           # JavaScript
-          # nodePackages.typescript-language-server
+          # typescript-language-server
 
           # Rust
           # cargo
