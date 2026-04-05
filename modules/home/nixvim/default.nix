@@ -154,16 +154,16 @@
           vim.keymap.set("n", "<leader>ca", '<cmd>Lspsaga code_action<cr>', { desc = "LSP Execute code action" })
         end
 
-        require('nvim-biscuits').setup({
-          default_config = {
-            min_distance = 6,
-            prefix_string = " ¤ "
-          },
-          language_config = {
-            nix = { disabled = true },
-            org = { disabled = true }
-          }
-        })
+        -- require('nvim-biscuits').setup({
+        --   default_config = {
+        --     min_distance = 6,
+        --     prefix_string = " ¤ "
+        --   },
+        --   language_config = {
+        --     nix = { disabled = true },
+        --     org = { disabled = true }
+        --   }
+        -- })
 
         -- require('go').setup()
 
@@ -266,7 +266,7 @@
       extraPlugins = with pkgs.vimPlugins; [
         vim-plugin-AnsiEsc
         # go-nvim
-        nvim-biscuits
+        # nvim-biscuits
       ];
 
       globals.mapleader = " ";
@@ -392,9 +392,12 @@
         # dap.enable = true;
         debugprint.enable = true;
         diffview.enable = true;
-        direnv.enable = true;
+        direnv = {
+          enable = true;
+          settings.direnv_silent_load = 1;
+        };
         helpview.enable = true;
-        hmts.enable = true;
+        # hmts.enable = true;
         image.enable = true;
         indent-blankline = {
           enable = true;
@@ -731,7 +734,6 @@
         todo-comments.enable = true;
         treesitter = {
           enable = true;
-          package = pkgs.vimPlugins.nvim-treesitter-legacy;
           folding.enable = true;
           nixvimInjections = true;
           settings = {
