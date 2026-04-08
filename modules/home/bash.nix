@@ -19,6 +19,8 @@
 
       source <(${pkgs.nix-your-shell}/bin/nix-your-shell --nom bash)
 
+      export PW_PREPARE="$(cat ~/.pw-prepare 2>/dev/null)"
+
       # if command -v tmux &> /dev/null && [[ $- == *i* ]] && [[ ! "$TERM" =~ xterm-kitty ]] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$INSIDE_EMACS" ] && [ -z "$MYVIMRC" ] && [ -z "$VIMRUNTIME" ] && [ -z "$TMUX" ]; then
       #   exec tmux new-session -A -s main >/dev/null 2>&1
       # fi
