@@ -1,10 +1,19 @@
-{ lib, pkgs, ... }:
+{
+  flake,
+  lib,
+  pkgs,
+  ...
+}:
+let
+  inherit (flake) inputs;
+in
 {
   programs = {
 
     nixvim = {
       enable = true;
       enableMan = true;
+      package = inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
       viAlias = true;
       vimAlias = true;
 
@@ -264,7 +273,7 @@
         ];
 
       extraPlugins = with pkgs.vimPlugins; [
-        vim-plugin-AnsiEsc
+        # vim-plugin-AnsiEsc
         # go-nvim
         # nvim-biscuits
       ];
