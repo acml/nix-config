@@ -1,3 +1,4 @@
+{ config, pkgs, ... }:
 {
   programs = {
     delta = {
@@ -11,6 +12,9 @@
     git = {
       enable = true;
       lfs.enable = true;
+      includes = [
+        { path = "${config.xdg.configHome}/gitalias/gitalias.txt"; }
+      ];
       settings = {
         user = {
           email = "ozgezer@gmail.com";
@@ -40,46 +44,25 @@
 
   home.shellAliases = rec {
     g = "git";
-    ga = "git add";
-    gaa = "${ga} -A";
-    gaap = "${gaa} --patch";
-    gap = "${ga} --patch";
-    gb = "git branch";
-    gch = "git checkout";
-    gcl = "git clone";
-    gco = "git commit";
-    gcom = "${gco} --message";
-    gcoa = "${gco} --amend";
-    gcoan = "${gcoa} --no-edit";
-    gdf = "git diff";
-    gdfs = "${gdf} --staged";
-    gdt = "git difftool";
-    gdts = "${gdt} --staged";
-    gf = "git fetch --all --prune --tags";
-    gfpl = "${gf} && ${gpl}";
-    gff = "${gf} --force";
-    gl = "git log --decorate --pretty=format:'%C(auto)%h %C(green)(%as)%C(reset)%C(blue) %<(20,trunc) %an%C(reset) %s%C(auto)%d'";
-    gm = "git merge";
-    gma = "${gm} --abort";
-    gmc = "${gm} --continue";
-    gpl = "git pull --rebase";
-    gps = "git push";
-    gpsf = "git push --force-with-lease";
-    grb = "git rebase";
-    grba = "${grb} --abort";
-    grbc = "${grb} --continue";
-    grbsn = "${grb} --exec 'git commit --amend --no-edit -n -S'";
-    grs = "git restore";
-    grss = "${grs} --staged";
-    # TODO: deprecate
-    gs = "git status";
-    gst = "git status";
-    gsw = "git switch";
-    gswc = "${gsw} -c";
-    gswcf = "${gsw} -C";
-    gwt = "git worktree";
-    gwta = "${gwt} add";
-    gwtl = "${gwt} list";
-    gwtr = "${gwt} remove";
+    git_what_changes_the_most = "git log --format=format: --name-only --since='1 year ago' | sort | uniq -c | sort -nr | head -20";
+    git_who_built_this = "git shortlog -sn --no-merges";
+    git_where_do_bugs_cluster = "git log -i -E --grep='fix|bug|broken' --name-only --format='' | sort | uniq -c | sort -nr | head -20";
+    git_is_this_project_accelerating_or_dying = "git log --format='%ad' --date=format:'%Y-%m' | sort | uniq -c";
+    git_how_often_is_the_team_firefighting = "git log --oneline --since='1 year ago' | grep -iE 'revert|hotfix|emergency|rollback'";
+  };
+
+  # link gitalias.txt from store to
+  # $XDG_CONFIG_HOME/gitalias/gitalias.txt
+  # nix run nixpkgs#nurl https://github.com/GitAlias/gitalias/
+  xdg.configFile = {
+    "gitalias/gitalias.txt".source =
+      pkgs.fetchFromGitHub {
+        # fill with snippet here
+        owner = "GitAlias";
+        repo = "gitalias";
+        rev = "08b0fb7d4be46a4cca8e5b33df60b02f3b05ad02";
+        hash = "sha256-hNuv3BjUsXEd+k6xR92F3XCsvoQrcutNxyNUsK7UYnk=";
+      }
+      + "/gitalias.txt";
   };
 }
