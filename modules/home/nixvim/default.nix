@@ -260,10 +260,14 @@ in
       extraPackages =
         with pkgs;
         [
-          ghostscript
-          imagemagick
-          mermaid-cli
-          sqlite
+          ghostscript # snacks.image
+          imagemagick # snacks.image
+          lynx # copilot-chat
+          # luajitPackages.tiktoken_core # copilot-chat
+          mermaid-cli # snacks.image
+          sqlite # snacks.picker
+          tectonic # snacks.image
+          tree-sitter # lspsaga
           universal-ctags
         ]
         ++ lib.optionals stdenv.hostPlatform.isLinux [
