@@ -343,7 +343,7 @@ lib.mkMerge [
           ;
       };
       shellAliases = {
-        e = "TERM=konsole emacs -nw";
+        e = "emacs -nw";
       };
     };
 
