@@ -1205,6 +1205,9 @@ you're done. This can be called from an external shell script."
   :hook
   (gptel-post-stream-hook . gptel-auto-scroll))
 
+(use-package! gptel-agent
+  :config (gptel-agent-update))
+
 (use-package! gptel-quick
   :after gptel
   :init

@@ -47,48 +47,45 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;;(unpin! t)
 
+(package! ascii :recipe (:host github :repo "acml/ascii"))
 (package! beginend)
+(package! catppuccin-theme)
 (package! compile-angel)
 (package! daemons)
-(package! catppuccin-theme)
+(package! dired-auto-readme :recipe (:host github :repo "amno1/dired-auto-readme"))
 (package! disk-usage)
 (package! dts-mode)
+(package! dwim-shell-command)
+(package! ef-themes)
 (package! exercism)
 (package! google-c-style)
-(package! dwim-shell-command)
-(package! dired-auto-readme :recipe (:host github :repo "amno1/dired-auto-readme"))
+(package! gptel-agent)
+(package! gt)
+(package! highlight-parentheses :recipe (:host github :repo "emacsmirror/highlight-parentheses"))
+(package! journalctl-mode)
 (package! ll-debug)
+(package! macher :recipe (:host github :repo "kmontag/macher"))
+(package! magit-todos)
+(package! mixed-pitch)
+(package! modus-themes)
+(package! obvious :recipe (:host github :repo "alphapapa/obvious.el"))
 (package! org-block-capf :recipe (:host github :repo "xenodium/org-block-capf"))
 (package! org-glossary :recipe (:host github :repo "tecosaur/org-glossary"))
 (package! org-pretty-table :recipe (:host github :repo "Fuco1/org-pretty-table")) ;; dired-auto-readme dependency
 (package! org-view-mode)                                                          ;; dired-auto-readme dependency
-
-;; (package! evil-colemak-basics)
-
-(package! gt)
-(package! highlight-parentheses :recipe (:host github :repo "emacsmirror/highlight-parentheses"))
-(package! journalctl-mode)
-(package! magit-todos)
-(package! mixed-pitch)
-(package! modus-themes)
-(package! ef-themes)
-(package! obvious :recipe (:host github :repo "alphapapa/obvious.el"))
-
 (package! page-break-lines)
+(package! rainbow-mode)
+(package! scopeline)
+(package! trashed)
+(package! turkish)
+(package! visual-ascii-mode)
+(package! yazi :recipe (:host github :repo "bommbo/yazi.el"))
+(package! ztree :recipe (:host codeberg :repo "fourier/ztree"))
+
+
 ;; Maybe the pdf-tools package is also installed outside of nix, and this is
 ;; conflicting. list-load-path-shadows will show you if you have a package
 ;; defined in multiple locations. This will use pdf-tools installed by nix
 (if (featurep :system 'macos)
     (package! pdf-tools :built-in 'prefer)
   (package! reader :built-in 'prefer))
-(package! rainbow-mode)
-(package! scopeline)
-(package! turkish)
-
-(package! trashed)
-(package! ascii :recipe (:host github :repo "acml/ascii"))
-(package! visual-ascii-mode)
-(package! yazi :recipe (:host github :repo "bommbo/yazi.el"))
-(package! ztree :recipe (:host codeberg :repo "fourier/ztree"))
-
-(package! macher :recipe (:host github :repo "kmontag/macher"))
