@@ -18,7 +18,7 @@ in
 
   # Host-specific home-manager user config
   home-manager.users.ahmet = {
-    imports = [ self.homeModules.trusted ];
+    # imports = [ self.homeModules.trusted ];
     # c.f. https://github.com/danth/stylix/issues/865
     nixpkgs.overlays = lib.mkForce null;
     # programs.git.settings.gpg.ssh.program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
@@ -36,7 +36,7 @@ in
   nix = {
     gc.automatic = true;
     linux-builder = {
-      enable = true;
+      enable = false;
       ephemeral = true;
       config = {
         imports = [ self.nixosModules.nix ];

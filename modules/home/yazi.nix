@@ -22,7 +22,7 @@
       initLua = # lua
         ''
           require("git"):setup()
-          require("recycle-bin"):setup()
+          -- require("recycle-bin"):setup()
         '';
       flavors =
         let
@@ -102,7 +102,7 @@
         inherit git;
         inherit mediainfo;
         inherit ouch;
-        inherit recycle-bin;
+        #inherit recycle-bin;
       };
       settings = {
         mgr = {
