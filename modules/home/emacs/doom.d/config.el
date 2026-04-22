@@ -262,13 +262,15 @@
 (use-package! page-break-lines)
 (add-hook! 'dired-auto-readme-mode-hook #'page-break-lines-mode)
 
-(defadvice! acml/dired-auto-readme--enable (fn &rest args)
-  :around #'dired-auto-readme--enable
+(add-hook! 'dired-mode-hook #'dired-auto-readme-mode)
+
+;; Runs ‘dired-auto-readme-mode‘ only when dirvish-side isn’t the active window.
+(defadvice! acml/dired-auto-readme-mode (fn &rest args)
+(defadvice! acml/dired-auto-readme-mode (fn &rest args)
+  :around #'dired-auto-readme-mode
   (let ((visible (dirvish-side--session-visible-p)))
     (unless (eq visible (selected-window))
-      (advice-add 'dired-revert :override #'ignore)
-      (apply fn args)
-      (advice-remove 'dired-revert #'ignore))))
+      (apply fn args))))
 
 (defadvice! acml/dirvish-subtree-toggle (fn &rest args)
   :around #'dirvish-subtree-toggle (save-excursion (apply fn args)))
@@ -300,8 +302,7 @@
         dirvish-subtree-prefix "  "
         dirvish-subtree-state-style 'nerd)
   ;; (dirvish-peek-mode)
-  (dirvish-side-follow-mode)
-  (add-hook! 'dirvish-setup-hook #'dired-auto-readme-mode))
+  (dirvish-side-follow-mode))
 
 (after! dirvish-side
   (setq dirvish-side-display-alist
