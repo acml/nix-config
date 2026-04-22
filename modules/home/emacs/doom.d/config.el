@@ -266,7 +266,6 @@
 
 ;; Runs ‘dired-auto-readme-mode‘ only when dirvish-side isn’t the active window.
 (defadvice! acml/dired-auto-readme-mode (fn &rest args)
-(defadvice! acml/dired-auto-readme-mode (fn &rest args)
   :around #'dired-auto-readme-mode
   (let ((visible (dirvish-side--session-visible-p)))
     (unless (eq visible (selected-window))
