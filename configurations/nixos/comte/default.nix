@@ -39,64 +39,93 @@ in
         "gccarch-znver5"
       ];
     };
-    buildMachines = [
-      {
-        hostName = "putnam?compress=true&max-connections=4";
-        system = "aarch64-linux";
-        protocol = "ssh-ng";
-        sshUser = "root";
-        sshKey = "/etc/ssh/ssh_host_ed25519_key";
-        maxJobs = 64;
-        speedFactor = 1;
-        supportedFeatures = [
-          "benchmark"
-          "big-parallel"
-          "kvm"
-          "nixos-test"
-          "gccarch-neoverse-v2"
-        ];
-      }
-      {
-        hostName = "keynes?compress=true&max-connections=4";
-        system = "x86_64-linux";
-        protocol = "ssh-ng";
-        sshUser = "root";
-        sshKey = "/etc/ssh/ssh_host_ed25519_key";
-        maxJobs = 96;
-        speedFactor = 1;
-        supportedFeatures = [
-          "benchmark"
-          "big-parallel"
-          "kvm"
-          "nixos-test"
-          "gccarch-znver5"
-        ];
-      }
-    ];
+    buildMachines =
+      let
+        mkBuilder =
+          {
+            hostName,
+            system,
+            gccarch,
+            maxJobs,
+            kvm,
+          }:
+          {
+            inherit system maxJobs;
+            hostName = "${hostName}?max-connections=4";
+            protocol = "ssh-ng";
+            sshUser = "root";
+            sshKey = "/etc/ssh/ssh_host_ed25519_key";
+            speedFactor = 1;
+            supportedFeatures = [
+              "benchmark"
+              "big-parallel"
+              gccarch
+            ]
+            ++ lib.optional kvm "nixos-test";
+            mandatoryFeatures = lib.optional kvm "kvm";
+          };
+      in
+      [
+        (mkBuilder {
+          hostName = "putnam";
+          system = "aarch64-linux";
+          gccarch = "gccarch-neoverse-v2";
+          maxJobs = 128;
+          kvm = false;
+        })
+        (mkBuilder {
+          hostName = "putnam-kvm";
+          system = "aarch64-linux";
+          gccarch = "gccarch-neoverse-v2";
+          maxJobs = 32;
+          kvm = true;
+        })
+        (mkBuilder {
+          hostName = "keynes";
+          system = "x86_64-linux";
+          gccarch = "gccarch-znver5";
+          maxJobs = 128;
+          kvm = false;
+        })
+        (mkBuilder {
+          hostName = "keynes-kvm";
+          system = "x86_64-linux";
+          gccarch = "gccarch-znver5";
+          maxJobs = 32;
+          kvm = true;
+        })
+      ];
   };
+
+  systemd.tmpfiles.rules = [
+    "D /nix/var/nix/current-load 0755 root root - -"
+  ];
 
   programs.ssh = {
     extraConfig = ''
-      Host putnam
+      Host putnam putnam-kvm
         HostName ip-172-31-40-156.ec2.internal
-        User root
-        IdentitiesOnly yes
-        IdentityFile /etc/ssh/ssh_host_ed25519_key
-        ServerAliveInterval 30
-        ServerAliveCountMax 3
 
-      Host keynes
+      Host keynes keynes-kvm
         HostName ip-172-31-47-65.ec2.internal
+
+      Host putnam putnam-kvm keynes keynes-kvm
         User root
         IdentitiesOnly yes
         IdentityFile /etc/ssh/ssh_host_ed25519_key
         ServerAliveInterval 30
         ServerAliveCountMax 3
+        IPQoS throughput
+        Ciphers aes128-gcm@openssh.com,aes256-gcm@openssh.com
+        ControlMaster auto
+        ControlPath /run/ssh-control-%C
+        ControlPersist 10m
     '';
     knownHosts = {
       putnam = {
         hostNames = [
           "putnam"
+          "putnam-kvm"
           "ip-172-31-40-156.ec2.internal"
         ];
         publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDjT1p1pwoQ48meY+qSOICOaEEFnA9fZd3UPvCsa/Orw";
@@ -104,6 +133,7 @@ in
       keynes = {
         hostNames = [
           "keynes"
+          "keynes-kvm"
           "ip-172-31-47-65.ec2.internal"
         ];
         publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGWy46fPOj5Z9oV64eC028oBQhUVpR+QZgEHxt6Zj7AM";
