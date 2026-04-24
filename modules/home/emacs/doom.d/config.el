@@ -788,11 +788,14 @@ clicked."
       :desc "Swap Left"  "<" #'+workspace/swap-left
       :desc "Swap Right" ">" #'+workspace/swap-right)
 
-(use-package! proced :commands (proced)
-              :init
-              (setq proced-auto-update-flag t
-                    proced-auto-update-interval 1
-                    proced-descend t))
+(use-package! proced
+  :commands (proced)
+  :custom
+  (proced-enable-color-flag t)
+  (proced-tree-flag t)
+  (proced-auto-update-flag 'visible)
+  (proced-auto-update-interval 1)
+  (proced-descent t))
 
 (after! projectile
   (setq ;; projectile-switch-project-action 'projectile-dired
