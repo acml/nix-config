@@ -937,13 +937,16 @@ will ensure are ignored")
 
 (setq which-key-allow-multiple-replacements t)
 (after! which-key
-  (pushnew! which-key-replacement-alist
-            ;; rename winum-select-window-1 entry to 1..9
-            '(("\\(.*\\)1" . "winum-select-window-1") . ("\\11..9" . "Switch to window 1..9"))
-            ;; hide winum-select-window-[2-9] entries
-            '((nil . "winum-select-window-[2-9]") . t)
-            '(("" . "\\`+?evil[-:/]?\\(?:a-\\)?\\(.*\\)") . (nil . " \\1"))
-            '(("\\`g s" . "\\`evilem--?motion-\\(.*\\)") . (nil . " \\1"))))
+  ;; rename winum-select-window-1 entry to 1..9
+  (cl-pushnew '(("\\(.*\\)1" . "winum-select-window-1") . ("\\11..9" . "Switch to window 1..9"))
+              which-key-replacement-alist)
+  ;; hide winum-select-window-[2-9] entries
+  (cl-pushnew '((nil . "winum-select-window-[2-9]") . t)
+              which-key-replacement-alist)
+  (cl-pushnew '(("" . "\\`+?evil[-:/]?\\(?:a-\\)?\\(.*\\)") . (nil . " \\1"))
+              which-key-replacement-alist)
+  (cl-pushnew '(("\\`g s" . "\\`evilem--?motion-\\(.*\\)") . (nil . " \\1"))
+              which-key-replacement-alist))
 
 ;; text mode directory tree
 (after! ztree
