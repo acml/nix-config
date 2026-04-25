@@ -5,6 +5,10 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
+;; (use-package! benchmark-init
+;;   :config
+;;   (add-hook 'after-init-hook #'benchmark-init/deactivate))
+
 (use-package! compile-angel
   :demand t
   :config
@@ -152,6 +156,7 @@
 
 ;; Directional window-selection routines
 (use-package! windmove
+  :defer t
   :config
   (windmove-default-keybindings '(shift))
   (windmove-swap-states-default-keybindings '(shift ctrl))
@@ -252,17 +257,16 @@
     "u" 'daemons-systemd-toggle-user))
 
 (use-package! dired
+  :defer t
   :config
   (setq dired-listing-switches (concat dired-listing-switches " --time-style=long-iso")))
 
 (use-package! dired-auto-readme
-  :config
-  (setq dired-auto-readme-separator "\n"))
+  :config (setq dired-auto-readme-separator "\n")
+  :hook (dired-mode . dired-auto-readme-mode))
 
-(use-package! page-break-lines)
-(add-hook! 'dired-auto-readme-mode-hook #'page-break-lines-mode)
-
-(add-hook! 'dired-mode-hook #'dired-auto-readme-mode)
+(use-package! page-break-lines
+  :hook (dired-auto-readme-mode . page-break-lines-mode))
 
 ;; Runs ‘dired-auto-readme-mode‘ only when dirvish-side isn’t the active window.
 (defadvice! acml/dired-auto-readme-mode (fn &rest args)
@@ -537,6 +541,7 @@ the sequences will be lost."
        :desc "List project todos" "t" #'magit-todos-list))
 
 (use-package! git-commit
+  :after magit
   :config
   (setq git-commit-summary-max-length 68))
 
@@ -605,13 +610,13 @@ the sequences will be lost."
 (use-package! org-glossary
   :hook (org-mode . org-glossary-mode))
 
-(setq
- ;; If you use `org' and don't want your org files in the default location below,
- ;; change `org-directory'. It must be set before org loads!
- org-directory (expand-file-name "~/Documents/org/")
- org-startup-with-inline-images t)
+;; If you use `org' and don't want your org files in the default location below,
+;; change `org-directory'. It must be set before org loads!
+(setopt org-directory (expand-file-name "~/Documents/org/")
+        org-startup-with-inline-images t)
 
 (use-package! org
+  :defer t
   :config
   (setq
    org-hide-emphasis-markers t
@@ -1066,6 +1071,7 @@ you're done. This can be called from an external shell script."
 ;; F12
 
 (use-package! yazi
+  :defer t
   :init
   (map! (:leader :desc "Yazi" :n "oy" #'yazi)))
 
@@ -1074,6 +1080,7 @@ you're done. This can be called from an external shell script."
   (zone-when-idle (* 60 1)))
 
 (use-package! macher
+  :defer t
   :custom
   ;; The org UI has structured navigation and nice content folding.
   (macher-action-buffer-ui 'org)
@@ -1093,6 +1100,7 @@ you're done. This can be called from an external shell script."
   )
 
 (use-package! gptel
+  :defer t
   :if (not (string= (system-name) "dinm5CG52813LW"))
   :config
   (pop gptel--known-backends) ; remove the default ChatGPT backend
@@ -1217,6 +1225,7 @@ you're done. This can be called from an external shell script."
   (gptel-post-stream-hook . gptel-auto-scroll))
 
 (use-package! gptel-agent
+  :after gptel
   :config (gptel-agent-update))
 
 (use-package! gptel-quick
@@ -1243,6 +1252,7 @@ you're done. This can be called from an external shell script."
   (setq copilot-max-char -1))
 
 (use-package! gt
+  :defer t
   ;; :bind (("C-c t" . gt-translate))
   :init
   (map! :leader :desc "Translate"

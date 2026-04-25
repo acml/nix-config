@@ -49,6 +49,7 @@
 
 (package! ascii :recipe (:host github :repo "acml/ascii"))
 (package! beginend)
+(package! benchmark-init)
 (package! catppuccin-theme)
 (package! compile-angel)
 (package! daemons)

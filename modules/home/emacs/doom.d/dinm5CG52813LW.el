@@ -99,15 +99,15 @@ Returns a list of directory paths suitable for `magit-repository-directories`."
     repositories))
 
 (defadvice! dinm5CG52813LW--enhance-magit-repositories (fn &rest args)
-    "Enhance magit repository discovery with multi-repo project support."
-    :around #'magit-list-repositories
-    (if-let* ((project-root (projectile-project-root))
-              (main-folder (dinm5CG52813LW--get-project-main-folder project-root))
-              (xml-file (dinm5CG52813LW--get-project-config-path project-root)))
-        (let ((magit-repository-directories
-               (dinm5CG52813LW--collect-magit-repositories project-root main-folder xml-file)))
-          (apply fn args))
-      (apply fn args)))
+  "Enhance magit repository discovery with multi-repo project support."
+  :around #'magit-list-repositories
+  (if-let* ((project-root (projectile-project-root))
+            (main-folder (dinm5CG52813LW--get-project-main-folder project-root))
+            (xml-file (dinm5CG52813LW--get-project-config-path project-root)))
+      (let ((magit-repository-directories
+             (dinm5CG52813LW--collect-magit-repositories project-root main-folder xml-file)))
+        (apply fn args))
+    (apply fn args)))
 
 ;;; Projectile Integration
 
