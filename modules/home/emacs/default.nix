@@ -10,7 +10,6 @@ let
   DOOMDIR = "${config.xdg.configHome}/doom";
   DOOMLOCALDIR = "${config.xdg.dataHome}/doom";
   EMACSDIR = "${config.xdg.configHome}/emacs";
-  # EDITOR = "emacsclient -tc";
   ALTERNATE_EDITOR = "emacs";
 
   # Define the base Emacs package to use
