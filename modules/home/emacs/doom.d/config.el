@@ -169,10 +169,8 @@
 ;; (add-hook 'org-shiftright-final-hook 'windmove-right)
 
 (use-package winum
-  :after-call doom-switch-window-hook
+  :after-call doom-after-init-hook
   :config
-  ;; (setq winum-scope 'frame-local)
-  ;; (winum-mode +1)
   (dolist (wn (seq-map 'number-to-string (number-sequence 1 9)))
     (let ((f (intern (concat "winum-select-window-" wn)))
           (k (concat "s-" wn)))
