@@ -210,6 +210,7 @@ ORIG-FUN is the original function, FILENAME is the file being processed, ARGS ar
 ;;; GPT Integration
 
 (use-package! gptel
+  :defer t
   :config
   (pop gptel--known-backends) ; remove the default ChatGPT backend
   (setq gptel-model 'claude-sonnet-4.6

@@ -617,6 +617,7 @@ the sequences will be lost."
 
 (use-package! org
   :defer t
+  :after-call (org-agenda org-capture +default/org-notes-headlines)
   :config
   (setq
    org-hide-emphasis-markers t
