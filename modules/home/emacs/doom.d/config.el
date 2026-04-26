@@ -615,6 +615,14 @@ the sequences will be lost."
 (setopt org-directory (expand-file-name "~/Documents/org/")
         org-startup-with-inline-images t)
 
+(defun my/org-disable-xterm-title-when-tty (window _prev-buffer)
+  "Disable `xterm-set-window-title` for Org buffers shown in TTY frames."
+  (let ((buffer (window-buffer window)))
+    (with-current-buffer buffer
+      (when (and (derived-mode-p 'org-mode)
+                 (not (display-graphic-p (window-frame window))))
+        (setq-local xterm-set-window-title nil)))))
+
 (use-package! org
   :defer t
   :after-call (org-agenda org-capture +default/org-notes-headlines)
@@ -624,7 +632,14 @@ the sequences will be lost."
    org-agenda-files (list org-directory  (expand-file-name "~/Documents/worg/"))
    org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?)) " " nil)
    org-startup-folded 'show2levels)
-  (add-to-list 'org-modules 'org-habit))
+  (add-to-list 'org-modules 'org-habit)
+  (add-hook 'window-buffer-change-functions
+            #'my/org-disable-xterm-title-when-tty)
+  :hook
+  (org-mode . (lambda ()
+                ;; Initial application in case buffer is already visible
+                (unless (display-graphic-p)
+                  (setq-local xterm-set-window-title nil)))))
 
 (use-package! ox-latex
   :after org
