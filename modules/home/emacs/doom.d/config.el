@@ -613,7 +613,7 @@ the sequences will be lost."
 (setopt org-directory (expand-file-name "~/Documents/org/")
         org-startup-with-inline-images t)
 
-(defun my/org-disable-xterm-title-when-tty (window _prev-buffer)
+(defun my/org-disable-xterm-title-when-tty (window)
   "Disable `xterm-set-window-title` for Org buffers shown in TTY frames."
   (let ((buffer (window-buffer window)))
     (with-current-buffer buffer
@@ -960,6 +960,13 @@ will ensure are ignored")
 (add-hook! 'vterm-mode-hook
   (set (make-local-variable 'buffer-face-mode-face) '(:family "IosevkaTerm Nerd Font"))
   (buffer-face-mode t))
+(advice-add 'hide-mode-line-mode :around (lambda (orig &rest args)
+                                           (let ((buffer (current-buffer)))
+                                             (with-current-buffer buffer
+                                               (if (and (derived-mode-p 'vterm-mode)
+                                                        (not (display-graphic-p)))
+                                                   t
+                                                 (apply orig args))))))
 
 (setq which-key-allow-multiple-replacements t)
 (after! which-key
