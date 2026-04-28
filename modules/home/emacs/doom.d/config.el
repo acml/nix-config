@@ -821,7 +821,9 @@ clicked."
   (proced-auto-update-interval 1)
   (proced-descent t))
 
-(after! projectile
+(use-package! projectile
+  :commands (+default/discover-projects projectile-register-project-type)
+  :init
   (setq ;; projectile-switch-project-action 'projectile-dired
    projectile-project-root-functions '(projectile-root-local
                                        projectile-root-marked
@@ -1285,6 +1287,54 @@ you're done. This can be called from an external shell script."
                 (toggle-truncate-lines -1)
                 (evil-define-key '(normal visual insert emacs) gt-buffer-render-local-map
                   "q" 'kill-buffer-and-window)))))
+
+;; Source - https://stackoverflow.com/a/14454756
+;; Posted by PascalVKooten, modified by community. See post 'Timeline' for change history
+;; Retrieved 2026-02-18, License - CC BY-SA 3.0
+
+(defun find-overlays-specifying (prop pos)
+  (let ((overlays (overlays-at pos))
+        found)
+    (while overlays
+      (let ((overlay (car overlays)))
+        (if (overlay-get overlay prop)
+            (setq found (cons overlay found))))
+      (setq overlays (cdr overlays)))
+    found))
+
+(defun highlight-or-dehighlight-line ()
+  (interactive)
+  (if (find-overlays-specifying
+       'line-highlight-overlay-marker
+       (line-beginning-position))
+      (remove-overlays (line-beginning-position) (+ 1 (line-end-position)))
+    (let ((overlay-highlight (make-overlay
+                              (line-beginning-position)
+                              (+ 1 (line-end-position)))))
+      (overlay-put overlay-highlight 'face 'highlight)
+      (overlay-put overlay-highlight 'line-highlight-overlay-marker t))))
+
+(global-set-key [f12] 'highlight-or-dehighlight-line)
+
+(defvar search-recenter-context-lines 10
+  "Number of lines to expose beyond the isearch match after scrolling.")
+
+(defvar-local my/save-scroll-margin nil
+  "Save value of `scroll-margin' outside of isearch.")
+
+(add-hook 'isearch-mode-hook
+          (lambda ()
+            (when (local-variable-if-set-p 'scroll-margin)
+              (setq my/save-scroll-margin scroll-margin))
+            (setq-local scroll-margin search-recenter-context-lines)))
+
+(add-hook 'isearch-mode-end-hook
+          (lambda ()
+            (if my/save-scroll-margin
+                (prog1
+                    (setq-local scroll-margin my/save-scroll-margin)
+                  (kill-local-variable 'my/save-scroll-margin))
+              (kill-local-variable 'scroll-margin))))
 
 ;; Load a file with the same name as the computer’s name. Just keep on going if
 ;; the requisite file isn't there.
