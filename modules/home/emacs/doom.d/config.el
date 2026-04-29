@@ -960,13 +960,6 @@ will ensure are ignored")
 (add-hook! 'vterm-mode-hook
   (set (make-local-variable 'buffer-face-mode-face) '(:family "IosevkaTerm Nerd Font"))
   (buffer-face-mode t))
-(advice-add 'hide-mode-line-mode :around (lambda (orig &rest args)
-                                           (let ((buffer (current-buffer)))
-                                             (with-current-buffer buffer
-                                               (if (and (derived-mode-p 'vterm-mode)
-                                                        (not (display-graphic-p)))
-                                                   t
-                                                 (apply orig args))))))
 
 (setq which-key-allow-multiple-replacements t)
 (after! which-key
