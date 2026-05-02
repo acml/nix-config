@@ -96,8 +96,6 @@
 ;;     (display-battery-mode 1)                        ; On laptops it's nice to know how much power you have
 ;;   (setq password-cache-expiry nil))               ; I can trust my desktops ... can't I? (no battery = desktop)
 
-(global-subword-mode 1)                           ; Iterate through CamelCase words
-
 (setq-default custom-file (expand-file-name "custom.el" doom-local-dir))
 (when (file-exists-p custom-file)
   (load custom-file))
@@ -156,6 +154,7 @@
 
 ;; Directional window-selection routines
 (use-package! windmove
+  :after-call doom-first-input-hook
   :defer t
   :config
   (windmove-default-keybindings '(shift))
@@ -169,7 +168,7 @@
 ;; (add-hook 'org-shiftright-final-hook 'windmove-right)
 
 (use-package winum
-  :after-call doom-after-init-hook
+  :after-call doom-first-input-hook
   :config
   (dolist (wn (seq-map 'number-to-string (number-sequence 1 9)))
     (let ((f (intern (concat "winum-select-window-" wn)))
@@ -180,17 +179,38 @@
       (global-set-key (kbd k) f))))
 
 ;; Simple is Emacs's built-in miscellaneous package.
-(use-package simple
+(use-package! simple
+  :defer t
+  :after-call doom-first-input-hook
   :config
   (bind-keys
    ;; ([remap just-one-space] . cycle-spacing)
    ([remap upcase-word] . upcase-dwim)
    ([remap downcase-word] . downcase-dwim)
    ([remap capitalize-word] . capitalize-dwim)
-   ([remap zap-to-char] . zap-up-to-char)))
+   ([remap zap-to-char] . zap-up-to-char))
 
-(when (fboundp 'repeat-mode)
-  (add-hook 'after-init-hook 'repeat-mode))
+  (global-subword-mode 1) ; Iterate through CamelCase words
+
+  ;; credit: yorickvP on Github
+  (when (and (display-graphic-p)
+             (string= (getenv "XDG_SESSION_TYPE") "wayland"))
+    (setq wl-copy-process nil)
+    (defun wl-copy (text)
+      (setq wl-copy-process (make-process :name "wl-copy"
+                                          :buffer nil
+                                          :command '("wl-copy" "-f" "-n")
+                                          :connection-type 'pipe
+                                          :noquery t))
+      (process-send-string wl-copy-process text)
+      (process-send-eof wl-copy-process))
+    (defun wl-paste ()
+      (if (and wl-copy-process (process-live-p wl-copy-process))
+          nil ; should return nil if we're the current paste owner
+        (shell-command-to-string "wl-paste -n | tr -d \r")))
+    (setq interprogram-cut-function 'wl-copy
+          interprogram-paste-function 'wl-paste))
+  :hook (doom-after-init . repeat-mode))
 
 (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t)
                     ("^\\*\\(?:Wo\\)?Man " :size 82 :side right :select t :quit t)))
@@ -201,19 +221,7 @@
         avy-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)))
 
 (use-package! beginend
-  :hook (after-init . beginend-global-mode))
-
-;; WSL specific setting
-(when (and (featurep :system 'linux)
-           (getenv "WSL_DISTRO_NAME"))
-  ;; teach Emacs how to open links with your default browser
-  (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
-        (cmd-args '("/c" "start")))
-    (when (file-exists-p cmd-exe)
-      (setq browse-url-generic-program  cmd-exe
-            browse-url-generic-args     cmd-args
-            browse-url-browser-function 'browse-url-generic
-            search-web-default-browser 'browse-url-generic))))
+  :hook (doom-after-init . beginend-global-mode))
 
 (after! calendar
   (setq calendar-location-name "Istanbul, Turkey"
@@ -255,6 +263,7 @@
     "u" 'daemons-systemd-toggle-user))
 
 (use-package! dired
+  :after-call doom-after-init-hook
   :defer t
   :config
   (setq dired-listing-switches (concat dired-listing-switches " --time-style=long-iso")))
@@ -356,7 +365,6 @@
 
 (after! evil
   (setq
-   ;; x-select-enable-clipboard nil   ; yanking to the system clipboard crashes emacs (emacsPgtkNativeComp)
    evil-want-fine-undo t       ; By default while in insert all changes are one big blob. Be more granular
    evil-vsplit-window-right t  ; Switch to the new window after splitting
    evil-split-window-below t))
@@ -393,6 +401,7 @@
   (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
 
 (use-package! highlight-parentheses
+  :defer t
   :init
   (setq highlight-parentheses-delay 0.2)
   :config
@@ -1067,16 +1076,28 @@ you're done. This can be called from an external shell script."
         :n "q" #'quit-window
         :n "Q" #'reader-close-doc))
 
-(when (and (featurep :system 'linux)
-           (display-graphic-p)
-           (getenv "WSL_DISTRO_NAME"))
-  (defun acml-set-keyboard ()
-    (interactive)
-    (start-process "" nil "setxkbmap" "us" "-variant" "colemak")
-    (message "Switched to the Colemak Keyboard Layout"))
+;; WSL specific setting
+(add-hook! 'doom-after-init-hook
+  (when (and (featurep :system 'linux)
+             (getenv "WSL_DISTRO_NAME"))
 
-  (map! "<f9>" #'acml-set-keyboard)
-  (add-hook! 'emacs-startup-hook #'acml-set-keyboard))
+    ;; teach Emacs how to open links with your default browser
+    (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
+          (cmd-args '("/c" "start")))
+      (when (file-exists-p cmd-exe)
+        (setq browse-url-generic-program  cmd-exe
+              browse-url-generic-args     cmd-args
+              browse-url-browser-function 'browse-url-generic
+              search-web-default-browser 'browse-url-generic)))
+
+    (when (display-graphic-p)
+      (defun acml-set-keyboard ()
+        (interactive)
+        (start-process "" nil "setxkbmap" "us" "-variant" "colemak")
+        (message "Switched to the Colemak Keyboard Layout"))
+
+      (map! "<f9>" #'acml-set-keyboard)
+      (acml-set-keyboard))))
 
 (map! "<f5>" #'projectile-run-project)
 (map! "<f6>" #'previous-error)
@@ -1269,13 +1290,11 @@ you're done. This can be called from an external shell script."
 
 (use-package! gt
   :defer t
-  ;; :bind (("C-c t" . gt-translate))
   :init
-  (map! :leader :desc "Translate"
-        "oc" #'gt-translate)
+  (map! :leader :desc "Translate" :n "o c" #'gt-translate)
   :config
   (setopt gt-langs '(de en tr)
-          gt-buffer-render-evil-leading-key nil
+          ;; gt-buffer-render-evil-leading-key nil
           gt-buffer-render-follow-p t
           gt-default-translator (gt-translator
                                  :taker   (gt-taker :text 'buffer :pick 'paragraph)
