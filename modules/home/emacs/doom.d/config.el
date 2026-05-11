@@ -193,6 +193,7 @@
   (global-subword-mode 1) ; Iterate through CamelCase words
 
   ;; credit: yorickvP on Github
+  ;; wl-copy integration for Wayland clipboard(need wl-clipboard package)
   (when (and (display-graphic-p)
              (string= (getenv "XDG_SESSION_TYPE") "wayland"))
     (setq wl-copy-process nil)
@@ -394,7 +395,11 @@
   (setq modus-themes-common-palette-overrides
         '(;; (fringe unspecified)
           (border-mode-line-active unspecified)
-          (border-mode-line-inactive unspecified)))
+          (border-mode-line-inactive unspecified))
+        modus-themes-italic-constructs t
+        modus-themes-bold-constructs t
+        modus-themes-mixed-fonts t
+        modus-themes-variable-pitch-ui t)
   (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t))
 
 (after! expand-region
@@ -624,10 +629,10 @@ the sequences will be lost."
 
 (defun my/org-disable-xterm-title-when-tty (window)
   "Disable `xterm-set-window-title` for Org buffers shown in TTY frames."
-  (let ((buffer (window-buffer window)))
-    (with-current-buffer buffer
-      (when (and (derived-mode-p 'org-mode)
-                 (not (display-graphic-p (window-frame window))))
+  (when (and (derived-mode-p 'org-mode)
+             (not (display-graphic-p (window-frame window))))
+    (let ((buffer (window-buffer window)))
+      (with-current-buffer buffer
         (setq-local xterm-set-window-title nil)))))
 
 (use-package! org
