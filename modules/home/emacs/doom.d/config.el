@@ -1360,6 +1360,22 @@ you're done. This can be called from an external shell script."
                   (kill-local-variable 'my/save-scroll-margin))
               (kill-local-variable 'scroll-margin))))
 
+(use-package! breadcrumb
+  :defer t
+  :when (modulep! :tools lsp +eglot)
+  :config
+  ;; Don't show the project/file name in the header, show only an icon
+  (with-eval-after-load 'nerd-icons
+    (advice-add
+     'breadcrumb-project-crumbs :override
+     #'(lambda ()
+         (concat " " (if-let* ((file buffer-file-name))
+                         (nerd-icons-icon-for-file file)
+                       (nerd-icons-icon-for-mode major-mode))))))
+  :hook
+  (prog-mode . breadcrumb-local-mode)
+  (text-mode . breadcrumb-local-mode))
+
 ;; Load a file with the same name as the computer’s name. Just keep on going if
 ;; the requisite file isn't there.
 (load! (car (split-string (system-name) "\\.")) nil t)
