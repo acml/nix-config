@@ -1366,12 +1366,47 @@ you're done. This can be called from an external shell script."
   :config
   ;; Don't show the project/file name in the header, show only an icon
   (with-eval-after-load 'nerd-icons
-    (advice-add
-     'breadcrumb-project-crumbs :override
-     #'(lambda ()
-         (concat " " (if-let* ((file buffer-file-name))
-                         (nerd-icons-icon-for-file file)
-                       (nerd-icons-icon-for-mode major-mode))))))
+    (advice-add #'breadcrumb-project-crumbs :override
+                (lambda ()
+                  (concat " " (if-let* ((file buffer-file-name))
+                                  (nerd-icons-icon-for-file file)
+                                (nerd-icons-icon-for-mode major-mode)))))
+    (advice-add #'breadcrumb--format-ipath-node :around
+                (lambda (og p more &rest r)
+                  "Icon for items"
+                  (let ((string (apply og p more r)))
+                    (if (not more)
+                        (propertize
+                         (concat (nerd-icons-codicon
+                                  "nf-cod-symbol_field"
+                                  :face 'breadcrumb-imenu-leaf-face)
+                                 " " string)
+                         'breadcrumb-dont-shorten t
+                         'breadcrumb-with-icon t)
+                      (if (functionp 'nerd-icons-corfu--get-by-kind)
+                          (propertize
+                           (concat (nerd-icons-corfu--get-by-kind (intern (downcase string)) nil)
+                                   " " string)
+                           'breadcrumb-with-icon t)
+                        string)))))
+    (advice-add #'breadcrumb--summarize :override
+                (lambda (crumbs cutoff separator)
+                  (let ((rcrumbs
+                         (cl-loop
+                          for available = (- cutoff used)
+                          for (c . more) on (reverse crumbs)
+                          for seplen = (if more (length separator) 0)
+                          for shorten-p = (unless (get-text-property 0 'breadcrumb-dont-shorten c)
+                                            (> (+ (length c) seplen) available))
+                          ;; NOTE: Include icon and first character
+                          for toadd = (if shorten-p
+                                          (if (get-text-property 0 'breadcrumb-with-icon c)
+                                              (substring c 0 3)
+                                            (substring c 0 1))
+                                        c)
+                          sum (+ (length toadd) seplen) into used
+                          collect toadd)))
+                    (string-join (reverse rcrumbs) separator)))))
   :hook
   (prog-mode . breadcrumb-local-mode)
   (text-mode . breadcrumb-local-mode))
