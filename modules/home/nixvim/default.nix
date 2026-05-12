@@ -221,7 +221,7 @@ in
             nargs = "*",
             bang = true,
         })
-        vim.keymap.set({'n', 'i'}, '<F20>', "<Esc>:Make -j$(nproc --ignore=1) -s", { silent = false, desc = "Compile in project" })
+        vim.keymap.set({'n', 'i'}, '<F20>', "<Esc>:Make -j 64 -l $(nproc --ignore=1) -s", { silent = false, desc = "Compile in project" })
 
         vim.api.nvim_create_user_command("OverseerRestartLast", function()
           local overseer = require("overseer")
