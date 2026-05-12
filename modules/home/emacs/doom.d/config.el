@@ -627,13 +627,13 @@ the sequences will be lost."
 (setopt org-directory (expand-file-name "~/Documents/org/")
         org-startup-with-inline-images t)
 
-(defun my/org-disable-xterm-title-when-tty (window)
+(defun my/org-disable-xterm-title-when-tty (frame)
   "Disable `xterm-set-window-title` for Org buffers shown in TTY frames."
-  (when (and (derived-mode-p 'org-mode)
-             (not (display-graphic-p (window-frame window))))
-    (let ((buffer (window-buffer window)))
-      (with-current-buffer buffer
-        (setq-local xterm-set-window-title nil)))))
+  (when (and (not (display-graphic-p frame))
+             (with-current-buffer (window-buffer (frame-selected-window frame))
+               (derived-mode-p 'org-mode)))
+    (with-current-buffer (window-buffer (frame-selected-window frame))
+      (setq-local xterm-set-window-title nil))))
 
 (use-package! org
   :defer t
