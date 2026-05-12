@@ -514,8 +514,9 @@ the sequences will be lost."
   (magit-add-section-hook 'magit-status-sections-hook
                           'magit-insert-ignored-files
                           'magit-insert-untracked-files
-                          nil)
+                          nil))
 
+(after! magit-repos
   (setq magit-repolist-columns
         '(("Name" 24 magit-repolist-column-ident nil)
           ("Version" 58 magit-repolist-column-version
@@ -532,7 +533,6 @@ the sequences will be lost."
             (:sort <)
             (:help-echo "Local changes not in upstream")))
           ("Path" 0 magit-repolist-column-path nil))))
-
 (setopt magit-format-file-function #'magit-format-file-nerd-icons)
 
 (setq magit-repository-directories '(("~/.nix-config" . 0)
