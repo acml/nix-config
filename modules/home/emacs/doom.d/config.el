@@ -533,6 +533,7 @@ the sequences will be lost."
             (:sort <)
             (:help-echo "Local changes not in upstream")))
           ("Path" 0 magit-repolist-column-path nil))))
+
 (setopt magit-format-file-function #'magit-format-file-nerd-icons)
 
 (setq magit-repository-directories '(("~/.nix-config" . 0)
