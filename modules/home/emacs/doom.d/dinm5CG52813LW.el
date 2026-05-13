@@ -164,7 +164,7 @@ DIR defaults to current project root."
                                     :project-file dinm5CG52813LW-project-config-file
                                     :compilation-dir #'dinm5CG52813LW--git-dt-compilation-dir
                                     :compile "set -o pipefail && mkdir -p log && unbuffer ./docker_make.sh -j $(( $(nproc)*2 )) -l $(nproc --ignore=1) -s |& tee log/build-$(date -Iseconds).log"
-                                    :configure "/usr/bin/git dt checkout -f"))
+                                    :configure "git dt checkout -f"))
 
 ;;; File Type Associations
 
