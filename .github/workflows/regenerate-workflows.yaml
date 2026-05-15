@@ -21,13 +21,13 @@ jobs:
           always-allow-substitutes = true
           builders-use-substitutes = true
           max-jobs = auto
-    - uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
+    - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
       with:
         key: nix-eval-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('flake.lock')
           }}
         path: ~/.cache/nix
         restore-keys: nix-eval-${{ runner.os }}-${{ runner.arch }}-
-    - uses: cachix/cachix-action@1eb2ef646ac0255473d23a5907ad7b04ce94065c
+    - uses: cachix/cachix-action@5f2d7c5294214f71b873db4b969586b980625e71
       with:
         authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
         extraPullNames: nix-community
