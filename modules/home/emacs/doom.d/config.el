@@ -1283,6 +1283,7 @@ you're done. This can be called from an external shell script."
 
 (use-package! gptel-quick
   :after gptel
+  :commands (gptel-quick)
   :init
   (map! "<f1>" #'gptel-quick))
 
