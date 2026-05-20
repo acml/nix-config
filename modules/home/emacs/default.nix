@@ -52,6 +52,7 @@ let
       copilot
       djvu
       emacsql
+      ghostel
       tree-sitter-langs
       treesit-grammars.with-all-grammars
       # (treesit-grammars.with-grammars (

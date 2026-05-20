@@ -963,6 +963,8 @@ will ensure are ignored")
      consult-bookmark
      :preview-key (list "C-SPC" :debounce 0.2 'any))))
 
+(use-package! ghostel :commands (ghostel-mode))
+
 (after! vterm
   (setq vterm-max-scrollback 100000))
 
