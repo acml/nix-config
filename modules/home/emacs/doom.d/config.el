@@ -820,7 +820,8 @@ clicked."
 
   (setq frame-title-format '(:eval (my--frame-title-format))))
 
-(setq +workspaces-switch-project-function #'dired)
+(setq +workspaces-switch-project-function #'(lambda (project-directory)
+                                              (dired project-directory)))
 
 (map! :when (modulep! :ui workspaces)
       :map doom-leader-workspace-map
@@ -963,7 +964,14 @@ will ensure are ignored")
      consult-bookmark
      :preview-key (list "C-SPC" :debounce 0.2 'any))))
 
-(use-package! ghostel :commands (ghostel-mode))
+(use-package! ghostel
+  :defer t
+  :commands (ghostel ghostel-project)
+  :init
+  (map! :leader "o t" #'ghostel)
+  :config
+  (set-popup-rule! "^\\*ghostel" :size 0.25 :vslot -4 :select t :quit nil :ttl 0)
+  (set-evil-initial-state! 'ghostel-mode 'emacs))
 
 (after! vterm
   (setq vterm-max-scrollback 100000))
