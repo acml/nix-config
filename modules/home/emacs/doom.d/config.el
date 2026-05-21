@@ -86,6 +86,7 @@
       x-stretch-cursor t           ; Stretch cursor to the glyph width
       undo-limit 80000000          ; Raise undo-limit to 80Mb
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
+      auto-revert-avoid-polling t  ; refresh buffers when files change on disk
       truncate-string-ellipsis "…" ; Unicode ellispis are nicer than "...", and also save /precious/ space
       window-resize-pixelwise t
       frame-resize-pixelwise t
@@ -967,15 +968,19 @@ will ensure are ignored")
      :preview-key (list "C-SPC" :debounce 0.2 'any))))
 
 (use-package! ghostel
+  :after-call doom-first-input-hook
   :defer t
   :hook (ghostel-mode . mode-line-invisible-mode)
   :commands (ghostel ghostel-project)
   :init
-  (require 'ghostel-compile)
-  (ghostel-compile-global-mode 1)
-  ;; (map! :leader "o t" #'ghostel)
   (set-popup-rule! "^\\*doom:ghostel-popup:" :size 0.25 :vslot -4 :select t :quit nil :ttl 0)
   (set-evil-initial-state! 'ghostel-mode 'emacs))
+
+(use-package! ghostel-compile
+  :after-call doom-first-input-hook
+  :defer t
+  :config
+  (ghostel-compile-global-mode 1))
 
 ;; (use-package! evil-ghostel
 ;;   :after (ghostel evil)
@@ -1048,22 +1053,19 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
       :map vterm-mode-map
       "<deletechar>" #'vterm-send-delete)
 
-(add-hook! 'vterm-mode-hook
+(add-hook! '(vterm-mode-hook ghostel-mode-hook)
   (set (make-local-variable 'buffer-face-mode-face) '(:family "IosevkaTerm Nerd Font"))
   (buffer-face-mode t))
 
-(setq which-key-allow-multiple-replacements t)
 (after! which-key
-  ;; rename winum-select-window-1 entry to 1..9
-  (cl-pushnew '(("\\(.*\\)1" . "winum-select-window-1") . ("\\11..9" . "Switch to window 1..9"))
-              which-key-replacement-alist)
-  ;; hide winum-select-window-[2-9] entries
-  (cl-pushnew '((nil . "winum-select-window-[2-9]") . t)
-              which-key-replacement-alist)
-  (cl-pushnew '(("" . "\\`+?evil[-:/]?\\(?:a-\\)?\\(.*\\)") . (nil . " \\1"))
-              which-key-replacement-alist)
-  (cl-pushnew '(("\\`g s" . "\\`evilem--?motion-\\(.*\\)") . (nil . " \\1"))
-              which-key-replacement-alist))
+  (setq which-key-allow-multiple-replacements t)
+  (dolist (r '((("\\(.*\\)1" . "winum-select-window-1") . ("\\11..9" . "Switch to window 1..9")) ; rename winum-select-window-1 entry to 1..9
+               ((nil . "winum-select-window-[2-9]") . t)                                         ; hide winum-select-window-[2-9] entries
+               (("" . "\\`+?evil[-:]?\\(?:a-\\)?\\(.*\\)") . (nil . "\\1"))
+               (("\\`g s" . "\\`evilem--?motion-\\(.*\\)") . (nil . "\\1"))
+               ;; (("" . "\\`+?Magit\\(.*\\)") . (nil . "\\1"))
+               ))
+    (add-to-list 'which-key-replacement-alist r)))
 
 ;; text mode directory tree
 (after! ztree
@@ -1188,11 +1190,6 @@ you're done. This can be called from an external shell script."
 (map! "<f8>" #'projectile-repeat-last-command)
 ;; (map! "<f9>" #'acml-set-keyboard)
 ;; F12
-
-(use-package! yazi
-  :defer t
-  :init
-  (map! (:leader :desc "Yazi" :n "oy" #'yazi)))
 
 (use-package zone :disabled
   :config

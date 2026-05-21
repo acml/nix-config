@@ -83,7 +83,6 @@
 (package! trashed)
 (package! turkish)
 (package! visual-ascii-mode)
-(package! yazi :recipe (:host github :repo "bommbo/yazi.el"))
 (package! ztree :recipe (:host codeberg :repo "fourier/ztree"))
 
 
