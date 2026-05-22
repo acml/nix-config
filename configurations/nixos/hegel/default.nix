@@ -27,6 +27,7 @@ in
     self.nixosModules.pam-limits
     self.nixosModules.hardware-secureboot
     self.nixosModules.services-blocky
+    self.nixosModules.services-cloudflare-ddns
     self.nixosModules.services-grafana
     self.nixosModules.services-nginx
     self.nixosModules.services-oauth2
@@ -74,7 +75,6 @@ in
   networking = {
     hostId = "65618eec";
     hostName = "hegel";
-    tailscaleAddress = "100.109.168.118";
   };
 
   nix = {
@@ -103,7 +103,11 @@ in
         "time.google.com"
         "tick.usnogps.navy.mil"
       ];
-      extraConfig = "allow 10.0.0.0/24";
+      extraConfig = ''
+        allow 10.0.0.0/24
+        allow fc00::/7
+        allow fe80::/10
+      '';
     };
     jellyfin = {
       hardwareAcceleration = {

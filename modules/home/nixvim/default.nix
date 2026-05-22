@@ -13,9 +13,11 @@ in
     nixvim = {
       enable = true;
       enableMan = true;
-      package = inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
       viAlias = true;
       vimAlias = true;
+
+      nixpkgs.config.allowUnfree = true;
+      package = inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
       colorschemes = {
         catppuccin = {

@@ -1,5 +1,4 @@
 {
-  config,
   flake,
   lib,
   pkgs,
@@ -7,7 +6,6 @@
 }:
 let
   inherit (flake) self;
-  inherit (config.networking) hostName tailscaleAddress;
 in
 {
   imports = with self.nixosModules; [
@@ -58,7 +56,8 @@ in
           logRetentionDays = 90;
         };
         ports = {
-          dns = [ "0.0.0.0:53" ];
+          # Wildcard dual-stack listener; "0.0.0.0:53" would be IPv4-only.
+          dns = [ ":53" ];
           http = [ "4000" ];
         };
         bootstrapDns = [ "tcp+udp:1.1.1.1" ];
@@ -115,14 +114,6 @@ in
         ];
       };
     };
-
-    nginx.virtualHosts."grafana.${hostName}.meurer.org".locations."/".extraConfig = ''
-      ${lib.optionalString (
-        tailscaleAddress != null
-      ) ''add_header Access-Control-Allow-Origin "http://${tailscaleAddress}";''}
-      add_header Access-Control-Allow-Origin "http://127.0.0.1";
-      add_header Access-Control-Allow-Origin "http://localhost";
-    '';
 
     unbound.settings.server.port = "5335";
   };
