@@ -748,7 +748,7 @@ in
         todo-comments.enable = true;
         treesitter = {
           enable = true;
-          # folding.enable = true;
+          folding.enable = true;
           nixvimInjections = true;
           settings = {
             indent.enable = false;
