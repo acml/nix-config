@@ -5,7 +5,7 @@
       enable = true;
       enableDefaultConfig = false;
       package = pkgs.openssh_gssapi;
-      matchBlocks."*" = {
+      settings."*" = {
         controlMaster = "auto";
         controlPath = "~/.ssh/ssh-%r@%h:%p";
         # controlPersist = "30s";
