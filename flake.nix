@@ -134,11 +134,11 @@
     };
     nixvim = {
       url = "github:nix-community/nixvim";
-      inputs = {
-        flake-parts.follows = "flake-parts";
-        nixpkgs.follows = "nixpkgs";
-        systems.follows = "systems";
-      };
+      # inputs = {
+      #   flake-parts.follows = "flake-parts";
+      #   nixpkgs.follows = "nixpkgs";
+      #   systems.follows = "systems";
+      # };
     };
 
     # Development tools
