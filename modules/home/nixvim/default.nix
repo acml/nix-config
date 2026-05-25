@@ -40,7 +40,7 @@ in
       extraConfigLua = ''
 
         -- UFO folding
-        vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
+        vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldinner: ,foldclose:]]
         vim.cmd [[set signcolumn=yes]]
 
         local signs = { Error = "", Warn = "", Hint = "", Info = "" }
@@ -637,7 +637,7 @@ in
         notify.enable = true;
         notify.settings.background_colour = "#000000";
         nvim-bqf.enable = true;
-        nvim-ufo.enable = true;
+        nvim-ufo.enable = false;
         nvim-surround.enable = true;
         orgmode = {
           enable = true;
@@ -656,7 +656,7 @@ in
         project-nvim = {
           enable = true;
           settings = {
-            manual_mode = true;
+            # manual_mode = true;
             patterns = [
               "proj.default.ini"
               ".git"
@@ -748,7 +748,7 @@ in
         todo-comments.enable = true;
         treesitter = {
           enable = true;
-          folding.enable = true;
+          # folding.enable = true;
           nixvimInjections = true;
           settings = {
             indent.enable = false;
