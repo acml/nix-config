@@ -279,7 +279,6 @@ in
         ];
 
       extraPlugins = with pkgs.vimPlugins; [
-        # vim-plugin-AnsiEsc
         # go-nvim
         # nvim-biscuits
       ];
