@@ -21,7 +21,10 @@
       shellWrapperName = "y";
       initLua = # lua
         ''
-          require("git"):setup()
+          require("git"):setup {
+            -- Order of status signs showing in the linemode
+            order = 1500,
+          }
           -- require("recycle-bin"):setup()
         '';
       flavors =
@@ -115,14 +118,14 @@
         plugin = {
           prepend_fetchers = [
             {
-              id = "git";
-              name = "*";
+              url = "*";
               run = "git";
+              group = "git";
             }
             {
-              id = "git";
-              name = "*/";
+              url = "*/";
               run = "git";
+              group = "git";
             }
           ];
           prepend_preloaders = [
