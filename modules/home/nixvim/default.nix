@@ -1,16 +1,16 @@
 {
   flake,
   lib,
-  pkgs,
   ...
 }:
 let
   inherit (flake) inputs;
 in
 {
-  programs = {
 
-    nixvim = {
+  programs.nixvim =
+    { pkgs, ... }:
+    {
       enable = true;
       enableMan = true;
       viAlias = true;
@@ -827,7 +827,6 @@ in
         };
       };
     };
-  };
 
   imports =
     with builtins;
