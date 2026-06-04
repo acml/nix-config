@@ -1486,6 +1486,38 @@ you're done. This can be called from an external shell script."
   (prog-mode . breadcrumb-local-mode)
   (text-mode . breadcrumb-local-mode))
 
+;; mouse mode must be initialised for each new terminal
+;; see http://stackoverflow.com/a/6798279/27782
+(defun initialise-mouse-mode (&optional frame)
+  "Initialise mouse mode for the current terminal."
+  (if (not frame) ;; The initial call.
+      (xterm-mouse-mode 1)
+    ;; Otherwise called via after-make-frame-functions.
+    (if xterm-mouse-mode
+        ;; Re-initialise the mode in case of a new terminal.
+        (xterm-mouse-mode 1))))
+
+;; Evaluate both now (for non-daemon emacs) and upon frame creation
+;; (for new terminals via emacsclient).
+(initialise-mouse-mode)
+(add-hook 'after-make-frame-functions 'initialise-mouse-mode)
+
+(setopt xterm-extra-capabilities '(getSelection setSelection modifyOtherKeys))
+
+;; TUI prettification
+(unless (display-graphic-p)
+  (when (version<= "31" emacs-version)
+    (standard-display-unicode-special-glyphs))
+  (set-display-table-slot standard-display-table 5 ?│)  ;; ?┃ ?┆ ?┇
+  (set-display-table-slot standard-display-table
+                          'box-down-right (make-glyph-code #x256d))
+  (set-display-table-slot standard-display-table
+                          'box-down-left (make-glyph-code #x256e))
+  (set-display-table-slot standard-display-table
+                          'box-up-right (make-glyph-code #x2570))
+  (set-display-table-slot standard-display-table
+                          'box-up-left (make-glyph-code #x256f)))
+
 ;; Load a file with the same name as the computer’s name. Just keep on going if
 ;; the requisite file isn't there.
 (load! (car (split-string (system-name) "\\.")) nil t)
