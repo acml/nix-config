@@ -240,9 +240,11 @@
                                       :completion (:detailedLabel t)
                                       :cache (:directory ,(file-truename "~/.cache/ccls")))))
 
-(defadvice! compile (before ad-compile-smart activate)
-  "Advises `compile' so it sets the argument COMINT to t."
-  (ad-set-arg 1 t))
+(defadvice! compile-smart-comint-a (orig-fn &rest args)
+  "Force compile to always use comint mode."
+  :around #'compile
+  (let ((current-prefix-arg t))
+    (apply orig-fn args)))
 
 (add-hook! 'shell-mode-hook #'compilation-shell-minor-mode)
 
