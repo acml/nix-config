@@ -38,11 +38,6 @@ in
       };
 
       extraConfigLua = ''
-
-        -- UFO folding
-        vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldinner: ,foldclose:]]
-        vim.cmd [[set signcolumn=yes]]
-
         local signs = { Error = "", Warn = "", Hint = "", Info = "" }
         for type, icon in pairs(signs) do
           local hl = "DiagnosticSign" .. type
@@ -637,7 +632,6 @@ in
         notify.enable = true;
         notify.settings.background_colour = "#000000";
         nvim-bqf.enable = true;
-        nvim-ufo.enable = false;
         nvim-surround.enable = true;
         orgmode = {
           enable = true;
