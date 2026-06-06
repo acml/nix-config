@@ -59,6 +59,7 @@
 (package! dts-mode)
 (package! dwim-shell-command)
 (package! ef-themes)
+(package! expreg)
 (package! exercism)
 (package! google-c-style)
 (package! ghostel :built-in 'prefer)

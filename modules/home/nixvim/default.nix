@@ -804,6 +804,7 @@ in
             }
           ];
         };
+        wildfire.enable = true;
         yazi = {
           enable = true;
           settings = {

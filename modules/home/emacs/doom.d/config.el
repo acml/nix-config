@@ -405,8 +405,16 @@
         modus-themes-variable-pitch-ui t)
   (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t))
 
-(after! expand-region
-  (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
+;; (after! expand-region
+;;   (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
+
+(use-package! expreg
+  :commands (expreg-expand expreg-contract)
+  :defer t)
+
+(after! evil
+  (map! :nv "RET" #'expreg-expand
+        :nv "DEL" #'expreg-contract))
 
 (use-package! highlight-parentheses
   :defer t
