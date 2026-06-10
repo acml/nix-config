@@ -1,4 +1,4 @@
-# Home-manager configuration for dinm5CG52813LW
+# Home-manager configuration for DINA5CG52813LW
 {
   flake,
   config,
