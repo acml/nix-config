@@ -61,13 +61,13 @@ jobs:
           hostPlatform: x86_64-linux
           name: spinoza
           runsOn: ubuntu-24.04
+        - attr: homeConfigurations.DINA5CG52813LW.activationPackage
+          hostPlatform: x86_64-linux
+          name: DINA5CG52813LW
+          runsOn: ubuntu-24.04
         - attr: homeConfigurations.darkstar.activationPackage
           hostPlatform: x86_64-linux
           name: darkstar
-          runsOn: ubuntu-24.04
-        - attr: homeConfigurations.dinm5CG52813LW.activationPackage
-          hostPlatform: x86_64-linux
-          name: dinm5CG52813LW
           runsOn: ubuntu-24.04
         - attr: homeConfigurations.goethe.activationPackage
           hostPlatform: x86_64-linux
