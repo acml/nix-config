@@ -52,7 +52,6 @@
 (package! benchmark-init)
 (package! breadcrumb)
 (package! catppuccin-theme)
-(package! compile-angel)
 (package! daemons)
 (package! dired-auto-readme :recipe (:host github :repo "amno1/dired-auto-readme"))
 (package! disk-usage)
