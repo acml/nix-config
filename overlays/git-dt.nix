@@ -13,11 +13,11 @@ final: _: {
     }:
     stdenv.mkDerivation rec {
       name = "git-dt";
-      version = "4.3.0-1-1";
+      version = "4.3.5-0-1";
 
       src = fetchurl {
         url = "https://captain.rtf.siemens.net/artifactory/simaticnet_wss_gitdt-stable-debian-egll/pool/git-dt_${version}_all.deb";
-        hash = "sha256-wHHsBoKh94mqt0UQXF7Jog9XJ0JXOOj7FSJYgfMMC6U=";
+        hash = "sha256-lEpYEjbvnJt/QcP6ZwkGHtQqcHiQdD0lgthxDGn3ehM=";
       };
 
       buildInputs = [
