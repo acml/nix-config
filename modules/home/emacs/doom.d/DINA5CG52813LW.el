@@ -212,7 +212,8 @@ ORIG-FUN is the original function, FILENAME is the file being processed, ARGS ar
 (use-package! gptel
   :defer t
   :config
-  (pop gptel--known-backends) ; remove the default ChatGPT backend
+  (setq gptel--known-backends ; remove the default ChatGPT backend
+        (cl-remove "ChatGPT" gptel--known-backends :key #'car :test #'equal))
   (setq gptel-model 'claude-sonnet-4.6
         gptel-backend (gptel-make-gh-copilot "Copilot"))
   ;; Only call macher-install if it exists

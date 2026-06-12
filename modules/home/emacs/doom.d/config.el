@@ -9,6 +9,11 @@
 ;;   :config
 ;;   (add-hook 'after-init-hook #'benchmark-init/deactivate))
 
+(defconst my/font-size
+  (cond ((featurep :system 'macos) 13.0)
+        ((string= (system-name) "DINA5CG52813LW") 10.8)
+        (t 12.0)))
+
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "Ahmet Cemal Özgezer"
@@ -17,15 +22,8 @@
       ;; There are two ways to load a theme. Both assume the theme is installed and
       ;; available. You can either set `doom-theme' or manually load a theme with the
       ;; `load-theme' function. This is the default:
-      doom-theme (if (display-graphic-p) 'ef-eagle 'ef-dark)
+      ;; doom-theme (if (display-graphic-p) 'ef-eagle 'ef-dark)
       ;; modus-operandi modus-vivendi doom-one doom-gruvbox doom-tomorrow-night
-
-      ;; This determines the style of line numbers in effect. If set to `nil', line
-      ;; numbers are disabled. For relative line numbers, set this to `relative'.
-      ;;
-      ;; Line numbers are pretty slow all around. The performance boost of
-      ;; disabling them outweighs the utility of always keeping them on.
-      display-line-numbers-type 'relative
 
       ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
       ;; are the three important ones:
@@ -37,28 +35,21 @@
       ;;
       ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
       ;; font string. You generally only need these two:
-      doom-font (font-spec :family "Iosevka Comfy" :size (cond ((featurep :system 'macos) 13.0)
-                                                               ((string= (system-name) "DINA5CG52813LW") 10.8)
-                                                               (t 12.0)))
+      doom-font (font-spec :family "Iosevka Comfy" :size my/font-size)
       doom-big-font (font-spec :family "Iosevka Comfy" :size (if (featurep :system 'macos) 26.0 20.0))
-      doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size (cond ((featurep :system 'macos) 13.0)
-                                                                                   ((string= (system-name) "DINA5CG52813LW") 10.8)
-                                                                                   (t 12.0)))
-      doom-serif-font (font-spec :family "BlexMono Nerd Font" :size (if (featurep :system 'macos) 13.0 12.0) :weight 'light)
+      doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size my/font-size)
+      doom-serif-font (font-spec :family "BlexMono Nerd Font" :size my/font-size :weight 'light)
 
-      fancy-splash-image (funcall
-                          (lambda (choices) (elt
-                                        choices (random (length choices))))
-                          (directory-files (concat (expand-file-name
-                                                    doom-user-dir) "splash")
-                                           t "^\\([^.]\\|\\.[^.]\\|\\.\\..\\)" t))
+      fancy-splash-image (when-let* ((dir (concat (expand-file-name doom-user-dir) "splash"))
+                                     (choices (and (file-directory-p dir)
+                                                   (directory-files dir t "^[^.]" t)))
+                                     ((> (length choices) 0)))
+                           (elt choices (random (length choices))))
 
       auth-source-cache-expiry nil ; default is 7200 (2h)
 
-      delete-by-moving-to-trash t  ; Delete files to trash
       window-combination-resize t  ; take new window space from all other windows (not just current)
       x-stretch-cursor t           ; Stretch cursor to the glyph width
-      undo-limit 80000000          ; Raise undo-limit to 80Mb
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
       auto-revert-avoid-polling t  ; refresh buffers when files change on disk
       truncate-string-ellipsis "…" ; Unicode ellispis are nicer than "...", and also save /precious/ space
@@ -66,12 +57,24 @@
       frame-resize-pixelwise t
       xref-history-storage 'xref-window-local-history)
 
+(setopt
+ ;; This determines the style of line numbers in effect. If set to `nil', line
+ ;; numbers are disabled. For relative line numbers, set this to `relative'.
+ ;;
+ ;; Line numbers are pretty slow all around. The performance boost of
+ ;; disabling them outweighs the utility of always keeping them on.
+ display-line-numbers-type 'relative
+
+ delete-by-moving-to-trash t  ; Delete files to trash
+ undo-limit 80000000          ; Raise undo-limit to 80Mb
+ )
+
 ;; (if (equal "Battery status not available"
 ;;            (battery))
 ;;     (display-battery-mode 1)                        ; On laptops it's nice to know how much power you have
 ;;   (setq password-cache-expiry nil))               ; I can trust my desktops ... can't I? (no battery = desktop)
 
-(setq-default custom-file (expand-file-name "custom.el" doom-local-dir))
+(setq custom-file (expand-file-name "custom.el" doom-local-dir))
 (when (file-exists-p custom-file)
   (load custom-file))
 
@@ -121,7 +124,7 @@
             (lambda (frame)
               (with-selected-frame frame
                 (if (not (display-graphic-p))
-                    (load-theme 'catppuccin t)
+                    (load-theme 'ef-dark t)
                   (load-theme 'ef-eagle t)
                   (set-frame-parameter (selected-frame) 'fullscreen 'maximized))))))
 
@@ -130,7 +133,6 @@
 ;; Directional window-selection routines
 (use-package! windmove
   :after-call doom-first-input-hook
-  :defer t
   :config
   (windmove-default-keybindings '(shift))
   (windmove-swap-states-default-keybindings '(shift ctrl))
@@ -142,20 +144,18 @@
 ;; (add-hook 'org-shiftdown-final-hook 'windmove-down)
 ;; (add-hook 'org-shiftright-final-hook 'windmove-right)
 
-(use-package winum
+(use-package! winum
   :after-call doom-first-input-hook
   :config
-  (dolist (wn (seq-map 'number-to-string (number-sequence 1 9)))
+  (dolist (wn (mapcar #'number-to-string (number-sequence 1 9)))
     (let ((f (intern (concat "winum-select-window-" wn)))
           (k (concat "s-" wn)))
       (map! :n k f)
       (map! :leader :n wn f
-            :n (concat "w" wn) f)
-      (global-set-key (kbd k) f))))
+            :n (concat "w" wn) f))))
 
 ;; Simple is Emacs's built-in miscellaneous package.
 (use-package! simple
-  :defer t
   :after-call doom-first-input-hook
   :config
   (bind-keys
@@ -169,23 +169,25 @@
 
   ;; credit: yorickvP on Github
   ;; wl-copy integration for Wayland clipboard(need wl-clipboard package)
-  (when (and (display-graphic-p)
-             (string= (getenv "XDG_SESSION_TYPE") "wayland"))
-    (setq wl-copy-process nil)
-    (defun wl-copy (text)
-      (setq wl-copy-process (make-process :name "wl-copy"
-                                          :buffer nil
-                                          :command '("wl-copy" "-f" "-n")
-                                          :connection-type 'pipe
-                                          :noquery t))
-      (process-send-string wl-copy-process text)
-      (process-send-eof wl-copy-process))
-    (defun wl-paste ()
-      (if (and wl-copy-process (process-live-p wl-copy-process))
-          nil ; should return nil if we're the current paste owner
-        (shell-command-to-string "wl-paste -n | tr -d \r")))
-    (setq interprogram-cut-function 'wl-copy
-          interprogram-paste-function 'wl-paste))
+  (defun wl-copy (text)
+    (setq wl-copy-process (make-process :name "wl-copy"
+                                        :buffer nil
+                                        :command '("wl-copy" "-f" "-n")
+                                        :connection-type 'pipe
+                                        :noquery t))
+    (process-send-string wl-copy-process text)
+    (process-send-eof wl-copy-process))
+  (defun wl-paste ()
+    (if (and wl-copy-process (process-live-p wl-copy-process))
+        nil ; should return nil if we're the current paste owner
+      (shell-command-to-string "wl-paste -n | tr -d \r")))
+  (add-hook! 'after-make-frame-functions
+    (when (and (display-graphic-p)
+               (string= (getenv "XDG_SESSION_TYPE") "wayland")
+               (executable-find "wl-copy"))
+      (setq wl-copy-process nil
+            interprogram-cut-function 'wl-copy
+            interprogram-paste-function 'wl-paste)))
   :hook (doom-after-init . repeat-mode))
 
 (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t)
@@ -204,28 +206,19 @@
         calendar-latitude 41.168602
         calendar-longitude 29.047024))
 
-(add-hook! 'c-mode-common-hook
-  (google-set-c-style)
-  (c-set-offset 'access-label -2)
-  (google-make-newline-indent))
+(after! google-c-style
+  (add-hook! 'c-mode-common-hook
+    (google-set-c-style)
+    (google-make-newline-indent)))
 
 (after! ccls
   (setq ccls-initialization-options `(:index (:comments 2)
                                       :completion (:detailedLabel t)
                                       :cache (:directory ,(file-truename "~/.cache/ccls")))))
 
-(defadvice! compile-smart-comint-a (orig-fn &rest args)
-  "Force compile to always use comint mode."
-  :around #'compile
-  (let ((current-prefix-arg t))
-    (apply orig-fn args)))
-
-(add-hook! 'shell-mode-hook #'compilation-shell-minor-mode)
-
 (after! compile
   (setq compilation-scroll-output t
         next-error-message-highlight t))
-(add-hook! 'next-error-hook #'recenter)
 
 (use-package! daemons
   :commands (daemons daemons-disable daemons-enable daemons-reload daemons-restart daemons-start daemons-status daemons-stop)
@@ -240,10 +233,7 @@
     "d" 'daemons-disable-at-point
     "u" 'daemons-systemd-toggle-user))
 
-(use-package! dired
-  :after-call doom-after-init-hook
-  :defer t
-  :config
+(after! dired
   (setq dired-listing-switches (concat dired-listing-switches " --time-style=long-iso")))
 
 (use-package! dired-auto-readme
@@ -256,9 +246,10 @@
 ;; Runs ‘dired-auto-readme-mode‘ only when dirvish-side isn’t the active window.
 (defadvice! acml/dired-auto-readme-mode (fn &rest args)
   :around #'dired-auto-readme-mode
-  (let ((visible (dirvish-side-session-visible-p)))
-    (unless (eq visible (selected-window))
-      (apply fn args))))
+  (when (fboundp 'dirvish-side-session-visible-p)
+    (let ((visible (dirvish-side-session-visible-p)))
+      (unless (eq visible (selected-window))
+        (apply fn args)))))
 
 (defadvice! acml/dirvish-subtree-toggle (fn &rest args)
   :around #'dirvish-subtree-toggle (save-excursion (apply fn args)))
@@ -320,18 +311,20 @@
 
 ;; Semi-center it over the target window, rather than at the cursor position
 ;; (which could be anywhere).
-(defadvice! my-emacs-everywhere-set-frame-position (&rest _)
-  :override #'emacs-everywhere-set-frame-position
-  (cl-destructuring-bind (width . height)
-      (alist-get 'outer-size (frame-geometry))
-    (set-frame-position (selected-frame)
-                        (+ emacs-everywhere-window-x
-                           (/ emacs-everywhere-window-width 2)
-                           (- (/ width 2)))
-                        (+ emacs-everywhere-window-y
-                           (/ emacs-everywhere-window-height 2)))))
+(after! emacs-everywhere
+  (defadvice! my-emacs-everywhere-set-frame-position (&rest _)
+    :override #'emacs-everywhere-set-frame-position
+    (cl-destructuring-bind (width . height)
+        (alist-get 'outer-size (frame-geometry))
+      (set-frame-position (selected-frame)
+                          (+ emacs-everywhere-window-x
+                             (/ emacs-everywhere-window-width 2)
+                             (- (/ width 2)))
+                          (+ emacs-everywhere-window-y
+                             (/ emacs-everywhere-window-height 2))))))
 
-(setq prefix-help-command #'embark-prefix-help-command)
+(after! embark
+  (setq prefix-help-command #'embark-prefix-help-command))
 (after! vertico-multiform
   (add-to-list 'vertico-multiform-categories '(embark-keybinding grid)))
 
@@ -364,10 +357,8 @@
   ;; :bind ("<f5>" . ef-themes-toggle)
   :custom
   (ef-themes-to-toggle '(ef-eagle ef-dark))
-  (ef-themes-variable-pitch-ui t)
-  (ef-themes-mixed-fonts t)
   ;; (ef-themes-headings '((0 1.4) (1 1.3) (2 1.2) (3 1.1)))
-  :init
+  :config
   ;; Remove the border
   (setq modus-themes-common-palette-overrides
         '(;; (fringe unspecified)
@@ -377,18 +368,26 @@
         modus-themes-bold-constructs t
         modus-themes-mixed-fonts t
         modus-themes-variable-pitch-ui t)
-  (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t))
+  (unless (daemonp)
+    (modus-themes-load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark))))
 
 ;; (after! expand-region
 ;;   (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
 
+;; expand-region, tree-sitter edition
 (use-package! expreg
-  :commands (expreg-expand expreg-contract)
-  :defer t)
-
-(after! evil
-  (map! :nv "RET" #'expreg-expand
-        :nv "DEL" #'expreg-contract))
+  :after-call doom-first-input-hook
+  ;; :bind (("C-=" . expreg-expand)
+  ;;        ("C--" . expreg-contract))
+  :config
+  (defvar expreg-repeat-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map "=" #'expreg-expand)
+      (define-key map "-" #'expreg-contract)
+      map))
+  (put 'expreg-expand 'repeat-map 'expreg-repeat-map)
+  (put 'expreg-contract 'repeat-map 'expreg-repeat-map)
+  (define-key evil-visual-state-map (kbd "v") 'expreg-expand))
 
 (use-package! highlight-parentheses
   :defer t
@@ -459,47 +458,44 @@ a cyan background and the second sequence turns it off.
 This strips the ANSI escape sequences and if the buffer is saved,
 the sequences will be lost."
   (interactive)
-  (let (beg end
-            (ansi-color-context-region nil))
-    (if (use-region-p)
-        (setq beg (region-beginning) end (region-end))
-      (setq beg (point-min) end (point-max))))
-  (if buffer-read-only
-      ;; read-only buffers may be pointing a read-only file system, so don't mark the buffer as
-      ;; modified. If the buffer where to become modified, a warning will be generated when emacs
-      ;; tries to autosave.
-      (let ((inhibit-read-only t)
-            (modified (buffer-modified-p)))
-        (ansi-color-apply-on-region beg end t)
-        (set-buffer-modified-p modified))
-    (ansi-color-apply-on-region (point-min) (point-max) t)))
+  (let ((ansi-color-context-region nil)
+        (beg (if (use-region-p) (region-beginning) (point-min)))
+        (end (if (use-region-p) (region-end) (point-max))))
+    (if buffer-read-only
+        ;; read-only buffers may be pointing a read-only file system, so don't mark the buffer as
+        ;; modified. If the buffer where to become modified, a warning will be generated when emacs
+        ;; tries to autosave.
+        (let ((inhibit-read-only t) (modified (buffer-modified-p)))
+          (ansi-color-apply-on-region beg end t)
+          (set-buffer-modified-p modified))
+      (ansi-color-apply-on-region beg end t))))
 
-(add-hook 'find-file-hook #'acml/render-log)
-(defun acml/render-log ()
-  (when (and (stringp buffer-file-name)
-             (string-match "\\.log\\'" buffer-file-name))
-    (acml/hide-dos-eol)
-    (acml/ansi-color)))
-
-;; (setq-default left-fringe-width 8
-;;               right-fringe-width 8)
-
-;;; :tools magit
-(add-hook! 'magit-mode-hook
-  (setq-local
-   left-fringe-width 16
-   magit-section-visibility-indicator (if (display-graphic-p)
-                                          '(magit-fringe-bitmap> . magit-fringe-bitmapv)
-                                        (cons (if (char-displayable-p ?) "" "...") t))))
+(define-derived-mode acml/log-mode fundamental-mode "Log"
+  (acml/hide-dos-eol)
+  (acml/ansi-color))
+(add-to-list 'auto-mode-alist '("\\.log\\'" . acml/log-mode))
 
 (after! magit
+  (setq magit-repository-directories '(("~/.nix-config" . 0)
+                                       ("~/.nixpkgs" . 0)
+                                       ("~/Projects" . 3))
+        magit-save-repository-buffers nil
+        ;; Don't restore the wconf after quitting magit, it's jarring
+        magit-inhibit-save-previous-winconf t
+        transient-values '((magit-rebase "--autostash" "--autosquash")
+                           (magit-pull "--autostash" "--rebase")))
   (magit-add-section-hook 'magit-status-sections-hook
                           'magit-insert-worktrees
                           'magit-insert-status-headers t)
   (magit-add-section-hook 'magit-status-sections-hook
                           'magit-insert-ignored-files
                           'magit-insert-untracked-files
-                          nil))
+                          nil)
+  (add-hook! 'magit-mode-hook
+    (setq-local
+     left-fringe-width 16
+     magit-section-visibility-indicators
+     `((magit-fringe-bitmap> . magit-fringe-bitmapv) (,(if (char-displayable-p ?) "" "...") . t)))))
 
 (after! magit-repos
   (setq magit-repolist-columns
@@ -521,15 +517,6 @@ the sequences will be lost."
 
 (setopt magit-format-file-function #'magit-format-file-nerd-icons)
 
-(setq magit-repository-directories '(("~/.nix-config" . 0)
-                                     ("~/.nixpkgs" . 0)
-                                     ("~/Projects" . 3))
-      magit-save-repository-buffers nil
-      ;; Don't restore the wconf after quitting magit, it's jarring
-      magit-inhibit-save-previous-winconf t
-      transient-values '((magit-rebase "--autostash" "--autosquash")
-                         (magit-pull "--autostash" "--rebase")))
-
 (use-package! magit-todos
   :after magit
   :config (magit-todos-mode 1))
@@ -538,15 +525,13 @@ the sequences will be lost."
       (:prefix ("p" . "project")
        :desc "List project todos" "t" #'magit-todos-list))
 
-(use-package! git-commit
-  :after magit
-  :config
+(after! git-commit
   (setq git-commit-summary-max-length 68))
 
 (use-package! gptel-magit
   :after gptel magit
   :if (not (string= (system-name) "DINA5CG52813LW"))
-  :config
+  ;; :config
   ;; (setq gptel-magit-model 'google/gemini-2.0-flash-exp:free
   ;;       gptel-magit-backend (gptel-make-openai "OpenRouter"
   ;;                             :host "openrouter.ai"
@@ -561,8 +546,6 @@ the sequences will be lost."
 
 (defun init-mixed-pitch-h ()
   "Hook `mixed-pitch-mode' into each mode of `elken/mixed-pitch-modes'"
-  (when (memq major-mode elken/mixed-pitch-modes)
-    (mixed-pitch-mode 1))
   (dolist (hook elken/mixed-pitch-modes)
     (add-hook (intern (concat (symbol-name hook) "-hook")) #'mixed-pitch-mode)))
 
@@ -613,37 +596,20 @@ the sequences will be lost."
 (setopt org-directory (expand-file-name "~/Documents/org/")
         org-startup-with-inline-images t)
 
-(defun my/org-disable-xterm-title-when-tty (frame)
-  "Disable `xterm-set-window-title` for Org buffers shown in TTY frames."
-  (when (and (not (display-graphic-p frame))
-             (with-current-buffer (window-buffer (frame-selected-window frame))
-               (derived-mode-p 'org-mode)))
-    (with-current-buffer (window-buffer (frame-selected-window frame))
-      (setq-local xterm-set-window-title nil))))
-
 (use-package! org
-  :defer t
-  :after-call (org-agenda org-capture +default/org-notes-headlines)
+  :after-call doom-after-init-hook
   :config
   (setq
-   org-hide-emphasis-markers t
    org-agenda-files (list org-directory  (expand-file-name "~/Documents/worg/"))
    org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?)) " " nil)
-   org-startup-folded 'show2levels)
+   org-hide-emphasis-markers t
+   org-latex-pdf-process '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f"))
+   org-startup-folded 'show2levels
   (add-to-list 'org-modules 'org-habit)
-  (add-hook 'window-buffer-change-functions
-            #'my/org-disable-xterm-title-when-tty)
   :hook
   (org-mode . (lambda ()
-                ;; Initial application in case buffer is already visible
                 (unless (display-graphic-p)
                   (setq-local xterm-set-window-title nil)))))
-
-(use-package! ox-latex
-  :after org
-  :config
-  (setq org-latex-pdf-process
-        '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f")))
 
 ;; (use-package! pdf-occur :commands (pdf-occur pdf-occur-global-minor-mode))
 ;; (use-package! pdf-history :commands (pdf-history-minor-mode))
@@ -653,6 +619,7 @@ the sequences will be lost."
 ;; (use-package! pdf-sync :commands (pdf-sync-minor-mode))
 
 (after! persp-mode
+  (require 'f)
   (defun lkn-tab-bar--workspaces ()
     "Return a list of the current workspaces."
     (nreverse
@@ -805,24 +772,23 @@ clicked."
 
   (setq frame-title-format '(:eval (my--frame-title-format))))
 
-(setq +workspaces-switch-project-function #'(lambda (project-directory)
-                                              (dired project-directory)
-                                              ;; (my/ghostel-toggle t)
-                                              ))
+(setq +workspaces-switch-project-function (lambda (project-directory)
+                                            (dired project-directory)
+                                            ;; (my/ghostel-toggle t)
+                                            ))
 
 (map! :when (modulep! :ui workspaces)
       :map doom-leader-workspace-map
       :desc "Swap Left"  "<" #'+workspace/swap-left
       :desc "Swap Right" ">" #'+workspace/swap-right)
 
-(use-package! proced
-  :commands (proced)
-  :custom
-  (proced-enable-color-flag t)
-  (proced-tree-flag t)
-  (proced-auto-update-flag 'visible)
-  (proced-auto-update-interval 1)
-  (proced-descent t))
+(after! proced
+  (setopt
+   proced-enable-color-flag t
+   proced-tree-flag t
+   proced-auto-update-flag 'visible
+   proced-auto-update-interval 1
+   proced-descent t))
 
 (use-package! projectile
   :commands (+default/discover-projects projectile-register-project-type)
@@ -838,6 +804,7 @@ clicked."
    projectile-project-search-path '(("~/.nix-config/" . 0)
                                     ("~/Projects" . 3)
                                     ("~/Work" . 2)))
+  :config
   (projectile-register-project-type 'acml/exercism-lua '(".exercism" ".busted" "HELP.md" "README.md")
                                     :project-file '("?*.lua")
                                     :test "busted -v"
@@ -852,8 +819,7 @@ clicked."
   :commands (scopeline-mode)
   ;; :config
   ;; (add-to-list 'scopeline-targets '(makefile-mode "conditional"))
-  :init
-  (add-hook! 'prog-mode-hook #'scopeline-mode))
+  :hook (prog-mode . scopeline-mode))
 
 (map!
  (:leader
@@ -953,7 +919,6 @@ will ensure are ignored")
 
 (use-package! ghostel
   :after-call doom-first-input-hook
-  :defer t
   :hook (ghostel-mode . mode-line-invisible-mode)
   :commands (ghostel ghostel-project)
   :init
@@ -1038,7 +1003,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
       "<deletechar>" #'vterm-send-delete)
 
 (add-hook! '(vterm-mode-hook ghostel-mode-hook)
-  (set (make-local-variable 'buffer-face-mode-face) '(:family "IosevkaTerm Nerd Font"))
+  (setq-local buffer-face-mode-face '(:family "IosevkaTerm Nerd Font"))
   (buffer-face-mode t))
 
 (after! which-key
@@ -1102,6 +1067,7 @@ you're done. This can be called from an external shell script."
           (add-hook 'delete-frame-functions #'cleanup-scratch-frame))))))
 
 (use-package! reader
+  :unless (featurep :system 'macos)
   :mode (("\\.pdf\\'" . reader-mode)
          ("\\.epub\\'" . reader-mode)
          ("\\.mobi\\'" . reader-mode)
@@ -1112,17 +1078,17 @@ you're done. This can be called from an external shell script."
          ("\\.docx\\'" . reader-mode)
          ("\\.pptx\\'" . reader-mode)
          ("\\.xlsx\\'" . reader-mode))
-  :bind ((:map reader-mode-map
-               ("j" . reader-scroll-down-or-next-page)
-               ("k" . reader-scroll-up-or-prev-page)
-               ("h" . reader-scroll-left)
-               ("l" . reader-scroll-right)
-               ("d" . reader-next-page)
-               ("u" . reader-previous-page)
-               ("P" . reader-goto-page)
-               ("H" . reader-fit-to-height)
-               ("W" . reader-fit-to-width)
-               ("q" . nil)))
+  ;; :bind ((:map reader-mode-map
+  ;;              ("j" . reader-scroll-down-or-next-page)
+  ;;              ("k" . reader-scroll-up-or-prev-page)
+  ;;              ("h" . reader-scroll-left)
+  ;;              ("l" . reader-scroll-right)
+  ;;              ("d" . reader-next-page)
+  ;;              ("u" . reader-previous-page)
+  ;;              ("P" . reader-goto-page)
+  ;;              ("H" . reader-fit-to-height)
+  ;;              ("W" . reader-fit-to-width)
+  ;;              ("q" . nil)))
   :config
   ;; Use evil keybindings in reader-mode
   (evil-set-initial-state 'reader-mode 'normal)
@@ -1145,7 +1111,7 @@ you're done. This can be called from an external shell script."
         :n "Q" #'reader-close-doc))
 
 ;; WSL specific setting
-(add-hook! 'doom-after-init-hook
+(add-hook! doom-after-init-hook
   (when (and (featurep :system 'linux)
              (getenv "WSL_DISTRO_NAME"))
 
@@ -1203,7 +1169,6 @@ you're done. This can be called from an external shell script."
   :defer t
   :if (not (string= (system-name) "DINA5CG52813LW"))
   :config
-  (pop gptel--known-backends) ; remove the default ChatGPT backend
   (setq gptel-include-reasoning 'ignore)
   (gptel-make-gemini "Gemini"
     :key #'gptel-api-key-from-auth-source
@@ -1376,14 +1341,8 @@ you're done. This can be called from an external shell script."
 ;; Retrieved 2026-02-18, License - CC BY-SA 3.0
 
 (defun find-overlays-specifying (prop pos)
-  (let ((overlays (overlays-at pos))
-        found)
-    (while overlays
-      (let ((overlay (car overlays)))
-        (if (overlay-get overlay prop)
-            (setq found (cons overlay found))))
-      (setq overlays (cdr overlays)))
-    found))
+  (cl-remove-if-not (lambda (o) (overlay-get o prop))
+                    (overlays-at pos)))
 
 (defun highlight-or-dehighlight-line ()
   (interactive)
@@ -1397,7 +1356,7 @@ you're done. This can be called from an external shell script."
       (overlay-put overlay-highlight 'face 'highlight)
       (overlay-put overlay-highlight 'line-highlight-overlay-marker t))))
 
-(global-set-key [f12] 'highlight-or-dehighlight-line)
+(map! "<f12>" #'highlight-or-dehighlight-line)
 
 (defvar search-recenter-context-lines 10
   "Number of lines to expose beyond the isearch match after scrolling.")
@@ -1424,7 +1383,7 @@ you're done. This can be called from an external shell script."
   :when (modulep! :tools lsp +eglot)
   :config
   ;; Don't show the project/file name in the header, show only an icon
-  (with-eval-after-load 'nerd-icons
+  (after! nerd-icons
     (advice-add #'breadcrumb-project-crumbs :override
                 (lambda ()
                   (concat " " (if-let* ((file buffer-file-name))
@@ -1472,19 +1431,14 @@ you're done. This can be called from an external shell script."
 
 ;; mouse mode must be initialised for each new terminal
 ;; see http://stackoverflow.com/a/6798279/27782
-(defun initialise-mouse-mode (&optional frame)
-  "Initialise mouse mode for the current terminal."
-  (if (not frame) ;; The initial call.
-      (xterm-mouse-mode 1)
-    ;; Otherwise called via after-make-frame-functions.
-    (if xterm-mouse-mode
-        ;; Re-initialise the mode in case of a new terminal.
-        (xterm-mouse-mode 1))))
+(defun initialize-mouse-mode (&optional frame)
+  (unless (display-graphic-p frame)
+    (xterm-mouse-mode 1)))
 
 ;; Evaluate both now (for non-daemon emacs) and upon frame creation
 ;; (for new terminals via emacsclient).
-(initialise-mouse-mode)
-(add-hook 'after-make-frame-functions 'initialise-mouse-mode)
+(initialize-mouse-mode)
+(add-hook 'after-make-frame-functions 'initialize-mouse-mode)
 
 (setopt xterm-extra-capabilities '(getSelection setSelection modifyOtherKeys))
 
