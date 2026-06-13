@@ -40,11 +40,11 @@
       doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size my/font-size)
       doom-serif-font (font-spec :family "BlexMono Nerd Font" :size my/font-size :weight 'light)
 
-      fancy-splash-image (when-let* ((dir (concat (expand-file-name doom-user-dir) "splash"))
+      fancy-splash-image (when-let* ((dir (file-name-concat doom-user-dir "splash"))
                                      (choices (and (file-directory-p dir)
                                                    (directory-files dir t "^[^.]" t)))
-                                     ((> (length choices) 0)))
-                           (elt choices (random (length choices)))))
+                                     ((consp choices)))
+                           (seq-random-elt choices)))
 
 (setopt
  auth-source-cache-expiry nil ; default is 7200 (2h)
@@ -138,9 +138,11 @@
             :n (number-to-string n) fn
             :n (format "w%d" n) fn))))
 
-(add-hook! doom-after-init-hook
-  (repeat-mode 1)
-  (global-subword-mode 1)) ; Iterate through CamelCase words
+(add-hook! 'doom-after-init-hook
+  (defun my/setup-global-modes ()
+    "Enable repeat-mode and subword-mode after Doom initializes."
+    (repeat-mode 1)
+    (global-subword-mode 1)))
 
 (map! ;; [remap just-one-space]  #'cycle-spacing
  [remap upcase-word]     #'upcase-dwim
@@ -154,11 +156,13 @@
 (defun wl-copy (text)
   (when (process-live-p wl-copy-process)
     (kill-process wl-copy-process))
-  (setq wl-copy-process (make-process :name "wl-copy"
-                                      :buffer nil
-                                      :command '("wl-copy" "-f" "-n")
-                                      :connection-type 'pipe
-                                      :noquery t))
+  (setq wl-copy-process
+        (make-process :name "wl-copy"
+                      :buffer nil
+                      :command '("wl-copy" "-f" "-n")
+                      :connection-type 'pipe
+                      :coding 'utf-8-unix   ; ← explicit
+                      :noquery t))
   (process-send-string wl-copy-process text)
   (process-send-eof wl-copy-process))
 
@@ -169,12 +173,18 @@
                    "[\r\n]+")))
       (unless (string-empty-p result) result))))
 
+(add-hook 'kill-emacs-hook
+          (lambda ()
+            (when (process-live-p wl-copy-process)
+              (kill-process wl-copy-process)
+              (setq wl-copy-process nil))))
+
 (defun my/setup-wayland-clipboard (&optional frame)
-  "Setup Wayland clipboard integration, only for graphical FRAME."
   (when (and (or (null frame) (display-graphic-p frame))
              (or (getenv "WAYLAND_DISPLAY")
                  (string= (getenv "XDG_SESSION_TYPE") "wayland"))
-             (executable-find "wl-copy"))
+             (executable-find "wl-copy")
+             (executable-find "wl-paste"))   ; ← new guard
     (setq interprogram-cut-function  #'wl-copy
           interprogram-paste-function #'wl-paste)
     (remove-hook 'after-make-frame-functions #'my/setup-wayland-clipboard)))
@@ -203,11 +213,6 @@
   (add-hook! 'c-mode-common-hook
     (google-set-c-style)
     (google-make-newline-indent)))
-
-(after! ccls
-  (setq ccls-initialization-options `(:index (:comments 2)
-                                      :completion (:detailedLabel t)
-                                      :cache (:directory ,(file-truename "~/.cache/ccls")))))
 
 (after! compile
   (setq compilation-scroll-output t
@@ -291,7 +296,10 @@
 
 (after! eglot
   ;; (set-eglot-client! '(c-mode c-ts-mode c++-mode c++-ts-mode objc-mode) `("ccls" ,(concat "--init={\"cache\": {\"directory\": \"" (file-truename "~/.cache/ccls") "\"}}")))
-  (set-eglot-client! 'nix-mode '("nil" "--stdio" :initializationOptions (:nil (:nix (:flake (:autoArchive t)))))))
+  (let ((nil-lsp '("nil" "--stdio" :initializationOptions
+                   (:nil (:nix (:flake (:autoArchive t)))))))
+    (set-eglot-client! 'nix-mode    nil-lsp)
+    (set-eglot-client! 'nix-ts-mode nil-lsp)))
 
 (after! embark
   (setq prefix-help-command #'embark-prefix-help-command))
@@ -374,27 +382,37 @@
   (setcdr (assq 'c++-mode ll-debug-statement-alist)
           (cdr (assq 'c-mode ll-debug-statement-alist))))
 
-(after! lsp-go
-  (lsp-register-custom-settings
-   '(("gopls.staticcheck" t t))))
+;; (after! ccls
+;;   (setq ccls-initialization-options `(:index (:comments 2)
+;;                                       :completion (:detailedLabel t)
+;;                                       :cache (:directory ,(file-truename "~/.cache/ccls")))))
 
-(after! lsp-mode
-  (setq lsp-enable-file-watchers t
-        lsp-file-watch-threshold 15000
-        lsp-lens-enable nil
-        lsp-semantic-tokens-enable t
-        lsp-signature-render-documentation t
-        lsp-headerline-breadcrumb-enable t))
+;; (after! lsp-go
+;;   (lsp-register-custom-settings
+;;    '(("gopls.staticcheck" t t))))
 
-(after! lsp-ui
-  (setq lsp-ui-doc-enable nil ; fixes the LSP lag
-        lsp-ui-doc-include-signature t
-        lsp-ui-doc-max-height 50
-        lsp-ui-doc-max-width 150
-        lsp-ui-doc-position 'bottom
-        lsp-ui-doc-use-childframe t
-        lsp-ui-sideline-show-hover t
-        lsp-ui-sideline-show-symbol t))
+(after! go-ts-mode
+  (setq-hook! 'go-ts-mode-hook
+    eglot-workspace-configuration
+    '(:gopls (:staticcheck t))))
+
+;; (after! lsp-mode
+;;   (setq lsp-enable-file-watchers t
+;;         lsp-file-watch-threshold 15000
+;;         lsp-lens-enable nil
+;;         lsp-semantic-tokens-enable t
+;;         lsp-signature-render-documentation t
+;;         lsp-headerline-breadcrumb-enable t))
+
+;; (after! lsp-ui
+;;   (setq lsp-ui-doc-enable nil ; fixes the LSP lag
+;;         lsp-ui-doc-include-signature t
+;;         lsp-ui-doc-max-height 50
+;;         lsp-ui-doc-max-width 150
+;;         lsp-ui-doc-position 'bottom
+;;         lsp-ui-doc-use-childframe t
+;;         lsp-ui-sideline-show-hover t
+;;         lsp-ui-sideline-show-symbol t))
 
 ;; https://stackoverflow.com/questions/730751/hiding-m-in-emacs
 (defun acml/hide-dos-eol ()
@@ -430,8 +448,11 @@ the sequences will be lost."
 
 (defun acml/ansi-color-tail ()
   "Colorize only newly appended content since last call."
-  (let ((beg (or acml/log-mode--colorized-to (point-min)))
-        (ansi-color-context-region nil))
+  (let* ((prev (or acml/log-mode--colorized-to 0))
+         (beg  (if (> prev (point-max))
+                   (point-min)   ; file was truncated/rotated — restart
+                 prev))
+         (ansi-color-context-region nil))
     (ansi-color-apply-on-region beg (point-max) t)
     (setq acml/log-mode--colorized-to (point-max))))
 
@@ -724,18 +745,18 @@ If prefix ARG is non-nil, recreate the Ghostel buffer in the current project's r
   (my/ghostel--configure-project-root-and-display
    arg
    (lambda ()
-     (let ((buffer-name (my/ghostel-buffer-name))
+     (let ((ghostel-buf (my/ghostel-buffer-name))  ; renamed from buffer-name
            confirm-kill-processes)
        (when arg
-         (when-let ((win (get-buffer-window buffer-name)))
+         (when-let ((win (get-buffer-window ghostel-buf)))
            (delete-window win))
-         (when-let ((buf (get-buffer buffer-name)))
+         (when-let ((buf (get-buffer ghostel-buf)))
            (kill-buffer buf)))
-       (if-let* ((win (get-buffer-window buffer-name)))
+       (if-let* ((win (get-buffer-window ghostel-buf)))
            (delete-window win)
-         (let ((ghostel-buffer-name buffer-name))
+         (let ((ghostel-buffer-name ghostel-buf))
            (ghostel)))
-       (get-buffer buffer-name)))))
+       (get-buffer ghostel-buf)))))
 
 (defun my/ghostel-here (arg)
   "Open a Ghostel buffer in the current window at project root.
@@ -774,8 +795,10 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
       "<deletechar>" #'vterm-send-delete)
 
 (add-hook! '(vterm-mode-hook ghostel-mode-hook)
-  (setq-local buffer-face-mode-face '(:family "IosevkaTerm Nerd Font"))
-  (buffer-face-mode t))
+  (defun my/setup-terminal-font ()
+    "Use a terminal-optimized font."
+    (setq-local buffer-face-mode-face '(:family "IosevkaTerm Nerd Font"))
+    (buffer-face-mode t)))
 
 (after! which-key
   (setq which-key-allow-multiple-replacements t)
@@ -1052,21 +1075,16 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 ;; Source - https://stackoverflow.com/a/14454756
 ;; Posted by PascalVKooten, modified by community. See post 'Timeline' for change history
 ;; Retrieved 2026-02-18, License - CC BY-SA 3.0
-(defun find-overlays-specifying (prop pos)
-  "Return first overlay at POS having property PROP, or nil."
-  (seq-find (lambda (o) (overlay-get o prop)) (overlays-at pos)))
-
 (defun highlight-or-dehighlight-line ()
   (interactive)
-  (if (find-overlays-specifying
-       'line-highlight-overlay-marker
-       (line-beginning-position))
-      (remove-overlays (line-beginning-position) (+ 1 (line-end-position)))
-    (let ((overlay-highlight (make-overlay
-                              (line-beginning-position)
-                              (+ 1 (line-end-position)))))
-      (overlay-put overlay-highlight 'face 'highlight)
-      (overlay-put overlay-highlight 'line-highlight-overlay-marker t))))
+  (let ((beg (line-beginning-position))
+        (end (1+ (line-end-position))))
+    (if (seq-find (lambda (o) (overlay-get o 'line-highlight-overlay-marker))
+                  (overlays-in beg end))
+        (remove-overlays beg end 'line-highlight-overlay-marker t)  ; targeted!
+      (let ((ov (make-overlay beg end)))
+        (overlay-put ov 'face 'highlight)
+        (overlay-put ov 'line-highlight-overlay-marker t)))))
 (map! "<f12>" #'highlight-or-dehighlight-line)
 
 (use-package! breadcrumb
