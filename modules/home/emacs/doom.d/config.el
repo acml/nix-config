@@ -44,30 +44,22 @@
                                      (choices (and (file-directory-p dir)
                                                    (directory-files dir t "^[^.]" t)))
                                      ((> (length choices) 0)))
-                           (elt choices (random (length choices))))
-
-      auth-source-cache-expiry nil ; default is 7200 (2h)
-
-      window-combination-resize t  ; take new window space from all other windows (not just current)
-      x-stretch-cursor t           ; Stretch cursor to the glyph width
-      auto-save-default t          ; Nobody likes to loose work, I certainly don't
-      auto-revert-avoid-polling t  ; refresh buffers when files change on disk
-      truncate-string-ellipsis "…" ; Unicode ellispis are nicer than "...", and also save /precious/ space
-      window-resize-pixelwise t
-      frame-resize-pixelwise t
-      xref-history-storage 'xref-window-local-history)
+                           (elt choices (random (length choices)))))
 
 (setopt
- ;; This determines the style of line numbers in effect. If set to `nil', line
- ;; numbers are disabled. For relative line numbers, set this to `relative'.
- ;;
- ;; Line numbers are pretty slow all around. The performance boost of
- ;; disabling them outweighs the utility of always keeping them on.
- display-line-numbers-type 'relative
-
+ auth-source-cache-expiry nil ; default is 7200 (2h)
+ auto-revert-avoid-polling t  ; refresh buffers when files change on disk
+ auto-revert-use-notify t     ; use inotify instead of polling
+ auto-save-default t          ; Nobody likes to loose work, I certainly don't
  delete-by-moving-to-trash t  ; Delete files to trash
+ display-line-numbers-type 'relative
+ frame-resize-pixelwise t
+ truncate-string-ellipsis "…" ; Unicode ellispis are nicer than "...", and also save /precious/ space
  undo-limit 80000000          ; Raise undo-limit to 80Mb
- )
+ window-combination-resize t  ; take new window space from all other windows (not just current)
+ window-resize-pixelwise t
+ x-stretch-cursor t           ; Stretch cursor to the glyph width
+ xref-history-storage 'xref-window-local-history)
 
 ;; (if (equal "Battery status not available"
 ;;            (battery))
@@ -117,16 +109,7 @@
 
 ;; to hide autosave file from recent files
 (after! recentf
-  (add-to-list 'recentf-exclude doom-local-dir))
-
-(when (daemonp)
-  (add-hook 'after-make-frame-functions
-            (lambda (frame)
-              (with-selected-frame frame
-                (if (not (display-graphic-p))
-                    (load-theme 'ef-dark t)
-                  (load-theme 'ef-eagle t)
-                  (set-frame-parameter (selected-frame) 'fullscreen 'maximized))))))
+  (add-to-list 'recentf-exclude (regexp-quote (file-truename doom-local-dir))))
 
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 
@@ -147,48 +130,54 @@
 (use-package! winum
   :after-call doom-first-input-hook
   :config
-  (dolist (wn (mapcar #'number-to-string (number-sequence 1 9)))
-    (let ((f (intern (concat "winum-select-window-" wn)))
-          (k (concat "s-" wn)))
-      (map! :n k f)
-      (map! :leader :n wn f
-            :n (concat "w" wn) f))))
+  (dotimes (i 9)
+    (let* ((n (1+ i))
+           (fn (intern (format "winum-select-window-%d" n))))
+      (map! :n (format "s-%d" n) fn
+            :leader
+            :n (number-to-string n) fn
+            :n (format "w%d" n) fn))))
 
-;; Simple is Emacs's built-in miscellaneous package.
-(use-package! simple
-  :after-call doom-first-input-hook
-  :config
-  (bind-keys
-   ;; ([remap just-one-space] . cycle-spacing)
-   ([remap upcase-word] . upcase-dwim)
-   ([remap downcase-word] . downcase-dwim)
-   ([remap capitalize-word] . capitalize-dwim)
-   ([remap zap-to-char] . zap-up-to-char))
+(add-hook! doom-after-init-hook
+  (repeat-mode 1)
+  (global-subword-mode 1)) ; Iterate through CamelCase words
 
-  (global-subword-mode 1) ; Iterate through CamelCase words
+(map! ;; [remap just-one-space]  #'cycle-spacing
+ [remap upcase-word]     #'upcase-dwim
+ [remap downcase-word]   #'downcase-dwim
+ [remap capitalize-word] #'capitalize-dwim
+ [remap zap-to-char]     #'zap-up-to-char)
 
-  ;; credit: yorickvP on Github
-  ;; wl-copy integration for Wayland clipboard(need wl-clipboard package)
-  (defun wl-copy (text)
-    (setq wl-copy-process (make-process :name "wl-copy"
-                                        :buffer nil
-                                        :command '("wl-copy" "-f" "-n")
-                                        :connection-type 'pipe
-                                        :noquery t))
-    (process-send-string wl-copy-process text)
-    (process-send-eof wl-copy-process))
-  (defun wl-paste ()
-    (if (and wl-copy-process (process-live-p wl-copy-process))
-        nil ; should return nil if we're the current paste owner
-      (shell-command-to-string "wl-paste -n | tr -d \r")))
-  (add-hook! 'after-make-frame-functions
-    (when (and (display-graphic-p)
-               (string= (getenv "XDG_SESSION_TYPE") "wayland")
-               (executable-find "wl-copy"))
-      (setq wl-copy-process nil
-            interprogram-cut-function 'wl-copy
-            interprogram-paste-function 'wl-paste)))
-  :hook (doom-after-init . repeat-mode))
+;; credit: yorickvP on Github
+;; wl-copy integration for Wayland clipboard(need wl-clipboard package)
+(defvar wl-copy-process nil)
+(defun wl-copy (text)
+  (when (process-live-p wl-copy-process)
+    (kill-process wl-copy-process))
+  (setq wl-copy-process (make-process :name "wl-copy"
+                                      :buffer nil
+                                      :command '("wl-copy" "-f" "-n")
+                                      :connection-type 'pipe
+                                      :noquery t))
+  (process-send-string wl-copy-process text)
+  (process-send-eof wl-copy-process))
+
+(defun wl-paste ()
+  (unless (and wl-copy-process (process-live-p wl-copy-process))
+    (string-trim-right (shell-command-to-string "wl-paste -n") "[\r\n]+")))
+
+(defun my/setup-wayland-clipboard (&optional frame)
+  "Setup Wayland clipboard integration, only for graphical FRAME."
+  (when (and (or (null frame) (display-graphic-p frame))
+             (string= (getenv "XDG_SESSION_TYPE") "wayland")
+             (executable-find "wl-copy"))
+    (setq interprogram-cut-function  #'wl-copy
+          interprogram-paste-function #'wl-paste)
+    (remove-hook 'after-make-frame-functions #'my/setup-wayland-clipboard)))
+
+(if (daemonp)
+    (add-hook 'after-make-frame-functions #'my/setup-wayland-clipboard)
+  (my/setup-wayland-clipboard))
 
 (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t)
                     ("^\\*\\(?:Wo\\)?Man " :size 82 :side right :select t :quit t)))
@@ -243,13 +232,12 @@
 (use-package! page-break-lines
   :hook (dired-auto-readme-mode . page-break-lines-mode))
 
-;; Runs ‘dired-auto-readme-mode‘ only when dirvish-side isn’t the active window.
+;; run normally unless the selected window IS the dirvish side window.
 (defadvice! acml/dired-auto-readme-mode (fn &rest args)
   :around #'dired-auto-readme-mode
-  (when (fboundp 'dirvish-side-session-visible-p)
-    (let ((visible (dirvish-side-session-visible-p)))
-      (unless (eq visible (selected-window))
-        (apply fn args)))))
+  (unless (and (fboundp 'dirvish-side-session-visible-p)
+               (eq (dirvish-side-session-visible-p) (selected-window)))
+    (apply fn args)))
 
 (defadvice! acml/dirvish-subtree-toggle (fn &rest args)
   :around #'dirvish-subtree-toggle (save-excursion (apply fn args)))
@@ -301,28 +289,6 @@
   ;; (set-eglot-client! '(c-mode c-ts-mode c++-mode c++-ts-mode objc-mode) `("ccls" ,(concat "--init={\"cache\": {\"directory\": \"" (file-truename "~/.cache/ccls") "\"}}")))
   (set-eglot-client! 'nix-mode '("nil" "--stdio" :initializationOptions (:nil (:nix (:flake (:autoArchive t)))))))
 
-;; Easier to match with a bspwm rule:
-;;   bspc rule -a 'Emacs:emacs-everywhere' state=floating sticky=on
-(setq emacs-everywhere-frame-name-format "emacs-everywhere")
-
-;; The modeline is not useful to me in the popup window. It looks much nicer
-;; to hide it.
-(add-hook 'emacs-everywhere-init-hooks #'hide-mode-line-mode)
-
-;; Semi-center it over the target window, rather than at the cursor position
-;; (which could be anywhere).
-(after! emacs-everywhere
-  (defadvice! my-emacs-everywhere-set-frame-position (&rest _)
-    :override #'emacs-everywhere-set-frame-position
-    (cl-destructuring-bind (width . height)
-        (alist-get 'outer-size (frame-geometry))
-      (set-frame-position (selected-frame)
-                          (+ emacs-everywhere-window-x
-                             (/ emacs-everywhere-window-width 2)
-                             (- (/ width 2)))
-                          (+ emacs-everywhere-window-y
-                             (/ emacs-everywhere-window-height 2))))))
-
 (after! embark
   (setq prefix-help-command #'embark-prefix-help-command))
 (after! vertico-multiform
@@ -334,42 +300,37 @@
               :config
               (setq exercism-directory "~/Projects/exercism"))
 
+(setq evil-want-fine-undo t)   ; By default while in insert all changes are one big blob. Be more granular
 (after! evil
   (setq
-   evil-want-fine-undo t       ; By default while in insert all changes are one big blob. Be more granular
    evil-vsplit-window-right t  ; Switch to the new window after splitting
    evil-split-window-below t))
-
-(use-package! evil-colemak-basics :disabled
-              :after evil evil-snipe
-              ;; :hook (ediff-keymap-setup-hook . evil-colemak-basics-mode)
-              :init
-              (setq evil-colemak-basics-rotate-t-f-j nil
-                    evil-colemak-basics-char-jump-commands 'evil-snipe)
-              :config
-              (global-evil-colemak-basics-mode))
 
 ;; :ui window-select settings, ignoring +numbers flag for now
 (after! ace-window
   (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)))
 
-(use-package! ef-themes
-  ;; :bind ("<f5>" . ef-themes-toggle)
-  :custom
-  (ef-themes-to-toggle '(ef-eagle ef-dark))
-  ;; (ef-themes-headings '((0 1.4) (1 1.3) (2 1.2) (3 1.1)))
-  :config
-  ;; Remove the border
-  (setq modus-themes-common-palette-overrides
-        '(;; (fringe unspecified)
-          (border-mode-line-active unspecified)
-          (border-mode-line-inactive unspecified))
-        modus-themes-italic-constructs t
+(after! modus-themes
+  (setq modus-themes-italic-constructs t
         modus-themes-bold-constructs t
         modus-themes-mixed-fonts t
-        modus-themes-variable-pitch-ui t)
-  (unless (daemonp)
-    (modus-themes-load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark))))
+        modus-themes-variable-pitch-ui t
+        modus-themes-common-palette-overrides
+        '((border-mode-line-active unspecified)
+          (border-mode-line-inactive unspecified))))
+
+(use-package! ef-themes
+  :custom
+  (ef-themes-to-toggle '(ef-eagle ef-dark))
+  :config
+  (if (daemonp)
+      (add-hook 'after-make-frame-functions
+                (lambda (frame)
+                  (with-selected-frame frame
+                    (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t)
+                    (when (display-graphic-p)
+                      (set-frame-parameter nil 'fullscreen 'maximized)))))
+    (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t)))
 
 ;; (after! expand-region
 ;;   (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
@@ -380,11 +341,9 @@
   ;; :bind (("C-=" . expreg-expand)
   ;;        ("C--" . expreg-contract))
   :config
-  (defvar expreg-repeat-map
-    (let ((map (make-sparse-keymap)))
-      (define-key map "=" #'expreg-expand)
-      (define-key map "-" #'expreg-contract)
-      map))
+  (defvar-keymap expreg-repeat-map
+    "=" #'expreg-expand
+    "-" #'expreg-contract)
   (put 'expreg-expand 'repeat-map 'expreg-repeat-map)
   (put 'expreg-contract 'repeat-map 'expreg-repeat-map)
   (define-key evil-visual-state-map (kbd "v") 'expreg-expand))
@@ -458,28 +417,30 @@ a cyan background and the second sequence turns it off.
 This strips the ANSI escape sequences and if the buffer is saved,
 the sequences will be lost."
   (interactive)
-  (let ((ansi-color-context-region nil)
-        (beg (if (use-region-p) (region-beginning) (point-min)))
-        (end (if (use-region-p) (region-end) (point-max))))
-    (if buffer-read-only
-        ;; read-only buffers may be pointing a read-only file system, so don't mark the buffer as
-        ;; modified. If the buffer where to become modified, a warning will be generated when emacs
-        ;; tries to autosave.
-        (let ((inhibit-read-only t) (modified (buffer-modified-p)))
-          (ansi-color-apply-on-region beg end t)
-          (set-buffer-modified-p modified))
-      (ansi-color-apply-on-region beg end t))))
+  (save-excursion
+    (let ((ansi-color-context-region nil)
+          (beg (if (use-region-p) (region-beginning) (point-min)))
+          (end (if (use-region-p) (region-end) (point-max))))
+      (if buffer-read-only
+          (let ((inhibit-read-only t) (modified (buffer-modified-p)))
+            (ansi-color-apply-on-region beg end t)
+            (set-buffer-modified-p modified))
+        (ansi-color-apply-on-region beg end t)))))
 
 (define-derived-mode acml/log-mode fundamental-mode "Log"
+  "Major mode for log files: strips DOS line endings and colorizes ANSI escapes."
   (acml/hide-dos-eol)
-  (acml/ansi-color))
+  (acml/ansi-color)
+  (setq-local auto-revert-verbose nil)
+  (auto-revert-tail-mode 1))
 (add-to-list 'auto-mode-alist '("\\.log\\'" . acml/log-mode))
 
 (after! magit
-  (setq magit-repository-directories '(("~/.nix-config" . 0)
-                                       ("~/.nixpkgs" . 0)
-                                       ("~/Projects" . 3))
-        magit-save-repository-buffers nil
+  (setopt magit-format-file-function #'magit-format-file-nerd-icons
+          magit-repository-directories '(("~/.nix-config" . 0)
+                                         ("~/.nixpkgs" . 0)
+                                         ("~/Projects" . 3)))
+  (setq magit-save-repository-buffers nil
         ;; Don't restore the wconf after quitting magit, it's jarring
         magit-inhibit-save-previous-winconf t
         transient-values '((magit-rebase "--autostash" "--autosquash")
@@ -515,8 +476,6 @@ the sequences will be lost."
             (:help-echo "Local changes not in upstream")))
           ("Path" 0 magit-repolist-column-path nil))))
 
-(setopt magit-format-file-function #'magit-format-file-nerd-icons)
-
 (use-package! magit-todos
   :after magit
   :config (magit-todos-mode 1))
@@ -541,52 +500,25 @@ the sequences will be lost."
   ;;                             :models '(google/gemini-2.0-flash-exp:free)))
   )
 
-(defvar elken/mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
-  "Only use `mixed-pitch-mode' for given modes.")
-
-(defun init-mixed-pitch-h ()
-  "Hook `mixed-pitch-mode' into each mode of `elken/mixed-pitch-modes'"
-  (dolist (hook elken/mixed-pitch-modes)
-    (add-hook (intern (concat (symbol-name hook) "-hook")) #'mixed-pitch-mode)))
-
-(add-hook 'doom-init-ui-hook #'init-mixed-pitch-h)
+(add-hook! '(org-mode-hook LaTeX-mode-hook markdown-mode-hook gfm-mode-hook Info-mode-hook)
+           #'mixed-pitch-mode)
 
 (add-hook! markdown-mode
   (add-hook! before-save :local #'markdown-toc-refresh-toc))
 
-(use-package! modus-themes
-  :disabled
-  :init
-  (setq modus-themes-italic-constructs t
-        modus-themes-bold-constructs nil
-        modus-themes-mixed-fonts t
-        modus-themes-variable-pitch-ui t
-        modus-themes-custom-auto-reload t)
-  ;; :bind ("<f5>" . modus-themes-toggle)
-  )
-
 (map! (:leader :desc "Obvious (Toggle Comments)" :n "to" #'obvious-mode))
 
 (use-package! deft
-  :after org
+  :after (org org-roam)
   :custom
   (deft-recursive t)
   (deft-use-filter-string-for-filename t)
   (deft-default-extension "org")
   (deft-directory org-roam-directory))
 
-;; (use-package! org-appear
-;;   :hook (org-mode . org-appear-mode)
-;;   :config
-;;   (setq org-appear-autoemphasis t
-;;         org-appear-autosubmarkers t
-;;         org-appear-autolinks nil)
-;;   ;; for proper first-time setup, `org-appear--set-elements'
-;;   ;; needs to be run after other hooks have acted.
-;;   (run-at-time nil nil #'org-appear--set-elements))
-
-(use-package! org-block-capf :after org)
-(add-hook! 'org-mode-hook #'org-block-capf-add-to-completion-at-point-functions)
+(use-package! org-block-capf
+  :after org
+  :hook (org-mode . org-block-capf-add-to-completion-at-point-functions))
 
 (use-package! org-glossary
   :hook (org-mode . org-glossary-mode))
@@ -599,178 +531,18 @@ the sequences will be lost."
 (use-package! org
   :after-call doom-after-init-hook
   :config
-  (setq
-   org-agenda-files (list org-directory  (expand-file-name "~/Documents/worg/"))
-   org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?)) " " nil)
-   org-hide-emphasis-markers t
-   org-latex-pdf-process '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f"))
-   org-startup-folded 'show2levels
-  (add-to-list 'org-modules 'org-habit)
-  :hook
-  (org-mode . (lambda ()
-                (unless (display-graphic-p)
-                  (setq-local xterm-set-window-title nil)))))
+  (setq org-agenda-files (list org-directory (expand-file-name "~/Documents/worg/"))
+        org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?)) " " nil)
+        org-hide-emphasis-markers t
+        org-latex-pdf-process '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f")
+        org-startup-folded 'show2levels)
+  (add-to-list 'org-modules 'org-habit))
 
-;; (use-package! pdf-occur :commands (pdf-occur pdf-occur-global-minor-mode))
-;; (use-package! pdf-history :commands (pdf-history-minor-mode))
-;; (use-package! pdf-links :commands (pdf-links-isearch-link pdf-links-action-perform pdf-links-minor-mode))
-;; (use-package! pdf-outline :commands (pdf-outline pdf-outline-minor-mode))
-;; (use-package! pdf-annot :commands (pdf-annot-minor-mode))
-;; (use-package! pdf-sync :commands (pdf-sync-minor-mode))
+(add-hook! 'org-mode-hook
+  (unless (display-graphic-p)
+    (setq-local xterm-set-window-title nil)))
 
-(after! persp-mode
-  (require 'f)
-  (defun lkn-tab-bar--workspaces ()
-    "Return a list of the current workspaces."
-    (nreverse
-     (let ((show-help-function nil)
-           (persps (+workspace-list-names))
-           (persp (+workspace-current-name)))
-       (when (< 1 (length persps))
-         (seq-reduce
-          (lambda (acc elm)
-            (let* ((face (if (equal persp elm)
-                             'tab-bar-tab
-                           'tab-bar-tab-inactive))
-                   (pos (1+ (cl-position elm persps)))
-                   (edge-x (get-text-property 0 'edge-x (car acc)))
-                   (tab-id (format " %d" pos))
-                   (tab-name (format " %s " elm)))
-              (push
-               (concat
-                (propertize tab-id
-                            'id pos
-                            'name elm
-                            'edge-x (+ edge-x (string-pixel-width tab-name) (string-pixel-width tab-id))
-                            'face
-                            `(:inherit ,face
-                              :weight bold))
-                (propertize tab-name 'face `,face)
-                " ")
-               acc)
-              acc))
-          persps
-          `(,(propertize (+workspace-current-name) 'edge-x 0 'invisible t)))))))
-
-  (customize-set-variable 'global-mode-string '((:eval
-                                                 (if (and (fboundp 'persp-names) (< 1 (length (+workspace-list-names))))
-                                                     (progn (unless tab-bar-mode
-                                                              (tab-bar-mode t))
-                                                            (lkn-tab-bar--workspaces))
-                                                   (when tab-bar-mode
-                                                     (tab-bar-mode -1))))
-                                                " "))
-  (customize-set-variable 'tab-bar-format '(tab-bar-format-global))
-  (add-hook! 'dirvish-setup-hook #'(lambda () (if (< 1 (length (+workspace-list-names))) (tab-bar-mode +1) (tab-bar-mode -1))))
-
-  ;; These two things combined prevents the tab list to be printed either as a
-  ;; tooltip or in the echo area
-  (defun tooltip-help-tips (_event)
-    "Hook function to display a help tooltip.
-This is installed on the hook `tooltip-functions', which
-is run when the timer with id `tooltip-timeout-id' fires.
-Value is non-nil if this function handled the tip."
-    (let ((xf (lambda (str) (string-trim (substring-no-properties str)))))
-      (when (and
-             (stringp tooltip-help-message)
-             (not (string= (funcall xf tooltip-help-message) (funcall xf (format-mode-line (lkn-tab-bar--workspaces))))))
-        (tooltip-show tooltip-help-message (not tooltip-mode))
-        t)))
-
-  (tooltip-mode)
-
-  (defun lkn-tab-bar--event-to-item (event)
-    "Given a click EVENT, translate to a tab.
-
-We handle this by using `string-pixel-width' to calculate how
-long the tab would be in pixels and use that in the reduction in
-`lkn-tab-bar--workspaces' to determine which tab has been
-clicked."
-    (let* ((posn (event-start event))
-           (workspaces (lkn-tab-bar--workspaces))
-           (x (car (posn-x-y posn))))
-      (car (cl-remove-if (lambda (workspace)
-                           (>= x (get-text-property 0 'edge-x workspace)))
-                         workspaces))))
-
-  (defun lkn-tab-bar-mouse-1 (ws)
-    "Switch to tabs by left clicking."
-    (when-let ((name (get-text-property 0 'name ws)))
-      (+workspace-switch name)))
-
-  (defun lkn-tab-bar-mouse-2 (ws)
-    "Close tabs by clicking the mouse wheel."
-    (when-let ((name (get-text-property 0 'name ws)))
-      (+workspace/kill name)))
-
-  (defun lkn-tab-bar-click-handler (evt)
-    "Function to handle clicks on the custom tab."
-    (interactive "e")
-    (when-let ((ws (lkn-tab-bar--event-to-item evt)))
-      (pcase (car evt)
-        ('mouse-1 (lkn-tab-bar-mouse-1 ws))
-        ('mouse-2 (lkn-tab-bar-mouse-2 ws)))))
-
-  (keymap-set tab-bar-map "<mouse-1>" #'lkn-tab-bar-click-handler)
-  (keymap-set tab-bar-map "<mouse-2>" #'lkn-tab-bar-click-handler)
-  (keymap-set tab-bar-map "<wheel-up>" #'+workspace:switch-previous)
-  (keymap-set tab-bar-map "<wheel-down>" #'+workspace:switch-next)
-
-  ;; ("%b – Doom Emacs")
-  ;; (setq frame-title-format
-  ;;     '((:eval
-  ;;        (let ((project-name (projectile-project-name)))
-  ;;          (unless (string= "-" project-name)
-  ;;            (format "[%s]: " project-name))))
-  ;;       "%b"))
-
-  ;; https://github.com/blaenk/dots/blob/main/dot_emacs.d/inits/conf/mode-line.el
-  ;; Construct the buffer identifier for a buffer backed by a file. This is done
-  ;; by combining: dirname/ + filename, each propertized separately.
-  (defun my--mode-line-file-identifier (path &optional max-width)
-    (let* ((path (if (file-remote-p buffer-file-name)
-                     (tramp-file-name-localname (tramp-dissect-file-name buffer-file-name))
-                   path))
-           ;; FIXME
-           ;; This calls f-short on tramp
-           (dirname (file-name-as-directory (abbreviate-file-name (or (file-name-directory path) "./"))))
-           (filename (f-filename path))
-           (propertized-filename
-            (propertize filename 'face 'mode-line-buffer-id)))
-      (if (> (+ (length dirname) (length filename) 2) max-width)
-          propertized-filename
-        (concat
-         (unless (string= dirname "./")
-           (propertize dirname 'face 'mode-line-stem-face))
-         propertized-filename))))
-
-  ;; Construct the buffer identifier for a regular, simple buffer that is not
-  ;; backed by a file nor remote.
-  (defun my--mode-line-buffer-identifier (&optional max-width)
-    (if buffer-file-name
-        (my--mode-line-file-identifier buffer-file-name max-width)
-      (propertize "%b" 'face 'mode-line-buffer-id)))
-
-  (defun my--frame-title-format ()
-    (cond
-     ((and buffer-file-name (file-remote-p buffer-file-name))
-      (let ((tramp-vec (tramp-dissect-file-name buffer-file-name)))
-        (concat
-         (tramp-file-name-host tramp-vec)
-         " — "
-         (abbreviate-file-name (tramp-file-name-localname tramp-vec)))))
-
-     ((and (featurep 'projectile) (projectile-project-p))
-      (concat
-       (projectile-project-name)
-       " — "
-       (if buffer-file-name
-           (f-relative buffer-file-name (projectile-project-root))
-         (buffer-name))))
-
-     (t (my--mode-line-buffer-identifier))))
-
-  (setq frame-title-format '(:eval (my--frame-title-format))))
+(load! "persp-config")
 
 (setq +workspaces-switch-project-function (lambda (project-directory)
                                             (dired project-directory)
@@ -847,24 +619,23 @@ clicked."
   ;; good reason for them to take up space. Let's add a mechanism to ignore them.
   (defvar treemacs-file-ignore-extensions '()
     "File extension which `treemacs-ignore-filter' will ensure are ignored")
-  (defvar treemacs-file-ignore-globs '()
-    "Globs which will are transformed to
-`treemacs-file-ignore-regexps' which `treemacs-ignore-filter'
-will ensure are ignored")
   (defvar treemacs-file-ignore-regexps '()
     "RegExps to be tested to ignore files, generated from
 `treeemacs-file-ignore-globs'")
   (defun treemacs-file-ignore-generate-regexps ()
     "Generate `treemacs-file-ignore-regexps' from `treemacs-file-ignore-globs'"
-    (setq treemacs-file-ignore-regexps (mapcar 'dired-glob-regexp treemacs-file-ignore-globs)))
-  (if (equal treemacs-file-ignore-globs '()) nil (treemacs-file-ignore-generate-regexps))
+    (setq treemacs-file-ignore-regexps (mapcar #'dired-glob-regexp treemacs-file-ignore-globs)))
+  (setq treemacs-file-ignore-globs
+        '("*/_minted-*"
+          "*/.auctex-auto"
+          "*/_region_.log"
+          "*/_region_.tex"))
+  (treemacs-file-ignore-generate-regexps)
   (defun treemacs-ignore-filter (file full-path)
-    "Ignore files specified by `treemacs-file-ignore-extensions', and
-`treemacs-file-ignore-regexps'"
+    "Ignore files by extension or glob pattern."
     (or (member (file-name-extension file) treemacs-file-ignore-extensions)
-        (let ((ignore-file nil))
-          (dolist (regexp treemacs-file-ignore-regexps ignore-file)
-            (setq ignore-file (or ignore-file (if (string-match-p regexp full-path) t nil)))))))
+        (seq-some (lambda (re) (string-match-p re full-path))
+                  treemacs-file-ignore-regexps)))
   (add-to-list 'treemacs-ignored-file-predicates #'treemacs-ignore-filter)
 
   ;; Now, we just identify the files in question.
@@ -891,15 +662,7 @@ will ensure are ignored")
           ;; LaTeX - pgfplots
           "mw"
           ;; LaTeX - pdfx
-          "pdfa.xmpi"
-          ))
-  (setq treemacs-file-ignore-globs
-        '(;; LaTeX
-          "*/_minted-*"
-          ;; AucTeX
-          "*/.auctex-auto"
-          "*/_region_.log"
-          "*/_region_.tex"))
+          "pdfa.xmpi"))
 
   (treemacs-follow-mode)
   (treemacs-filewatch-mode))
@@ -936,6 +699,13 @@ will ensure are ignored")
 ;;   :if (featurep 'evil)
 ;;   :hook (ghostel-mode . evil-ghostel-mode))
 
+(defun my/ghostel-buffer-name ()
+  "Return the ghostel popup buffer name for the current workspace."
+  (format "*doom:ghostel-popup:%s*"
+          (if (bound-and-true-p persp-mode)
+              (safe-persp-name (get-current-persp))
+            "main")))
+
 ;; Enable a ghostel popup similar to doom's =vterm= popup.
 (defun my/ghostel-toggle (arg)
   "Toggle a Ghostel popup window at project root.
@@ -946,13 +716,8 @@ project's root."
   (my/ghostel--configure-project-root-and-display
    arg
    (lambda ()
-     (let ((buffer-name
-            (format "*doom:ghostel-popup:%s*"
-                    (if (bound-and-true-p persp-mode)
-                        (safe-persp-name (get-current-persp))
-                      "main")))
-           confirm-kill-processes
-           current-prefix-arg)
+     (let ((buffer-name (my/ghostel-buffer-name))
+           confirm-kill-processes)
        (when arg
          (let ((buffer (get-buffer buffer-name))
                (window (get-buffer-window buffer-name)))
@@ -1021,51 +786,6 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   (setq ztree-draw-unicode-lines t
         ztree-show-number-of-children t))
 
-;;
-;;; Scratch frame
-
-(defvar +hlissner--scratch-frame nil)
-
-(defun cleanup-scratch-frame (frame)
-  (when (eq frame +hlissner--scratch-frame)
-    (with-selected-frame frame
-      (setq doom-fallback-buffer-name (frame-parameter frame 'old-fallback-buffer))
-      (remove-hook 'delete-frame-functions #'cleanup-scratch-frame))))
-
-;;;###autoload
-(defun open-scratch-frame (&optional fn)
-  "Opens the org-capture window in a floating frame that cleans itself up once
-you're done. This can be called from an external shell script."
-  (interactive)
-  (let* ((frame-title-format "")
-         (preframe (cl-loop for frame in (frame-list)
-                            if (equal (frame-parameter frame 'name) "scratch")
-                            return frame))
-         (frame (unless preframe
-                  (make-frame `((name . "scratch")
-                                (width . 120)
-                                (height . 24)
-                                (transient . t)
-                                (internal-border-width . 10)
-                                (left-fringe . 0)
-                                (right-fringe . 0)
-                                (undecorated . t)
-                                ,(if (featurep :system 'linux) '(display . ":0")))))))
-    (setq +hlissner--scratch-frame (or frame posframe))
-    (select-frame-set-input-focus +hlissner--scratch-frame)
-    (when frame
-      (with-selected-frame frame
-        (if fn
-            (call-interactively fn)
-          (with-current-buffer (switch-to-buffer "*scratch*")
-            ;; (text-scale-set 2)
-            (when (eq major-mode 'fundamental-mode)
-              (emacs-lisp-mode)))
-          (redisplay)
-          (set-frame-parameter frame 'old-fallback-buffer doom-fallback-buffer-name)
-          (setq doom-fallback-buffer-name "*scratch*")
-          (add-hook 'delete-frame-functions #'cleanup-scratch-frame))))))
-
 (use-package! reader
   :unless (featurep :system 'macos)
   :mode (("\\.pdf\\'" . reader-mode)
@@ -1078,17 +798,6 @@ you're done. This can be called from an external shell script."
          ("\\.docx\\'" . reader-mode)
          ("\\.pptx\\'" . reader-mode)
          ("\\.xlsx\\'" . reader-mode))
-  ;; :bind ((:map reader-mode-map
-  ;;              ("j" . reader-scroll-down-or-next-page)
-  ;;              ("k" . reader-scroll-up-or-prev-page)
-  ;;              ("h" . reader-scroll-left)
-  ;;              ("l" . reader-scroll-right)
-  ;;              ("d" . reader-next-page)
-  ;;              ("u" . reader-previous-page)
-  ;;              ("P" . reader-goto-page)
-  ;;              ("H" . reader-fit-to-height)
-  ;;              ("W" . reader-fit-to-width)
-  ;;              ("q" . nil)))
   :config
   ;; Use evil keybindings in reader-mode
   (evil-set-initial-state 'reader-mode 'normal)
@@ -1111,10 +820,14 @@ you're done. This can be called from an external shell script."
         :n "Q" #'reader-close-doc))
 
 ;; WSL specific setting
-(add-hook! doom-after-init-hook
-  (when (and (featurep :system 'linux)
-             (getenv "WSL_DISTRO_NAME"))
+(defun acml/wsl-p ()
+  "Return non-nil when running inside Windows Subsystem for Linux."
+  (and (featurep :system 'linux)
+       (or (getenv "WSL_DISTRO_NAME")
+           (file-exists-p "/proc/sys/fs/binfmt_misc/WSLInterop"))))
 
+(add-hook! doom-after-init-hook
+  (when (acml/wsl-p)
     ;; teach Emacs how to open links with your default browser
     (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
           (cmd-args '("/c" "start")))
@@ -1141,10 +854,6 @@ you're done. This can be called from an external shell script."
 ;; (map! "<f9>" #'acml-set-keyboard)
 ;; F12
 
-(use-package zone :disabled
-  :config
-  (zone-when-idle (* 60 1)))
-
 (use-package! macher
   :defer t
   :custom
@@ -1162,8 +871,7 @@ you're done. This can be called from an external shell script."
    'display-buffer-alist
    '("\\*macher-patch:.*\\*"
      (display-buffer-in-side-window)
-     (side . right)))
-  )
+     (side . right))))
 
 (use-package! gptel
   :defer t
@@ -1284,7 +992,6 @@ you're done. This can be called from an external shell script."
               google/gemma-3-4b-it
               google/gemma-3-1b-it
               gpt-4o))
-  (gptel-make-gh-copilot "Copilot")
   (macher-install)
   :hook
   (gptel-post-stream-hook . gptel-auto-scroll))
@@ -1315,7 +1022,7 @@ you're done. This can be called from an external shell script."
   (add-to-list 'copilot-indentation-alist '(text-mode 2))
   (add-to-list 'copilot-indentation-alist '(clojure-mode 2))
   (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
-  (setq copilot-max-char -1))
+  (setq copilot-max-char 100000))
 
 (use-package! gt
   :defer t
@@ -1339,10 +1046,10 @@ you're done. This can be called from an external shell script."
 ;; Source - https://stackoverflow.com/a/14454756
 ;; Posted by PascalVKooten, modified by community. See post 'Timeline' for change history
 ;; Retrieved 2026-02-18, License - CC BY-SA 3.0
-
 (defun find-overlays-specifying (prop pos)
-  (cl-remove-if-not (lambda (o) (overlay-get o prop))
-                    (overlays-at pos)))
+  "Return first overlay at POS having property PROP, or nil."
+  (cl-some (lambda (o) (and (overlay-get o prop) o))
+           (overlays-at pos)))
 
 (defun highlight-or-dehighlight-line ()
   (interactive)
@@ -1355,28 +1062,7 @@ you're done. This can be called from an external shell script."
                               (+ 1 (line-end-position)))))
       (overlay-put overlay-highlight 'face 'highlight)
       (overlay-put overlay-highlight 'line-highlight-overlay-marker t))))
-
 (map! "<f12>" #'highlight-or-dehighlight-line)
-
-(defvar search-recenter-context-lines 10
-  "Number of lines to expose beyond the isearch match after scrolling.")
-
-(defvar-local my/save-scroll-margin nil
-  "Save value of `scroll-margin' outside of isearch.")
-
-(add-hook 'isearch-mode-hook
-          (lambda ()
-            (when (local-variable-if-set-p 'scroll-margin)
-              (setq my/save-scroll-margin scroll-margin))
-            (setq-local scroll-margin search-recenter-context-lines)))
-
-(add-hook 'isearch-mode-end-hook
-          (lambda ()
-            (if my/save-scroll-margin
-                (prog1
-                    (setq-local scroll-margin my/save-scroll-margin)
-                  (kill-local-variable 'my/save-scroll-margin))
-              (kill-local-variable 'scroll-margin))))
 
 (use-package! breadcrumb
   :defer t
@@ -1437,10 +1123,12 @@ you're done. This can be called from an external shell script."
 
 ;; Evaluate both now (for non-daemon emacs) and upon frame creation
 ;; (for new terminals via emacsclient).
-(initialize-mouse-mode)
-(add-hook 'after-make-frame-functions 'initialize-mouse-mode)
+(add-hook 'after-make-frame-functions #'initialize-mouse-mode)
+(unless (daemonp)
+  (initialize-mouse-mode))
 
-(setopt xterm-extra-capabilities '(getSelection setSelection modifyOtherKeys))
+(unless (display-graphic-p)
+  (setopt xterm-extra-capabilities '(getSelection setSelection modifyOtherKeys)))
 
 ;; TUI prettification
 (unless (display-graphic-p)
