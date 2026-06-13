@@ -164,12 +164,16 @@
 
 (defun wl-paste ()
   (unless (and wl-copy-process (process-live-p wl-copy-process))
-    (string-trim-right (shell-command-to-string "wl-paste -n") "[\r\n]+")))
+    (let ((result (string-trim-right
+                   (shell-command-to-string "wl-paste -n 2>/dev/null")
+                   "[\r\n]+")))
+      (unless (string-empty-p result) result))))
 
 (defun my/setup-wayland-clipboard (&optional frame)
   "Setup Wayland clipboard integration, only for graphical FRAME."
   (when (and (or (null frame) (display-graphic-p frame))
-             (string= (getenv "XDG_SESSION_TYPE") "wayland")
+             (or (getenv "WAYLAND_DISPLAY")
+                 (string= (getenv "XDG_SESSION_TYPE") "wayland"))
              (executable-find "wl-copy"))
     (setq interprogram-cut-function  #'wl-copy
           interprogram-paste-function #'wl-paste)
@@ -338,15 +342,9 @@
 ;; expand-region, tree-sitter edition
 (use-package! expreg
   :after-call doom-first-input-hook
-  ;; :bind (("C-=" . expreg-expand)
-  ;;        ("C--" . expreg-contract))
   :config
-  (defvar-keymap expreg-repeat-map
-    "=" #'expreg-expand
-    "-" #'expreg-contract)
-  (put 'expreg-expand 'repeat-map 'expreg-repeat-map)
-  (put 'expreg-contract 'repeat-map 'expreg-repeat-map)
-  (define-key evil-visual-state-map (kbd "v") 'expreg-expand))
+  (map! :v "v" #'expreg-expand
+        :v "V" #'expreg-contract))
 
 (use-package! highlight-parentheses
   :defer t
@@ -427,11 +425,23 @@ the sequences will be lost."
             (set-buffer-modified-p modified))
         (ansi-color-apply-on-region beg end t)))))
 
+(defvar-local acml/log-mode--colorized-to nil
+  "Buffer position up to which ANSI colors have been applied.")
+
+(defun acml/ansi-color-tail ()
+  "Colorize only newly appended content since last call."
+  (let ((beg (or acml/log-mode--colorized-to (point-min)))
+        (ansi-color-context-region nil))
+    (ansi-color-apply-on-region beg (point-max) t)
+    (setq acml/log-mode--colorized-to (point-max))))
+
 (define-derived-mode acml/log-mode fundamental-mode "Log"
   "Major mode for log files: strips DOS line endings and colorizes ANSI escapes."
   (acml/hide-dos-eol)
   (acml/ansi-color)
+  (setq-local acml/log-mode--colorized-to (point-max))
   (setq-local auto-revert-verbose nil)
+  (add-hook 'after-revert-hook #'acml/ansi-color-tail nil t)
   (auto-revert-tail-mode 1))
 (add-to-list 'auto-mode-alist '("\\.log\\'" . acml/log-mode))
 
@@ -439,12 +449,12 @@ the sequences will be lost."
   (setopt magit-format-file-function #'magit-format-file-nerd-icons
           magit-repository-directories '(("~/.nix-config" . 0)
                                          ("~/.nixpkgs" . 0)
-                                         ("~/Projects" . 3)))
-  (setq magit-save-repository-buffers nil
-        ;; Don't restore the wconf after quitting magit, it's jarring
-        magit-inhibit-save-previous-winconf t
-        transient-values '((magit-rebase "--autostash" "--autosquash")
-                           (magit-pull "--autostash" "--rebase")))
+                                         ("~/Projects" . 3))
+          magit-save-repository-buffers nil)
+  (setq ;; Don't restore the wconf after quitting magit, it's jarring
+   magit-inhibit-save-previous-winconf t
+   transient-values '((magit-rebase "--autostash" "--autosquash")
+                      (magit-pull "--autostash" "--rebase")))
   (magit-add-section-hook 'magit-status-sections-hook
                           'magit-insert-worktrees
                           'magit-insert-status-headers t)
@@ -560,7 +570,7 @@ the sequences will be lost."
    proced-tree-flag t
    proced-auto-update-flag 'visible
    proced-auto-update-interval 1
-   proced-descent t))
+   proced-descend t))
 
 (use-package! projectile
   :commands (+default/discover-projects projectile-register-project-type)
@@ -709,9 +719,7 @@ the sequences will be lost."
 ;; Enable a ghostel popup similar to doom's =vterm= popup.
 (defun my/ghostel-toggle (arg)
   "Toggle a Ghostel popup window at project root.
-
-If prefix ARG is non-nil, recreate the Ghostel buffer in the current
-project's root."
+If prefix ARG is non-nil, recreate the Ghostel buffer in the current project's root."
   (interactive "P")
   (my/ghostel--configure-project-root-and-display
    arg
@@ -719,12 +727,10 @@ project's root."
      (let ((buffer-name (my/ghostel-buffer-name))
            confirm-kill-processes)
        (when arg
-         (let ((buffer (get-buffer buffer-name))
-               (window (get-buffer-window buffer-name)))
-           (when (buffer-live-p buffer)
-             (kill-buffer buffer))
-           (when (window-live-p window)
-             (delete-window window))))
+         (when-let ((win (get-buffer-window buffer-name)))
+           (delete-window win))
+         (when-let ((buf (get-buffer buffer-name)))
+           (kill-buffer buf)))
        (if-let* ((win (get-buffer-window buffer-name)))
            (delete-window win)
          (let ((ghostel-buffer-name buffer-name))
@@ -1008,21 +1014,21 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
-  :bind (:map copilot-completion-map
-              ("<tab>" . 'copilot-accept-completion)
-              ("TAB" . 'copilot-accept-completion)
-              ("C-TAB" . 'copilot-accept-completion-by-word)
-              ("C-<tab>" . 'copilot-accept-completion-by-word)
-              ("C-n" . 'copilot-next-completion)
-              ("C-p" . 'copilot-previous-completion))
-
   :config
-  (add-to-list 'copilot-indentation-alist '(prog-mode 2))
-  (add-to-list 'copilot-indentation-alist '(org-mode 2))
-  (add-to-list 'copilot-indentation-alist '(text-mode 2))
-  (add-to-list 'copilot-indentation-alist '(clojure-mode 2))
-  (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
-  (setq copilot-max-char 100000))
+  (map! :map copilot-completion-map
+        "<tab>"   #'copilot-accept-completion
+        "TAB"     #'copilot-accept-completion
+        "C-TAB"   #'copilot-accept-completion-by-word
+        "C-<tab>" #'copilot-accept-completion-by-word
+        "C-n"     #'copilot-next-completion
+        "C-p"     #'copilot-previous-completion)
+  (setq copilot-indentation-alist
+        '((prog-mode        2)
+          (org-mode         2)
+          (text-mode        2)
+          (clojure-mode     2)
+          (emacs-lisp-mode  2))
+        copilot-max-char 100000))
 
 (use-package! gt
   :defer t
@@ -1030,26 +1036,25 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   (map! :leader :desc "Translate" :n "o c" #'gt-translate)
   :config
   (setopt gt-langs '(de en tr)
-          ;; gt-buffer-render-evil-leading-key nil
           gt-buffer-render-follow-p t
           gt-default-translator (gt-translator
                                  :taker   (gt-taker :text 'buffer :pick 'paragraph)
                                  :engines (list (gt-bing-engine))
-                                 :render  (gt-buffer-render)))
-  (with-eval-after-load 'evil
-    (add-hook 'gt-buffer-render-init-hook
-              (lambda ()
-                (toggle-truncate-lines -1)
-                (evil-define-key '(normal visual insert emacs) gt-buffer-render-local-map
-                  "q" 'kill-buffer-and-window)))))
+                                 :render  (gt-buffer-render))))
+
+(after! (gt evil)
+  (add-hook 'gt-buffer-render-init-hook
+            (lambda ()
+              (toggle-truncate-lines -1)
+              (evil-define-key '(normal visual insert emacs) gt-buffer-render-local-map
+                "q" #'kill-buffer-and-window))))
 
 ;; Source - https://stackoverflow.com/a/14454756
 ;; Posted by PascalVKooten, modified by community. See post 'Timeline' for change history
 ;; Retrieved 2026-02-18, License - CC BY-SA 3.0
 (defun find-overlays-specifying (prop pos)
   "Return first overlay at POS having property PROP, or nil."
-  (cl-some (lambda (o) (and (overlay-get o prop) o))
-           (overlays-at pos)))
+  (seq-find (lambda (o) (overlay-get o prop)) (overlays-at pos)))
 
 (defun highlight-or-dehighlight-line ()
   (interactive)
