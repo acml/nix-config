@@ -39,7 +39,11 @@
       doom-big-font (font-spec :family "Iosevka Comfy" :size (if (featurep :system 'macos) 26.0 20.0))
       doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size my/font-size)
       doom-serif-font (font-spec :family "BlexMono Nerd Font" :size my/font-size :weight 'light)
-
+      fancy-splash-image (when-let* ((dir (file-name-concat doom-user-dir "splash"))
+                                     (choices (and (file-directory-p dir)
+                                                   (directory-files dir t "^[^.]" t)))
+                                     ((consp choices)))
+                           (seq-random-elt choices))
       auth-source-cache-expiry nil ; default is 7200 (2h)
       auto-revert-avoid-polling t  ; refresh buffers when files change on disk
       auto-revert-use-notify t     ; use inotify instead of polling
@@ -89,14 +93,6 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
-
-(add-hook! 'doom-init-ui-hook :depth 90
-  (setq fancy-splash-image
-        (when-let* ((dir (file-name-concat doom-user-dir "splash"))
-                    (choices (and (file-directory-p dir)
-                                  (directory-files dir t "^[^.]" t)))
-                    ((consp choices)))
-          (seq-random-elt choices))))
 
 (custom-set-faces!
   '(aw-leading-char-face
@@ -329,21 +325,17 @@
           (border-mode-line-inactive unspecified))))
 
 (use-package! ef-themes
-  :commands (modus-themes-load-theme)
-  :defer t
-  :init
-  (setq ef-themes-to-toggle '(ef-eagle ef-dark))
-
-  (defun my/load-ef-theme (&optional frame)
-    "Load ef-eagle for GUI frames, ef-dark for terminal."
-    (with-selected-frame (or frame (selected-frame))
-      (modus-themes-load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark))
-      (when (and frame (display-graphic-p frame))
-        (set-frame-parameter frame 'fullscreen 'maximized))))
-
+  :custom
+  (ef-themes-to-toggle '(ef-eagle ef-dark))
+  :config
   (if (daemonp)
-      (add-hook 'after-make-frame-functions #'my/load-ef-theme)
-    (add-hook 'doom-init-ui-hook #'my/load-ef-theme 90)))
+      (add-hook 'after-make-frame-functions
+                (lambda (frame)
+                  (with-selected-frame frame
+                    (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t)
+                    (when (display-graphic-p)
+                      (set-frame-parameter nil 'fullscreen 'maximized)))))
+    (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t)))
 
 ;; (after! expand-region
 ;;   (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
