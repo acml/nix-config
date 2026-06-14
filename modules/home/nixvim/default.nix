@@ -28,7 +28,7 @@ in
           };
         };
         modus = {
-          enabled = false;
+          enable = false;
           settings = {
             dim_inactive.enabled = true;
             style = "modus_vivendi";
