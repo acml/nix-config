@@ -38,22 +38,21 @@
       doom-font (font-spec :family "Iosevka Comfy" :size my/font-size)
       doom-big-font (font-spec :family "Iosevka Comfy" :size (if (featurep :system 'macos) 26.0 20.0))
       doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size my/font-size)
-      doom-serif-font (font-spec :family "BlexMono Nerd Font" :size my/font-size :weight 'light))
+      doom-serif-font (font-spec :family "BlexMono Nerd Font" :size my/font-size :weight 'light)
 
-(setopt
- auth-source-cache-expiry nil ; default is 7200 (2h)
- auto-revert-avoid-polling t  ; refresh buffers when files change on disk
- auto-revert-use-notify t     ; use inotify instead of polling
- auto-save-default t          ; Nobody likes to loose work, I certainly don't
- delete-by-moving-to-trash t  ; Delete files to trash
- display-line-numbers-type 'relative
- frame-resize-pixelwise t
- truncate-string-ellipsis "…" ; Unicode ellispis are nicer than "...", and also save /precious/ space
- undo-limit 80000000          ; Raise undo-limit to 80Mb
- window-combination-resize t  ; take new window space from all other windows (not just current)
- window-resize-pixelwise t
- x-stretch-cursor t           ; Stretch cursor to the glyph width
- xref-history-storage 'xref-window-local-history)
+      auth-source-cache-expiry nil ; default is 7200 (2h)
+      auto-revert-avoid-polling t  ; refresh buffers when files change on disk
+      auto-revert-use-notify t     ; use inotify instead of polling
+      auto-save-default t          ; Nobody likes to loose work, I certainly don't
+      delete-by-moving-to-trash t  ; Delete files to trash
+      display-line-numbers-type 'relative
+      frame-resize-pixelwise t
+      truncate-string-ellipsis "…" ; Unicode ellispis are nicer than "...", and also save /precious/ space
+      undo-limit 80000000          ; Raise undo-limit to 80Mb
+      window-combination-resize t  ; take new window space from all other windows (not just current)
+      window-resize-pixelwise t
+      x-stretch-cursor t           ; Stretch cursor to the glyph width
+      xref-history-storage 'xref-window-local-history)
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 (when (file-exists-p custom-file)
@@ -616,13 +615,7 @@ the sequences will be lost."
 (use-package! rainbow-mode
   :hook
   ((prog-mode . rainbow-mode)
-   (org-mode . rainbow-mode))
-  :config
-  (setq rainbow-x-colors nil      ; Biggest win: disables 400+ named color lookups
-        rainbow-latex-colors nil
-        rainbow-r-colors nil
-        rainbow-html-colors-major-mode-list
-        '(css-mode html-mode web-mode scss-mode less-css-mode)))
+   (org-mode . rainbow-mode)))
 
 (use-package! scopeline
   :commands (scopeline-mode)
