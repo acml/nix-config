@@ -191,9 +191,14 @@ FILENAME is the file being processed."
     DINA5CG52813LW--jka-compr-original-info-list))
 
 (defun DINA5CG52813LW--compression-advice (orig-fun filename &rest args)
-  "Advice around `insert-file-contents` to disable .lzma decompression for specific files.
-ORIG-FUN is the original function, FILENAME is the file being processed, ARGS are additional arguments."
-  (let ((jka-compr-compression-info-list (DINA5CG52813LW--filter-compression-info-list filename)))
+  "Advice around `insert-file-contents' - near-zero overhead on non-excluded files."
+  (if (and (stringp filename)
+           (string-suffix-p ".lzma" filename)
+           (member (file-name-nondirectory filename)
+                   DINA5CG52813LW-lzma-excluded-files))
+      (let ((jka-compr-compression-info-list
+             (DINA5CG52813LW--filter-compression-info-list filename)))
+        (apply orig-fun filename args))
     (apply orig-fun filename args)))
 
 (advice-add 'insert-file-contents :around #'DINA5CG52813LW--compression-advice)

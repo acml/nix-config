@@ -330,6 +330,7 @@
           (border-mode-line-inactive unspecified))))
 
 (use-package! ef-themes
+  :commands (modus-themes-load-theme)
   :defer t
   :init
   (setq ef-themes-to-toggle '(ef-eagle ef-dark))
@@ -337,7 +338,7 @@
   (defun my/load-ef-theme (&optional frame)
     "Load ef-eagle for GUI frames, ef-dark for terminal."
     (with-selected-frame (or frame (selected-frame))
-      (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t)
+      (modus-themes-load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark))
       (when (and frame (display-graphic-p frame))
         (set-frame-parameter frame 'fullscreen 'maximized))))
 
@@ -560,9 +561,7 @@ the sequences will be lost."
 (setopt org-directory (expand-file-name "~/Documents/org/")
         org-startup-with-inline-images t)
 
-(use-package! org
-  :after-call doom-after-init-hook
-  :config
+(after! org
   (setq org-agenda-files (list org-directory (expand-file-name "~/Documents/worg/"))
         org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?)) " " nil)
         org-hide-emphasis-markers t
@@ -617,7 +616,13 @@ the sequences will be lost."
 (use-package! rainbow-mode
   :hook
   ((prog-mode . rainbow-mode)
-   (org-mode . rainbow-mode)))
+   (org-mode . rainbow-mode))
+  :config
+  (setq rainbow-x-colors nil      ; Biggest win: disables 400+ named color lookups
+        rainbow-latex-colors nil
+        rainbow-r-colors nil
+        rainbow-html-colors-major-mode-list
+        '(css-mode html-mode web-mode scss-mode less-css-mode)))
 
 (use-package! scopeline
   :commands (scopeline-mode)
