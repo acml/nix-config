@@ -22,7 +22,7 @@
       ;; There are two ways to load a theme. Both assume the theme is installed and
       ;; available. You can either set `doom-theme' or manually load a theme with the
       ;; `load-theme' function. This is the default:
-      ;; doom-theme (if (display-graphic-p) 'ef-eagle 'ef-dark)
+      doom-theme (if (display-graphic-p) 'ef-eagle 'ef-dark)
       ;; modus-operandi modus-vivendi doom-one doom-gruvbox doom-tomorrow-night
 
       ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
@@ -50,7 +50,13 @@
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
       delete-by-moving-to-trash t  ; Delete files to trash
       display-line-numbers-type 'relative
+      fast-but-imprecise-scrolling          t     ; skip fontification when scrolling fast
       frame-resize-pixelwise t
+      jit-lock-defer-time                   0.05  ; delay fontification 50ms after last input
+      jit-lock-stealth-time                 1.0   ; fontify idle buffers after 1s
+      redisplay-skip-fontification-on-input t     ; don't fontify while typing
+      scroll-margin                         3
+      scroll-preserve-screen-position       t
       truncate-string-ellipsis "…" ; Unicode ellispis are nicer than "...", and also save /precious/ space
       undo-limit 80000000          ; Raise undo-limit to 80Mb
       window-combination-resize t  ; take new window space from all other windows (not just current)
@@ -288,6 +294,10 @@
   (require 'dwim-shell-commands))
 
 (after! eglot
+  (setq eglot-events-buffer-size 0  ; disable *EGLOT events* log — it's a CPU/memory drain
+        eglot-autoshutdown      t   ; kill server when last managed buffer closes
+        eglot-sync-connect      nil) ; connect async — don't block opening a file
+
   ;; (set-eglot-client! '(c-mode c-ts-mode c++-mode c++-ts-mode objc-mode) `("ccls" ,(concat "--init={\"cache\": {\"directory\": \"" (file-truename "~/.cache/ccls") "\"}}")))
   (let ((nil-lsp '("nil" "--stdio" :initializationOptions
                    (:nil (:nix (:flake (:autoArchive t)))))))
@@ -296,8 +306,24 @@
 
 (after! embark
   (setq prefix-help-command #'embark-prefix-help-command))
+
 (after! vertico-multiform
   (add-to-list 'vertico-multiform-categories '(embark-keybinding grid)))
+
+(when (modulep! :completion vertico)
+  (after! consult
+    (consult-customize
+     +default/search-project +default/search-other-project
+     +default/search-project-for-symbol-at-point
+     +default/search-cwd +default/search-other-cwd
+     +default/search-notes-for-symbol-at-point
+     +default/search-emacsd
+     consult-bookmark
+     :preview-key (list "C-SPC" :debounce 0.2 'any))))
+
+(after! corfu
+  (setq corfu-auto-delay  0.2
+        corfu-auto-prefix  2))
 
 (use-package! exercism :commands (exercism)
               :init
@@ -316,26 +342,23 @@
   (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)))
 
 (after! modus-themes
-  (setq modus-themes-italic-constructs t
-        modus-themes-bold-constructs t
+  (setq modus-themes-bold-constructs t
+        modus-themes-italic-constructs t
         modus-themes-mixed-fonts t
         modus-themes-variable-pitch-ui t
+        modus-themes-to-toggle '(ef-eagle ef-dark)
         modus-themes-common-palette-overrides
         '((border-mode-line-active unspecified)
           (border-mode-line-inactive unspecified))))
 
-(use-package! ef-themes
-  :custom
-  (ef-themes-to-toggle '(ef-eagle ef-dark))
-  :config
-  (if (daemonp)
-      (add-hook 'after-make-frame-functions
-                (lambda (frame)
-                  (with-selected-frame frame
-                    (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t)
-                    (when (display-graphic-p)
-                      (set-frame-parameter nil 'fullscreen 'maximized)))))
-    (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t)))
+(when (daemonp)
+  (setq doom-theme nil)
+  (add-hook 'after-make-frame-functions
+            (lambda (frame)
+              (with-selected-frame frame
+                (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t)
+                (when (display-graphic-p)
+                  (set-frame-parameter nil 'fullscreen 'maximized))))))
 
 ;; (after! expand-region
 ;;   (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
@@ -388,6 +411,9 @@
   (setq-hook! 'go-ts-mode-hook
     eglot-workspace-configuration
     '(:gopls (:staticcheck t))))
+
+(after! treesit
+  (setq treesit-font-lock-level 3))
 
 ;; (after! lsp-mode
 ;;   (setq lsp-enable-file-watchers t
@@ -691,17 +717,6 @@ the sequences will be lost."
 
 (use-package! turkish :commands (turkish-mode))
 
-(when (modulep! :completion vertico)
-  (after! consult
-    (consult-customize
-     +default/search-project +default/search-other-project
-     +default/search-project-for-symbol-at-point
-     +default/search-cwd +default/search-other-cwd
-     +default/search-notes-for-symbol-at-point
-     +default/search-emacsd
-     consult-bookmark
-     :preview-key (list "C-SPC" :debounce 0.2 'any))))
-
 (use-package! ghostel
   :after-call doom-first-input-hook
   :hook (ghostel-mode . mode-line-invisible-mode)
@@ -711,7 +726,7 @@ the sequences will be lost."
   (set-evil-initial-state! 'ghostel-mode 'emacs))
 
 (use-package! ghostel-compile
-  :after-call doom-first-input-hook
+  :after-call doom-first-buffer-hook
   :defer t
   :config
   (ghostel-compile-global-mode 1))
@@ -792,7 +807,9 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
     (buffer-face-mode t)))
 
 (after! which-key
-  (setq which-key-allow-multiple-replacements t)
+  (setq which-key-allow-multiple-replacements t
+        which-key-idle-delay                  0.3
+        which-key-idle-secondary-delay        0.05)
   (dolist (r '((("\\(.*\\)1" . "winum-select-window-1") . ("\\11..9" . "Switch to window 1..9")) ; rename winum-select-window-1 entry to 1..9
                ((nil . "winum-select-window-[2-9]") . t)                                         ; hide winum-select-window-[2-9] entries
                (("" . "\\`+?evil[-:]?\\(?:a-\\)?\\(.*\\)") . (nil . "\\1"))
