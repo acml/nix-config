@@ -20,7 +20,6 @@
 ;;; Code:
 
 (after! persp-mode
-  (require 'f)
   (defun lkn-tab-bar--workspaces ()
     "Return a list of the current workspaces."
     (nreverse
@@ -132,10 +131,9 @@ clicked."
     (let* ((path (if (file-remote-p buffer-file-name)
                      (tramp-file-name-localname (tramp-dissect-file-name buffer-file-name))
                    path))
-           ;; FIXME
-           ;; This calls f-short on tramp
-           (dirname (file-name-as-directory (abbreviate-file-name (or (file-name-directory path) "./"))))
-           (filename (f-filename path))
+           (dirname (file-name-as-directory
+                       (abbreviate-file-name (or (file-name-directory path) "./"))))
+           (filename (file-name-nondirectory path))          ; was f-filename
            (propertized-filename
             (propertize filename 'face 'mode-line-buffer-id)))
       (if (> (+ (length dirname) (length filename) 2) max-width)
@@ -156,19 +154,17 @@ clicked."
     (cond
      ((and buffer-file-name (file-remote-p buffer-file-name))
       (let ((tramp-vec (tramp-dissect-file-name buffer-file-name)))
-        (concat
-         (tramp-file-name-host tramp-vec)
-         " — "
-         (abbreviate-file-name (tramp-file-name-localname tramp-vec)))))
-
+        (concat (tramp-file-name-host tramp-vec)
+                " — "
+                (abbreviate-file-name            ; was f-short
+                 (tramp-file-name-localname tramp-vec)))))
      ((and (featurep 'projectile) (projectile-project-p))
-      (concat
-       (projectile-project-name)
-       " — "
-       (if buffer-file-name
-           (f-relative buffer-file-name (projectile-project-root))
-         (buffer-name))))
-
+      (concat (projectile-project-name)
+              " — "
+              (if buffer-file-name
+                  (file-relative-name           ; was f-relative
+                   buffer-file-name (projectile-project-root))
+                (buffer-name))))
      (t (my--mode-line-buffer-identifier))))
 
   (setq frame-title-format '(:eval (my--frame-title-format))))

@@ -20,6 +20,11 @@
 ;;; Code:
 
 
+;; (if (equal "Battery status not available"
+;;            (battery))
+;;     (display-battery-mode 1)                        ; On laptops it's nice to know how much power you have
+;;   (setq password-cache-expiry nil))               ; I can trust my desktops ... can't I? (no battery = desktop)
+
 ;; (use-package! pdf-occur :commands (pdf-occur pdf-occur-global-minor-mode))
 ;; (use-package! pdf-history :commands (pdf-history-minor-mode))
 ;; (use-package! pdf-links :commands (pdf-links-isearch-link pdf-links-action-perform pdf-links-minor-mode))

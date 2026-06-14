@@ -38,13 +38,7 @@
       doom-font (font-spec :family "Iosevka Comfy" :size my/font-size)
       doom-big-font (font-spec :family "Iosevka Comfy" :size (if (featurep :system 'macos) 26.0 20.0))
       doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size my/font-size)
-      doom-serif-font (font-spec :family "BlexMono Nerd Font" :size my/font-size :weight 'light)
-
-      fancy-splash-image (when-let* ((dir (file-name-concat doom-user-dir "splash"))
-                                     (choices (and (file-directory-p dir)
-                                                   (directory-files dir t "^[^.]" t)))
-                                     ((consp choices)))
-                           (seq-random-elt choices)))
+      doom-serif-font (font-spec :family "BlexMono Nerd Font" :size my/font-size :weight 'light))
 
 (setopt
  auth-source-cache-expiry nil ; default is 7200 (2h)
@@ -60,11 +54,6 @@
  window-resize-pixelwise t
  x-stretch-cursor t           ; Stretch cursor to the glyph width
  xref-history-storage 'xref-window-local-history)
-
-;; (if (equal "Battery status not available"
-;;            (battery))
-;;     (display-battery-mode 1)                        ; On laptops it's nice to know how much power you have
-;;   (setq password-cache-expiry nil))               ; I can trust my desktops ... can't I? (no battery = desktop)
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 (when (file-exists-p custom-file)
@@ -101,6 +90,14 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
+
+(add-hook! 'doom-init-ui-hook :depth 90
+  (setq fancy-splash-image
+        (when-let* ((dir (file-name-concat doom-user-dir "splash"))
+                    (choices (and (file-directory-p dir)
+                                  (directory-files dir t "^[^.]" t)))
+                    ((consp choices)))
+          (seq-random-elt choices))))
 
 (custom-set-faces!
   '(aw-leading-char-face
@@ -152,46 +149,47 @@
 
 ;; credit: yorickvP on Github
 ;; wl-copy integration for Wayland clipboard(need wl-clipboard package)
-(defvar wl-copy-process nil)
-(defun wl-copy (text)
-  (when (process-live-p wl-copy-process)
-    (kill-process wl-copy-process))
-  (setq wl-copy-process
-        (make-process :name "wl-copy"
-                      :buffer nil
-                      :command '("wl-copy" "-f" "-n")
-                      :connection-type 'pipe
-                      :coding 'utf-8-unix   ; ← explicit
-                      :noquery t))
-  (process-send-string wl-copy-process text)
-  (process-send-eof wl-copy-process))
+(when (or (getenv "WAYLAND_DISPLAY")
+          (string= (getenv "XDG_SESSION_TYPE") "wayland"))
 
-(defun wl-paste ()
-  (unless (and wl-copy-process (process-live-p wl-copy-process))
-    (let ((result (string-trim-right
-                   (shell-command-to-string "wl-paste -n 2>/dev/null")
-                   "[\r\n]+")))
-      (unless (string-empty-p result) result))))
+  (defvar wl-copy-process nil)
 
-(add-hook 'kill-emacs-hook
-          (lambda ()
-            (when (process-live-p wl-copy-process)
-              (kill-process wl-copy-process)
-              (setq wl-copy-process nil))))
+  (defun wl-copy (text)
+    (when (process-live-p wl-copy-process)
+      (kill-process wl-copy-process))
+    (setq wl-copy-process
+          (make-process :name "wl-copy"
+                        :buffer nil
+                        :command '("wl-copy" "-f" "-n")
+                        :connection-type 'pipe
+                        :coding 'utf-8-unix
+                        :noquery t))
+    (process-send-string wl-copy-process text)
+    (process-send-eof wl-copy-process))
 
-(defun my/setup-wayland-clipboard (&optional frame)
-  (when (and (or (null frame) (display-graphic-p frame))
-             (or (getenv "WAYLAND_DISPLAY")
-                 (string= (getenv "XDG_SESSION_TYPE") "wayland"))
-             (executable-find "wl-copy")
-             (executable-find "wl-paste"))   ; ← new guard
-    (setq interprogram-cut-function  #'wl-copy
-          interprogram-paste-function #'wl-paste)
-    (remove-hook 'after-make-frame-functions #'my/setup-wayland-clipboard)))
+  (defun wl-paste ()
+    (unless (and wl-copy-process (process-live-p wl-copy-process))
+      (let ((result (string-trim-right
+                     (shell-command-to-string "wl-paste -n 2>/dev/null")
+                     "[\r\n]+")))
+        (unless (string-empty-p result) result))))
 
-(if (daemonp)
-    (add-hook 'after-make-frame-functions #'my/setup-wayland-clipboard)
-  (my/setup-wayland-clipboard))
+  (add-hook 'kill-emacs-hook
+            (lambda ()
+              (when (process-live-p wl-copy-process)
+                (kill-process wl-copy-process)
+                (setq wl-copy-process nil))))
+
+  (defun my/setup-wayland-clipboard (&optional frame)
+    (when (or (null frame) (display-graphic-p frame))
+      (when (and (executable-find "wl-copy") (executable-find "wl-paste"))
+        (setq interprogram-cut-function  #'wl-copy
+              interprogram-paste-function #'wl-paste)
+        (remove-hook 'after-make-frame-functions #'my/setup-wayland-clipboard))))
+
+  (if (daemonp)
+      (add-hook 'after-make-frame-functions #'my/setup-wayland-clipboard)
+    (my/setup-wayland-clipboard)))
 
 (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t)
                     ("^\\*\\(?:Wo\\)?Man " :size 82 :side right :select t :quit t)))
@@ -202,7 +200,7 @@
         avy-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)))
 
 (use-package! beginend
-  :hook (doom-after-init . beginend-global-mode))
+  :hook (doom-first-buffer . beginend-global-mode))
 
 (after! calendar
   (setq calendar-location-name "Istanbul, Turkey"
@@ -332,17 +330,20 @@
           (border-mode-line-inactive unspecified))))
 
 (use-package! ef-themes
-  :custom
-  (ef-themes-to-toggle '(ef-eagle ef-dark))
-  :config
+  :defer t
+  :init
+  (setq ef-themes-to-toggle '(ef-eagle ef-dark))
+
+  (defun my/load-ef-theme (&optional frame)
+    "Load ef-eagle for GUI frames, ef-dark for terminal."
+    (with-selected-frame (or frame (selected-frame))
+      (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t)
+      (when (and frame (display-graphic-p frame))
+        (set-frame-parameter frame 'fullscreen 'maximized))))
+
   (if (daemonp)
-      (add-hook 'after-make-frame-functions
-                (lambda (frame)
-                  (with-selected-frame frame
-                    (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t)
-                    (when (display-graphic-p)
-                      (set-frame-parameter nil 'fullscreen 'maximized)))))
-    (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t)))
+      (add-hook 'after-make-frame-functions #'my/load-ef-theme)
+    (add-hook 'doom-init-ui-hook #'my/load-ef-theme 90)))
 
 ;; (after! expand-region
 ;;   (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
