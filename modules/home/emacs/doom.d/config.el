@@ -39,11 +39,6 @@
       doom-big-font (font-spec :family "Iosevka Comfy" :size (if (featurep :system 'macos) 26.0 20.0))
       doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size my/font-size)
       doom-serif-font (font-spec :family "BlexMono Nerd Font" :size my/font-size :weight 'light)
-      fancy-splash-image (when-let* ((dir (file-name-concat doom-user-dir "splash"))
-                                     (choices (and (file-directory-p dir)
-                                                   (directory-files dir t "^[^.]" t)))
-                                     ((consp choices)))
-                           (seq-random-elt choices))
       auth-source-cache-expiry nil ; default is 7200 (2h)
       auto-revert-avoid-polling t  ; refresh buffers when files change on disk
       auto-revert-use-notify t     ; use inotify instead of polling
@@ -62,11 +57,27 @@
       window-combination-resize t  ; take new window space from all other windows (not just current)
       window-resize-pixelwise t
       x-stretch-cursor t           ; Stretch cursor to the glyph width
-      xref-history-storage 'xref-window-local-history)
+      xref-history-storage 'xref-window-local-history
+      ;; ── NEW: bidi scanning is expensive; all your buffers are LTR ──────────
+      bidi-paragraph-direction 'left-to-right
+      bidi-inhibit-bpa          t            ; skip bidirectional paren algorithm
+      ;; ── NEW: display micro-optimisations ───────────────────────────────────
+      auto-window-vscroll              nil   ; faster line-height computation
+      cursor-in-non-selected-windows   nil)  ; one less cursor to render per window
+
+(add-hook! 'doom-after-init-hook
+  (defun my/set-random-splash-image ()
+    (when-let* ((dir     (file-name-concat doom-user-dir "splash"))
+                (choices (and (file-directory-p dir)
+                              (directory-files dir t "^[^.]" t)))
+                ((consp choices)))
+      (setq fancy-splash-image (seq-random-elt choices)))))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
-(when (file-exists-p custom-file)
-  (load custom-file))
+;; Defer to after-init so customizations don't slow module loading.
+(add-hook 'doom-after-init-hook
+          (lambda () (when (file-exists-p custom-file) (load custom-file)))
+          90)
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
@@ -142,6 +153,11 @@
     (repeat-mode 1)
     (global-subword-mode 1)))
 
+(after! gcmh
+  (setq gcmh-high-cons-threshold (* 32 1024 1024)  ; 32 MB (Doom default: 16 MB)
+        gcmh-idle-delay           'auto
+        gcmh-auto-idle-delay-factor 10))
+
 (map! ;; [remap just-one-space]  #'cycle-spacing
  [remap upcase-word]     #'upcase-dwim
  [remap downcase-word]   #'downcase-dwim
@@ -188,9 +204,10 @@
               interprogram-paste-function #'wl-paste)
         (remove-hook 'after-make-frame-functions #'my/setup-wayland-clipboard))))
 
-  (if (daemonp)
-      (add-hook 'after-make-frame-functions #'my/setup-wayland-clipboard)
-    (my/setup-wayland-clipboard)))
+  (add-hook (if (daemonp)
+                'after-make-frame-functions
+              'emacs-startup-hook)
+            #'my/setup-wayland-clipboard))
 
 (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t)
                     ("^\\*\\(?:Wo\\)?Man " :size 82 :side right :select t :quit t)))
@@ -294,9 +311,11 @@
   (require 'dwim-shell-commands))
 
 (after! eglot
-  (setq eglot-events-buffer-size 0  ; disable *EGLOT events* log — it's a CPU/memory drain
-        eglot-autoshutdown      t   ; kill server when last managed buffer closes
-        eglot-sync-connect      nil) ; connect async — don't block opening a file
+  (setq eglot-events-buffer-size 0
+        eglot-autoshutdown      t
+        eglot-sync-connect      nil
+        eglot-report-progress   nil  ; no "Loading /path…" in echo area
+        eglot-extend-to-xref    t)   ; follow xref across file boundaries
 
   ;; (set-eglot-client! '(c-mode c-ts-mode c++-mode c++-ts-mode objc-mode) `("ccls" ,(concat "--init={\"cache\": {\"directory\": \"" (file-truename "~/.cache/ccls") "\"}}")))
   (let ((nil-lsp '("nil" "--stdio" :initializationOptions
@@ -322,8 +341,9 @@
      :preview-key (list "C-SPC" :debounce 0.2 'any))))
 
 (after! corfu
-  (setq corfu-auto-delay  0.2
-        corfu-auto-prefix  2))
+  (setq corfu-auto-delay  0.3
+        corfu-auto-prefix  3
+        corfu-cycle        t))
 
 (use-package! exercism :commands (exercism)
               :init
@@ -572,6 +592,16 @@ the sequences will be lost."
 
 (use-package! org-glossary
   :hook (org-mode . org-glossary-mode))
+
+(after! org-roam
+  ;; Persist per-save updates but compress into a deferred idle sync
+  ;; so consecutive rapid saves don't each hammer the SQLite DB.
+  (setq org-roam-db-update-on-save  nil)  ; manual control
+  (add-hook 'after-save-hook
+            (lambda ()
+              (when (org-roam-file-p)
+                (run-with-idle-timer 2 nil #'org-roam-db-update-file
+                                     (buffer-file-name))))))
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
