@@ -335,11 +335,6 @@
      consult-bookmark
      :preview-key (list "C-SPC" :debounce 0.2 'any))))
 
-(after! corfu
-  (setq corfu-auto-delay  0.3
-        corfu-auto-prefix  3
-        corfu-cycle        t))
-
 (use-package! exercism :commands (exercism)
               :init
               (map! (:leader :desc "Exercism" :n "ox" #'exercism))
@@ -591,14 +586,22 @@ the sequences will be lost."
 (after! org-roam
   (setq org-roam-db-update-on-save nil)
 
+  (defvar-local my/org-roam--sync-timer nil)
+
   (defun my/org-roam-schedule-db-sync ()
-    "Lazily sync the org-roam DB for the current buffer after an idle period."
-    (run-with-idle-timer 2 nil #'org-roam-db-update-file (buffer-file-name)))
+    "Cancel any pending sync and schedule a fresh one 2 s from now."
+    (when (timerp my/org-roam--sync-timer)
+      (cancel-timer my/org-roam--sync-timer))
+    (let ((file (buffer-file-name)))
+      (setq my/org-roam--sync-timer
+            (run-with-idle-timer 2 nil
+                                 (lambda () (org-roam-db-update-file file))))))
 
   (add-hook 'org-mode-hook
             (lambda ()
               (when (org-roam-file-p)
-                (add-hook 'after-save-hook #'my/org-roam-schedule-db-sync nil :local)))))
+                (add-hook 'after-save-hook
+                          #'my/org-roam-schedule-db-sync nil :local)))))
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
