@@ -45,25 +45,14 @@
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
       delete-by-moving-to-trash t  ; Delete files to trash
       display-line-numbers-type 'relative
-      fast-but-imprecise-scrolling          t     ; skip fontification when scrolling fast
-      frame-resize-pixelwise t
-      ;; jit-lock-defer-time                   0.05  ; delay fontification 50ms after last input
-      ;; jit-lock-stealth-time                 1.0   ; fontify idle buffers after 1s
-      redisplay-skip-fontification-on-input t     ; don't fontify while typing
+      read-process-output-max (* 4 1024 1024) ; 4 MB — eglot/LSP sends large JSON chunks
       scroll-margin                         3
       scroll-preserve-screen-position       t
       truncate-string-ellipsis "…" ; Unicode ellispis are nicer than "...", and also save /precious/ space
       undo-limit 80000000          ; Raise undo-limit to 80Mb
       window-combination-resize t  ; take new window space from all other windows (not just current)
-      window-resize-pixelwise t
       x-stretch-cursor t           ; Stretch cursor to the glyph width
-      xref-history-storage 'xref-window-local-history
-      ;; ── NEW: bidi scanning is expensive; all your buffers are LTR ──────────
-      bidi-paragraph-direction 'left-to-right
-      bidi-inhibit-bpa          t            ; skip bidirectional paren algorithm
-      ;; ── NEW: display micro-optimisations ───────────────────────────────────
-      auto-window-vscroll              nil   ; faster line-height computation
-      cursor-in-non-selected-windows   nil)  ; one less cursor to render per window
+      xref-history-storage 'xref-window-local-history)
 
 (add-hook! 'doom-after-init-hook
   (defun my/set-random-splash-image ()
@@ -71,7 +60,11 @@
                 (choices (and (file-directory-p dir)
                               (directory-files dir t "^[^.]" t)))
                 ((consp choices)))
-      (setq fancy-splash-image (seq-random-elt choices)))))
+      (setq fancy-splash-image (seq-random-elt choices))))
+  (defun my/setup-global-modes ()
+    "Enable repeat-mode and subword-mode after Doom initializes."
+    (repeat-mode 1)
+    (global-subword-mode 1)))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 ;; Defer to after-init so customizations don't slow module loading.
@@ -147,12 +140,6 @@
             :n (number-to-string n) fn
             :n (format "w%d" n) fn))))
 
-(add-hook! 'doom-after-init-hook
-  (defun my/setup-global-modes ()
-    "Enable repeat-mode and subword-mode after Doom initializes."
-    (repeat-mode 1)
-    (global-subword-mode 1)))
-
 (after! gcmh
   (setq gcmh-high-cons-threshold (* 32 1024 1024)  ; 32 MB (Doom default: 16 MB)
         gcmh-idle-delay           'auto
@@ -169,45 +156,50 @@
 (when (or (getenv "WAYLAND_DISPLAY")
           (string= (getenv "XDG_SESSION_TYPE") "wayland"))
 
-  (defvar wl-copy-process nil)
+  ;; Resolve once at startup; avoids repeated PATH searches on each new frame
+  ;; (relevant when running as a daemon).
+  (defvar my/wl-copy-exe (executable-find "wl-copy"))
+  (defvar my/wl-paste-exe (executable-find "wl-paste"))
 
-  (defun wl-copy (text)
-    (when (process-live-p wl-copy-process)
-      (kill-process wl-copy-process))
-    (setq wl-copy-process
-          (make-process :name "wl-copy"
-                        :buffer nil
-                        :command '("wl-copy" "-f" "-n")
-                        :connection-type 'pipe
-                        :coding 'utf-8-unix
-                        :noquery t))
-    (process-send-string wl-copy-process text)
-    (process-send-eof wl-copy-process))
+  (when (and my/wl-copy-exe my/wl-paste-exe)
+    (defvar wl-copy-process nil)
 
-  (defun wl-paste ()
-    (unless (and wl-copy-process (process-live-p wl-copy-process))
-      (let ((result (string-trim-right
-                     (shell-command-to-string "wl-paste -n 2>/dev/null")
-                     "[\r\n]+")))
-        (unless (string-empty-p result) result))))
+    (defun wl-copy (text)
+      (when (process-live-p wl-copy-process)
+        (kill-process wl-copy-process))
+      (setq wl-copy-process
+            (make-process :name "wl-copy"
+                          :buffer nil
+                          :command '("wl-copy" "-f" "-n")
+                          :connection-type 'pipe
+                          :coding 'utf-8-unix
+                          :noquery t))
+      (process-send-string wl-copy-process text)
+      (process-send-eof wl-copy-process))
 
-  (add-hook 'kill-emacs-hook
-            (lambda ()
-              (when (process-live-p wl-copy-process)
-                (kill-process wl-copy-process)
-                (setq wl-copy-process nil))))
+    (defun wl-paste ()
+      (unless (and wl-copy-process (process-live-p wl-copy-process))
+        (let ((result (string-trim-right
+                       (shell-command-to-string "wl-paste -n 2>/dev/null")
+                       "[\r\n]+")))
+          (unless (string-empty-p result) result))))
 
-  (defun my/setup-wayland-clipboard (&optional frame)
-    (when (or (null frame) (display-graphic-p frame))
-      (when (and (executable-find "wl-copy") (executable-find "wl-paste"))
+    (add-hook 'kill-emacs-hook
+              (lambda ()
+                (when (process-live-p wl-copy-process)
+                  (kill-process wl-copy-process)
+                  (setq wl-copy-process nil))))
+
+    (defun my/setup-wayland-clipboard (&optional frame)
+      (when (or (null frame) (display-graphic-p frame))
         (setq interprogram-cut-function  #'wl-copy
               interprogram-paste-function #'wl-paste)
-        (remove-hook 'after-make-frame-functions #'my/setup-wayland-clipboard))))
+        (remove-hook 'after-make-frame-functions #'my/setup-wayland-clipboard)))
 
-  (add-hook (if (daemonp)
-                'after-make-frame-functions
-              'emacs-startup-hook)
-            #'my/setup-wayland-clipboard))
+    (add-hook (if (daemonp)
+                  'after-make-frame-functions
+                'emacs-startup-hook)
+              #'my/setup-wayland-clipboard)))
 
 (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t)
                     ("^\\*\\(?:Wo\\)?Man " :size 82 :side right :select t :quit t)))
@@ -311,13 +303,16 @@
   (require 'dwim-shell-commands))
 
 (after! eglot
+  ;; jsonrpc--log-event is called on every LSP message; with the events buffer
+  ;; already disabled (size 0) there is nothing useful left for it to do.
+  (fset 'jsonrpc--log-event #'ignore)
+
   (setq eglot-events-buffer-size 0
         eglot-autoshutdown      t
         eglot-sync-connect      nil
-        eglot-report-progress   nil  ; no "Loading /path…" in echo area
-        eglot-extend-to-xref    t)   ; follow xref across file boundaries
+        eglot-report-progress   nil
+        eglot-extend-to-xref    t)
 
-  ;; (set-eglot-client! '(c-mode c-ts-mode c++-mode c++-ts-mode objc-mode) `("ccls" ,(concat "--init={\"cache\": {\"directory\": \"" (file-truename "~/.cache/ccls") "\"}}")))
   (let ((nil-lsp '("nil" "--stdio" :initializationOptions
                    (:nil (:nix (:flake (:autoArchive t)))))))
     (set-eglot-client! 'nix-mode    nil-lsp)
@@ -594,14 +589,16 @@ the sequences will be lost."
   :hook (org-mode . org-glossary-mode))
 
 (after! org-roam
-  ;; Persist per-save updates but compress into a deferred idle sync
-  ;; so consecutive rapid saves don't each hammer the SQLite DB.
-  (setq org-roam-db-update-on-save  nil)  ; manual control
-  (add-hook 'after-save-hook
+  (setq org-roam-db-update-on-save nil)
+
+  (defun my/org-roam-schedule-db-sync ()
+    "Lazily sync the org-roam DB for the current buffer after an idle period."
+    (run-with-idle-timer 2 nil #'org-roam-db-update-file (buffer-file-name)))
+
+  (add-hook 'org-mode-hook
             (lambda ()
               (when (org-roam-file-p)
-                (run-with-idle-timer 2 nil #'org-roam-db-update-file
-                                     (buffer-file-name))))))
+                (add-hook 'after-save-hook #'my/org-roam-schedule-db-sync nil :local)))))
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -620,7 +617,8 @@ the sequences will be lost."
   (unless (display-graphic-p)
     (setq-local xterm-set-window-title nil)))
 
-(load! "persp-config")
+(after! persp-mode
+  (load! "persp-config"))
 
 (setq +workspaces-switch-project-function (lambda (project-directory)
                                             (dired project-directory)
@@ -675,72 +673,34 @@ the sequences will be lost."
  (:leader
   :desc "Project sidebar" :n "0" #'treemacs-select-window))
 
-(setq +treemacs-git-mode 'deferred
-      ;; treemacs-collapse-dirs 5
-      ;; treemacs-eldoc-display t
-      ;; treemacs-is-never-other-window nil
-      treemacs-position 'right
-      treemacs-recenter-after-file-follow 'on-distance
-      treemacs-recenter-after-project-expand 'on-distance
-      ;; treemacs-show-hidden-files t
-      ;; treemacs-silent-filewatch t
-      ;; treemacs-silent-refresh t
-      ;; treemacs-sorting 'alphabetic-asc
-      ;; treemacs-user-mode-line-format nil
-      treemacs-width 40
-      treemacs-follow-after-init t)
+(setq +treemacs-git-mode 'deferred)
 
 (after! treemacs
+  (setq treemacs-position                       'right
+        treemacs-recenter-after-file-follow     'on-distance
+        treemacs-recenter-after-project-expand  'on-distance
+        treemacs-width                          40
+        treemacs-follow-after-init              t)
+
   (treemacs-define-RET-action 'file-node-open   #'treemacs-visit-node-in-most-recently-used-window)
   (treemacs-define-RET-action 'file-node-closed #'treemacs-visit-node-in-most-recently-used-window)
-  ;; Quite often there are superfluous files I'm not that interested in. There's no
-  ;; good reason for them to take up space. Let's add a mechanism to ignore them.
-  (defvar treemacs-file-ignore-extensions '()
-    "File extension which `treemacs-ignore-filter' will ensure are ignored")
-  (defvar treemacs-file-ignore-regexps '()
-    "RegExps to be tested to ignore files, generated from
-`treeemacs-file-ignore-globs'")
+
+  (defvar treemacs-file-ignore-extensions '())
+  (defvar treemacs-file-ignore-regexps '())
   (defun treemacs-file-ignore-generate-regexps ()
-    "Generate `treemacs-file-ignore-regexps' from `treemacs-file-ignore-globs'"
     (setq treemacs-file-ignore-regexps (mapcar #'dired-glob-regexp treemacs-file-ignore-globs)))
   (setq treemacs-file-ignore-globs
-        '("*/_minted-*"
-          "*/.auctex-auto"
-          "*/_region_.log"
-          "*/_region_.tex"))
+        '("*/_minted-*" "*/.auctex-auto" "*/_region_.log" "*/_region_.tex"))
   (treemacs-file-ignore-generate-regexps)
   (defun treemacs-ignore-filter (file full-path)
-    "Ignore files by extension or glob pattern."
     (or (member (file-name-extension file) treemacs-file-ignore-extensions)
         (seq-some (lambda (re) (string-match-p re full-path))
                   treemacs-file-ignore-regexps)))
   (add-to-list 'treemacs-ignored-file-predicates #'treemacs-ignore-filter)
 
-  ;; Now, we just identify the files in question.
   (setq treemacs-file-ignore-extensions
-        '(;; build outputs
-          "o"
-          "psd"
-          ;; LaTeX
-          "aux"
-          "ptc"
-          "fdb_latexmk"
-          "fls"
-          "synctex.gz"
-          "toc"
-          ;; LaTeX - glossary
-          "glg"
-          "glo"
-          "gls"
-          "glsdefs"
-          "ist"
-          "acn"
-          "acr"
-          "alg"
-          ;; LaTeX - pgfplots
-          "mw"
-          ;; LaTeX - pdfx
-          "pdfa.xmpi"))
+        '("o" "psd" "aux" "ptc" "fdb_latexmk" "fls" "synctex.gz" "toc"
+          "glg" "glo" "gls" "glsdefs" "ist" "acn" "acr" "alg" "mw" "pdfa.xmpi"))
 
   (treemacs-follow-mode)
   (treemacs-filewatch-mode))
