@@ -47,8 +47,8 @@
       display-line-numbers-type 'relative
       fast-but-imprecise-scrolling          t     ; skip fontification when scrolling fast
       frame-resize-pixelwise t
-      jit-lock-defer-time                   0.05  ; delay fontification 50ms after last input
-      jit-lock-stealth-time                 1.0   ; fontify idle buffers after 1s
+      ;; jit-lock-defer-time                   0.05  ; delay fontification 50ms after last input
+      ;; jit-lock-stealth-time                 1.0   ; fontify idle buffers after 1s
       redisplay-skip-fontification-on-input t     ; don't fontify while typing
       scroll-margin                         3
       scroll-preserve-screen-position       t
@@ -607,10 +607,10 @@ the sequences will be lost."
 ;; change `org-directory'. It must be set before org loads!
 (setopt org-directory (expand-file-name "~/Documents/org/")
         org-startup-with-inline-images t)
+(setq org-agenda-files (list org-directory (expand-file-name "~/Documents/worg/")))
 
 (after! org
-  (setq org-agenda-files (list org-directory (expand-file-name "~/Documents/worg/"))
-        org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?)) " " nil)
+  (setq org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?)) " " nil)
         org-hide-emphasis-markers t
         org-latex-pdf-process '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f")
         org-startup-folded 'show2levels)
