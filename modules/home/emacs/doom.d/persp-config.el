@@ -20,37 +20,48 @@
 ;;; Code:
 
 (after! persp-mode
+  (defvar lkn-tab-bar--render-cache (cons nil nil)
+    "Cons of (STATE . TABS); STATE = (workspace-names . current-name).
+Recomputed only when workspace list or active workspace changes.")
+
   (defun lkn-tab-bar--workspaces ()
-    "Return a list of the current workspaces."
-    (nreverse
-     (let ((show-help-function nil)
-           (persps (+workspace-list-names))
-           (persp (+workspace-current-name)))
-       (when (< 1 (length persps))
-         (seq-reduce
-          (lambda (acc elm)
-            (let* ((face (if (equal persp elm)
-                             'tab-bar-tab
-                           'tab-bar-tab-inactive))
-                   (pos (1+ (cl-position elm persps)))
-                   (edge-x (get-text-property 0 'edge-x (car acc)))
-                   (tab-id (format " %d" pos))
-                   (tab-name (format " %s " elm)))
-              (push
-               (concat
-                (propertize tab-id
-                            'id pos
-                            'name elm
-                            'edge-x (+ edge-x (string-pixel-width tab-name) (string-pixel-width tab-id))
-                            'face
-                            `(:inherit ,face
-                              :weight bold))
-                (propertize tab-name 'face `,face)
-                " ")
-               acc)
-              acc))
-          persps
-          `(,(propertize (+workspace-current-name) 'edge-x 0 'invisible t)))))))
+    "Return workspace tab strings, caching the expensive pixel-width computation.
+A cache miss occurs only on workspace switch / add / remove."
+    (let* ((names   (+workspace-list-names))
+           (current (+workspace-current-name))
+           (state   (cons names current)))
+      (if (equal state (car lkn-tab-bar--render-cache))
+          (cdr lkn-tab-bar--render-cache)
+        (let ((tabs (lkn-tab-bar--compute-workspaces names current)))
+          (setq lkn-tab-bar--render-cache (cons state tabs))
+          tabs))))
+
+  (defun lkn-tab-bar--compute-workspaces (persps persp)
+    "Render workspace tab strings for PERSPS with PERSP as the active workspace."
+    (when (< 1 (length persps))
+      (nreverse
+       (let ((show-help-function nil))
+       (seq-reduce
+        (lambda (acc elm)
+          (let* ((face     (if (equal persp elm) 'tab-bar-tab 'tab-bar-tab-inactive))
+                 (pos      (1+ (cl-position elm persps)))
+                 (edge-x   (get-text-property 0 'edge-x (car acc)))
+                 (tab-id   (format " %d" pos))
+                 (tab-name (format " %s " elm)))
+            (push (concat
+                   (propertize tab-id
+                               'id     pos
+                               'name   elm
+                               'edge-x (+ edge-x
+                                          (string-pixel-width tab-name)
+                                          (string-pixel-width tab-id))
+                               'face   `(:inherit ,face :weight bold))
+                   (propertize tab-name 'face `,face)
+                   " ")
+                  acc)
+            acc))
+        persps
+        `(,(propertize persp 'edge-x 0 'invisible t)))))))
 
   (customize-set-variable 'global-mode-string '((:eval
                                                  (if (and (fboundp 'persp-names) (< 1 (length (+workspace-list-names))))
@@ -132,7 +143,7 @@ clicked."
                      (tramp-file-name-localname (tramp-dissect-file-name buffer-file-name))
                    path))
            (dirname (file-name-as-directory
-                       (abbreviate-file-name (or (file-name-directory path) "./"))))
+                     (abbreviate-file-name (or (file-name-directory path) "./"))))
            (filename (file-name-nondirectory path))          ; was f-filename
            (propertized-filename
             (propertize filename 'face 'mode-line-buffer-id)))
