@@ -153,53 +153,44 @@
 
 ;; credit: yorickvP on Github
 ;; wl-copy integration for Wayland clipboard(need wl-clipboard package)
-(when (or (getenv "WAYLAND_DISPLAY")
-          (string= (getenv "XDG_SESSION_TYPE") "wayland"))
 
-  ;; Resolve once at startup; avoids repeated PATH searches on each new frame
-  ;; (relevant when running as a daemon).
-  (defvar my/wl-copy-exe (executable-find "wl-copy"))
-  (defvar my/wl-paste-exe (executable-find "wl-paste"))
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (when (or (getenv "WAYLAND_DISPLAY")
+                      (string= (getenv "XDG_SESSION_TYPE") "wayland"))
+              (let ((wl-copy-exe  (executable-find "wl-copy"))
+                    (wl-paste-exe (executable-find "wl-paste")))
+                (when (and wl-copy-exe wl-paste-exe)
+                  (defvar wl-copy-process nil)
 
-  (when (and my/wl-copy-exe my/wl-paste-exe)
-    (defvar wl-copy-process nil)
+                  (defun wl-copy (text)
+                    (when (process-live-p wl-copy-process)
+                      (kill-process wl-copy-process))
+                    (setq wl-copy-process
+                          (make-process :name "wl-copy"
+                                        :buffer nil
+                                        :command `(,wl-copy-exe "-f" "-n")
+                                        :connection-type 'pipe
+                                        :coding 'utf-8-unix
+                                        :noquery t))
+                    (process-send-string wl-copy-process text)
+                    (process-send-eof wl-copy-process))
 
-    (defun wl-copy (text)
-      (when (process-live-p wl-copy-process)
-        (kill-process wl-copy-process))
-      (setq wl-copy-process
-            (make-process :name "wl-copy"
-                          :buffer nil
-                          :command '("wl-copy" "-f" "-n")
-                          :connection-type 'pipe
-                          :coding 'utf-8-unix
-                          :noquery t))
-      (process-send-string wl-copy-process text)
-      (process-send-eof wl-copy-process))
+                  (defun wl-paste ()
+                    (unless (and wl-copy-process (process-live-p wl-copy-process))
+                      (with-temp-buffer
+                        (when (zerop (call-process wl-paste-exe nil t nil "-n"))
+                          (let ((result (string-trim-right (buffer-string) "[\r\n]+")))
+                            (unless (string-empty-p result) result))))))
 
-    (defun wl-paste ()
-      (unless (and wl-copy-process (process-live-p wl-copy-process))
-        (with-temp-buffer
-          (when (zerop (call-process my/wl-paste-exe nil t nil "-n"))
-            (let ((result (string-trim-right (buffer-string) "[\r\n]+")))
-              (unless (string-empty-p result) result))))))
+                  (add-hook 'kill-emacs-hook
+                            (lambda ()
+                              (when (process-live-p wl-copy-process)
+                                (kill-process wl-copy-process)
+                                (setq wl-copy-process nil))))
 
-    (add-hook 'kill-emacs-hook
-              (lambda ()
-                (when (process-live-p wl-copy-process)
-                  (kill-process wl-copy-process)
-                  (setq wl-copy-process nil))))
-
-    (defun my/setup-wayland-clipboard (&optional frame)
-      (when (or (null frame) (display-graphic-p frame))
-        (setq interprogram-cut-function  #'wl-copy
-              interprogram-paste-function #'wl-paste)
-        (remove-hook 'after-make-frame-functions #'my/setup-wayland-clipboard)))
-
-    (add-hook (if (daemonp)
-                  'after-make-frame-functions
-                'emacs-startup-hook)
-              #'my/setup-wayland-clipboard)))
+                  (setq interprogram-cut-function  #'wl-copy
+                        interprogram-paste-function #'wl-paste))))))
 
 (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t)
                     ("^\\*\\(?:Wo\\)?Man " :size 82 :side right :select t :quit t)))
@@ -366,7 +357,11 @@
   (add-hook 'after-make-frame-functions
             (lambda (frame)
               (with-selected-frame frame
-                (load-theme (if (display-graphic-p) 'ef-eagle 'ef-dark) t)
+                (let ((theme (if (display-graphic-p) 'ef-eagle 'ef-dark)))
+                  ;; Only load if this theme isn't already active.
+                  ;; Without this guard every new emacsclient frame re-runs load-theme.
+                  (unless (memq theme custom-enabled-themes)
+                    (load-theme theme t)))
                 (when (display-graphic-p)
                   (set-frame-parameter nil 'fullscreen 'maximized))))))
 
@@ -540,7 +535,8 @@ the sequences will be lost."
   :after magit
   :config
   (setq magit-todos-max-items 30
-        magit-todos-depth     5)
+        magit-todos-depth     5
+        magit-todos-scanner   #'magit-todos--scan-with-rg)
   (magit-todos-mode 1))
 
 (map! :leader
@@ -569,7 +565,10 @@ the sequences will be lost."
 (add-hook! markdown-mode
   (add-hook! before-save :local #'markdown-toc-refresh-toc))
 
-(map! (:leader :desc "Obvious (Toggle Comments)" :n "to" #'obvious-mode))
+(use-package! obvious
+  :commands (obvious-mode)
+  :init
+  (map! (:leader :desc "Obvious (Toggle Comments)" :n "to" #'obvious-mode)))
 
 (use-package! deft
   :after (org org-roam)
@@ -1030,7 +1029,9 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 
 (use-package! gptel-agent
   :after gptel
-  :config (gptel-agent-update))
+  :config
+  ;; gptel-agent-update may make network requests — don't block gptel's load path.
+  (run-with-idle-timer 2 nil #'gptel-agent-update))
 
 (use-package! gptel-quick
   :after gptel

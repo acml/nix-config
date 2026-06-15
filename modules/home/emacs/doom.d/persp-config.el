@@ -63,16 +63,33 @@ A cache miss occurs only on workspace switch / add / remove."
         persps
         `(,(propertize persp 'edge-x 0 'invisible t)))))))
 
-  (customize-set-variable 'global-mode-string '((:eval
-                                                 (if (and (fboundp 'persp-names) (< 1 (length (+workspace-list-names))))
-                                                     (progn (unless tab-bar-mode
-                                                              (tab-bar-mode t))
-                                                            (lkn-tab-bar--workspaces))
-                                                   (when tab-bar-mode
-                                                     (tab-bar-mode -1))))
-                                                " "))
+  (defun lkn-tab-bar--workspaces-or-nil ()
+    "Return workspace tab strings when multiple workspaces exist, nil otherwise.
+Must be side-effect-free: this runs inside a display :eval form."
+    (when (and (bound-and-true-p persp-mode)
+               (< 1 (length (+workspace-list-names))))
+      (lkn-tab-bar--workspaces)))
+
+  (customize-set-variable 'global-mode-string
+                          '((:eval (lkn-tab-bar--workspaces-or-nil)) " "))
   (customize-set-variable 'tab-bar-format '(tab-bar-format-global))
-  (add-hook! 'dirvish-setup-hook #'(lambda () (if (< 1 (length (+workspace-list-names))) (tab-bar-mode +1) (tab-bar-mode -1))))
+
+  ;; ── tab-bar-mode lifecycle managed by explicit hooks, not during display ─────
+  (defun lkn-tab-bar--sync-visibility (&rest _)
+    "Enable/disable tab-bar-mode based on current workspace count."
+    (let ((multiple-workspaces (and (bound-and-true-p persp-mode)
+                                    (< 1 (length (+workspace-list-names))))))
+      (cond ((and multiple-workspaces  (not tab-bar-mode)) (tab-bar-mode  1))
+            ((and (not multiple-workspaces) tab-bar-mode)  (tab-bar-mode -1)))))
+
+  ;; persp-mode runs these with run-hook-with-args so add-hook works fine.
+  (add-hook 'persp-activated-functions #'lkn-tab-bar--sync-visibility)
+  (add-hook 'persp-created-functions   #'lkn-tab-bar--sync-visibility)
+  ;; For kill we advise *after* so the count is already decremented.
+  (advice-add 'persp-kill :after #'lkn-tab-bar--sync-visibility)
+
+  ;; dirvish re-creates its window; re-sync visibility there too.
+  (add-hook! 'dirvish-setup-hook #'lkn-tab-bar--sync-visibility)
 
   ;; These two things combined prevents the tab list to be printed either as a
   ;; tooltip or in the echo area
