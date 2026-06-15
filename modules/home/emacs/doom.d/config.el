@@ -1140,7 +1140,8 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                     (string-join (reverse rcrumbs) separator)))))
   :hook
   (prog-mode . breadcrumb-local-mode)
-  (text-mode . breadcrumb-local-mode))
+  ;; (text-mode . breadcrumb-local-mode)
+  )
 
 ;; mouse mode must be initialised for each new terminal
 ;; see http://stackoverflow.com/a/6798279/27782
