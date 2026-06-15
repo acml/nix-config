@@ -141,8 +141,8 @@
             :n (format "w%d" n) fn))))
 
 (after! gcmh
-  (setq gcmh-high-cons-threshold (* 32 1024 1024)  ; 32 MB (Doom default: 16 MB)
-        gcmh-idle-delay           'auto
+  (setq gcmh-high-cons-threshold    (* 64 1024 1024)  ; 64 MB, was 32 MB
+        gcmh-idle-delay             'auto
         gcmh-auto-idle-delay-factor 10))
 
 (map! ;; [remap just-one-space]  #'cycle-spacing
@@ -179,10 +179,10 @@
 
     (defun wl-paste ()
       (unless (and wl-copy-process (process-live-p wl-copy-process))
-        (let ((result (string-trim-right
-                       (shell-command-to-string "wl-paste -n 2>/dev/null")
-                       "[\r\n]+")))
-          (unless (string-empty-p result) result))))
+        (with-temp-buffer
+          (when (zerop (call-process my/wl-paste-exe nil t nil "-n"))
+            (let ((result (string-trim-right (buffer-string) "[\r\n]+")))
+              (unless (string-empty-p result) result))))))
 
     (add-hook 'kill-emacs-hook
               (lambda ()
@@ -223,7 +223,7 @@
     (google-make-newline-indent)))
 
 (after! compile
-  (setq compilation-scroll-output t
+  (setq compilation-scroll-output 'first-error
         next-error-message-highlight t))
 
 (use-package! daemons
@@ -391,12 +391,12 @@
 
 (after! indent-bars
   (setq
-   indent-bars-color '(highlight :face-bg t :blend 0.15)
-   indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 1) ; blend=1: blend with BG only
-   indent-bars-highlight-current-depth '(:blend 0.5) ; pump up the BG blend on current
-   ;; indent-bars-pattern "."
-   indent-bars-starting-column nil
-   indent-bars-width-frac 0.1))
+   indent-bars-treesit-support         t    ; faster + more accurate with ts modes
+   indent-bars-color                   '(highlight :face-bg t :blend 0.15)
+   indent-bars-color-by-depth          '(:regexp "outline-\\([0-9]+\\)" :blend 1)
+   indent-bars-highlight-current-depth '(:blend 0.5)
+   indent-bars-starting-column         nil
+   indent-bars-width-frac              0.1))
 
 (use-package! journalctl-mode :commands (journalctl))
 
@@ -538,7 +538,10 @@ the sequences will be lost."
 
 (use-package! magit-todos
   :after magit
-  :config (magit-todos-mode 1))
+  :config
+  (setq magit-todos-max-items 30
+        magit-todos-depth     5)
+  (magit-todos-mode 1))
 
 (map! :leader
       (:prefix ("p" . "project")
@@ -663,8 +666,7 @@ the sequences will be lost."
 
 (use-package! rainbow-mode
   :hook
-  ((prog-mode . rainbow-mode)
-   (org-mode . rainbow-mode)))
+  ((css-mode scss-mode sass-mode less-css-mode web-mode conf-mode) . rainbow-mode))
 
 (use-package! scopeline
   :commands (scopeline-mode)

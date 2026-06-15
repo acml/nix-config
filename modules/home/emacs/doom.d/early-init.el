@@ -34,7 +34,7 @@
 ;; Doom sets these in its own early-init; mirroring them here ensures they apply
 ;; to the very first frame before Doom's machinery runs, eliminating any flicker
 ;; of menu/tool/scroll bars during startup.
-(push '(menu-bar-lines      . 0) default-frame-alist)
-(push '(tool-bar-lines      . 0) default-frame-alist)
+(push '(menu-bar-lines     . 0) default-frame-alist)
+(push '(tool-bar-lines     . 0) default-frame-alist)
 (push '(vertical-scroll-bars  ) default-frame-alist)
 (push '(horizontal-scroll-bars) default-frame-alist)
