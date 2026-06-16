@@ -173,35 +173,16 @@ DIR defaults to current project root."
 
 ;;; Compression Handling
 
-(eval-when-compile
-  (require 'jka-compr))
-
-(defvar DINA5CG52813LW--jka-compr-original-info-list jka-compr-compression-info-list
-  "Backup of the original jka-compr compression info list.")
-
-(defun DINA5CG52813LW--filter-compression-info-list (filename)
-  "Return filtered compression info list excluding .lzma for specific files.
-FILENAME is the file being processed."
-  (if (member (file-name-nondirectory filename) DINA5CG52813LW-lzma-excluded-files)
-      ;; Remove .lzma entry from the list
-      (cl-remove-if (lambda (entry)
-                      (and (vectorp entry)
-                           (string= (aref entry 0) "\\.lzma\\'")))
-                    DINA5CG52813LW--jka-compr-original-info-list)
-    DINA5CG52813LW--jka-compr-original-info-list))
-
-(defun DINA5CG52813LW--compression-advice (orig-fun filename &rest args)
-  "Advice around `insert-file-contents' - near-zero overhead on non-excluded files."
-  (if (and (stringp filename)
-           (string-suffix-p ".lzma" filename)
-           (member (file-name-nondirectory filename)
-                   DINA5CG52813LW-lzma-excluded-files))
-      (let ((jka-compr-compression-info-list
-             (DINA5CG52813LW--filter-compression-info-list filename)))
-        (apply orig-fun filename args))
-    (apply orig-fun filename args)))
-
-(advice-add 'insert-file-contents :around #'DINA5CG52813LW--compression-advice)
+;; Advise `jka-compr-get-compression-info' rather than `insert-file-contents'.
+;; The former is called only when jka-compr's file-name handler fires (*.lzma);
+;; the latter is called for every file Emacs reads, making advice there costly.
+(defadvice! DINA5CG52813LW--jka-compr-skip-excluded (fn filename)
+  "Return nil for FILENAME if it is in `DINA5CG52813LW-lzma-excluded-files'.
+This prevents jka-compr from attempting LZMA decompression on those files."
+  :around #'jka-compr-get-compression-info
+  (unless (member (file-name-nondirectory filename)
+                  DINA5CG52813LW-lzma-excluded-files)
+    (funcall fn filename)))
 
 ;;; Search Integration
 

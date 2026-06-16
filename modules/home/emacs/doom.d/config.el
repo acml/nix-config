@@ -154,6 +154,9 @@
 ;; credit: yorickvP on Github
 ;; wl-copy integration for Wayland clipboard(need wl-clipboard package)
 
+(defvar wl-copy-process nil
+  "Live wl-copy process, or nil when the clipboard is empty.")
+
 (add-hook 'emacs-startup-hook
           (lambda ()
             (when (or (getenv "WAYLAND_DISPLAY")
@@ -161,7 +164,6 @@
               (let ((wl-copy-exe  (executable-find "wl-copy"))
                     (wl-paste-exe (executable-find "wl-paste")))
                 (when (and wl-copy-exe wl-paste-exe)
-                  (defvar wl-copy-process nil)
 
                   (defun wl-copy (text)
                     (when (process-live-p wl-copy-process)
@@ -174,7 +176,7 @@
                                         :coding 'utf-8-unix
                                         :noquery t))
                     (process-send-string wl-copy-process text)
-                    (process-send-eof wl-copy-process))
+                    (process-send-eof    wl-copy-process))
 
                   (defun wl-paste ()
                     (unless (and wl-copy-process (process-live-p wl-copy-process))
@@ -588,10 +590,11 @@ the sequences will be lost."
 (after! org-roam
   (setq org-roam-db-update-on-save nil)
 
-  (defvar-local my/org-roam--sync-timer nil)
+  (defvar-local my/org-roam--sync-timer nil
+    "Timer handle for the debounced DB sync.")
 
   (defun my/org-roam-schedule-db-sync ()
-    "Cancel any pending sync and schedule a fresh one 2 s from now."
+    "Cancel any pending sync; schedule a fresh one 2 s from now."
     (when (timerp my/org-roam--sync-timer)
       (cancel-timer my/org-roam--sync-timer))
     (let ((file (buffer-file-name)))
@@ -599,11 +602,11 @@ the sequences will be lost."
             (run-with-idle-timer 2 nil
                                  (lambda () (org-roam-db-update-file file))))))
 
-  (add-hook 'org-mode-hook
+  ;; org-roam-find-file-hook fires only for roam files; no per-buffer predicate needed.
+  (add-hook 'org-roam-find-file-hook
             (lambda ()
-              (when (org-roam-file-p)
-                (add-hook 'after-save-hook
-                          #'my/org-roam-schedule-db-sync nil :local)))))
+              (add-hook 'after-save-hook
+                        #'my/org-roam-schedule-db-sync nil :local))))
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
