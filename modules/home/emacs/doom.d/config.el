@@ -9,10 +9,24 @@
 ;;   :config
 ;;   (add-hook 'after-init-hook #'benchmark-init/deactivate))
 
+;;; Cached environment predicates ------------------------------------------------
+(defconst my/host (system-name)
+  "Cached `system-name'.")
+
+(defconst my/work-host-p
+  (string-equal-ignore-case my/host "DINA5CG52813LW")
+  "Non-nil on the DINA5CG52813LW work machine.")
+
+(defconst my/wsl-p
+  (and (featurep :system 'linux)
+       (or (getenv "WSL_DISTRO_NAME")
+           (file-exists-p "/proc/sys/fs/binfmt_misc/WSLInterop")))
+  "Cached WSL detection.")
+
 (defconst my/font-size
   (cond ((featurep :system 'macos) 13.0)
-        ((string= (system-name) "DINA5CG52813LW") 10.8)
-        (t 12.0)))
+        (my/work-host-p            10.8)
+        (t                         12.0)))
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
@@ -55,17 +69,22 @@
       vc-handled-backends          '(Git)
       xref-history-storage 'xref-window-local-history)
 
+(defvar my/splash-images
+  (when-let* ((dir (file-name-concat doom-user-dir "splash"))
+              ((file-directory-p dir)))
+    (directory-files dir t "^[^.]" t))
+  "Cached splash image candidates.")
+
+(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+
 (add-hook! 'doom-after-init-hook
   (defun my/set-random-splash-image ()
-    (when-let* ((dir     (file-name-concat doom-user-dir "splash"))
-                (choices (and (file-directory-p dir)
-                              (directory-files dir t "^[^.]" t)))
-                ((consp choices)))
-      (setq fancy-splash-image (seq-random-elt choices))))
+    (when my/splash-images
+      (setq fancy-splash-image (seq-random-elt my/splash-images))))
   (defun my/setup-global-modes ()
-    "Enable repeat-mode and subword-mode after Doom initializes."
+    "Enable repeat-mode immediately; defer subword-mode to idle."
     (repeat-mode 1)
-    (global-subword-mode 1)))
+    (run-with-idle-timer 0.5 nil #'global-subword-mode 1)))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 ;; Defer to after-init so customizations don't slow module loading.
@@ -113,10 +132,9 @@
 (use-package! windmove
   :after-call doom-first-input-hook
   :config
+  (setq windmove-wrap-around t)
   (windmove-default-keybindings '(shift))
-  (windmove-swap-states-default-keybindings '(shift ctrl))
-  :custom
-  (windmove-wrap-around t))
+  (windmove-swap-states-default-keybindings '(shift ctrl)))
 
 ;; (add-hook 'org-shiftup-final-hook 'windmove-up)
 ;; (add-hook 'org-shiftleft-final-hook 'windmove-left)
@@ -227,8 +245,17 @@
         (format "%s\\|%s" vc-ignore-dir-regexp tramp-file-name-regexp)))
 
 (use-package! dired-auto-readme
+  :commands dired-auto-readme-mode
   :config (setq dired-auto-readme-separator "\n")
-  :hook (dired-mode . dired-auto-readme-mode))
+  :hook (dired-mode . my/dired-auto-readme-maybe))
+
+(defun my/dired-auto-readme-maybe ()
+  "Enable `dired-auto-readme-mode' only when a README exists here."
+  (when (seq-some
+         (lambda (n) (file-exists-p (expand-file-name n)))
+         '("README" "README.md" "README.org" "README.rst" "README.txt"
+           "readme" "readme.md" "readme.org" "readme.rst" "readme.txt"))
+    (dired-auto-readme-mode 1)))
 
 (use-package! page-break-lines
   :hook (dired-auto-readme-mode . page-break-lines-mode))
@@ -353,17 +380,16 @@
         '((border-mode-line-active unspecified)
           (border-mode-line-inactive unspecified))))
 
-(let ((my/theme (if (display-graphic-p) 'ef-eagle 'ef-dark)))
-  (if (daemonp)
-      (add-hook 'after-make-frame-functions
-                (lambda (frame)
-                  (with-selected-frame frame
-                    (let ((theme (if (display-graphic-p) 'ef-eagle 'ef-dark)))
-                      (unless (memq theme custom-enabled-themes)
-                        (load-theme theme t)))
-                    (when (display-graphic-p)
-                      (set-frame-parameter nil 'fullscreen 'maximized)))))
-    (setq doom-theme my/theme)))
+(setq doom-theme (if (display-graphic-p) 'ef-eagle 'ef-dark))
+(when (daemonp)
+  (add-hook 'after-make-frame-functions
+            (defun my/daemon-theme-setup (frame)
+              (with-selected-frame frame
+                (let ((theme (if (display-graphic-p) 'ef-eagle 'ef-dark)))
+                  (unless (memq theme custom-enabled-themes)
+                    (load-theme theme t)))
+                (when (display-graphic-p)
+                  (set-frame-parameter nil 'fullscreen 'maximized))))))
 
 ;; (after! expand-region
 ;;   (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
@@ -534,15 +560,15 @@ the sequences will be lost."
   "Cached fallback for magit-section-visibility-indicators.")
 
 (after! magit
-  (setopt magit-format-file-function #'magit-format-file-nerd-icons
-          magit-repository-directories '(("~/.nix-config" . 0)
-                                         ("~/.nixpkgs" . 0)
-                                         ("~/Projects" . 3))
-          magit-save-repository-buffers nil)
-  (setq ;; Don't restore the wconf after quitting magit, it's jarring
-   magit-inhibit-save-previous-winconf t
-   transient-values '((magit-rebase "--autostash" "--autosquash")
-                      (magit-pull "--autostash" "--rebase")))
+  (setq magit-format-file-function #'magit-format-file-nerd-icons
+        magit-repository-directories '(("~/.nix-config" . 0)
+                                       ("~/.nixpkgs" . 0)
+                                       ("~/Projects" . 3))
+        magit-save-repository-buffers nil
+        ;; Don't restore the wconf after quitting magit, it's jarring
+        magit-inhibit-save-previous-winconf t
+        transient-values '((magit-rebase "--autostash" "--autosquash")
+                           (magit-pull "--autostash" "--rebase")))
   (magit-add-section-hook 'magit-status-sections-hook
                           'magit-insert-worktrees
                           'magit-insert-status-headers t)
@@ -550,11 +576,13 @@ the sequences will be lost."
                           'magit-insert-ignored-files
                           'magit-insert-untracked-files
                           nil)
+  (defconst my/magit-section-visibility-indicators
+    `((magit-fringe-bitmap> . magit-fringe-bitmapv)
+      (,my/magit-fold-indicator . t)))
   (add-hook! 'magit-mode-hook
-    (setq-local
-     left-fringe-width 16
-     magit-section-visibility-indicators `((magit-fringe-bitmap> . magit-fringe-bitmapv)
-                                           (,my/magit-fold-indicator . t)))))
+    (setq-local left-fringe-width 16
+                magit-section-visibility-indicators
+                my/magit-section-visibility-indicators)))
 
 (after! magit-repos
   (setq magit-repolist-columns
@@ -591,7 +619,7 @@ the sequences will be lost."
 
 (use-package! gptel-magit
   :after gptel magit
-  :if (not (string= (system-name) "DINA5CG52813LW"))
+  :unless my/work-host-p
   ;; :config
   ;; (setq gptel-magit-model 'google/gemini-2.0-flash-exp:free
   ;;       gptel-magit-backend (gptel-make-openai "OpenRouter"
@@ -651,9 +679,9 @@ the sequences will be lost."
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setopt org-directory (expand-file-name "~/Documents/org/")
-        org-startup-with-inline-images t)
-(setq org-agenda-files (list org-directory (expand-file-name "~/Documents/worg/")))
+(setq org-directory (expand-file-name "~/Documents/org/")
+      org-startup-with-inline-images t
+      org-agenda-files (list org-directory (expand-file-name "~/Documents/worg/")))
 
 (after! org
   (setq org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?)) " " nil)
@@ -680,12 +708,11 @@ the sequences will be lost."
       :desc "Swap Right" ">" #'+workspace/swap-right)
 
 (after! proced
-  (setopt
-   proced-enable-color-flag t
-   proced-tree-flag t
-   proced-auto-update-flag 'visible
-   proced-auto-update-interval 1
-   proced-descend t))
+  (setq proced-enable-color-flag t
+        proced-tree-flag t
+        proced-auto-update-flag 'visible
+        proced-auto-update-interval 1
+        proced-descend t))
 
 (use-package! projectile
   :commands (+default/discover-projects projectile-register-project-type)
@@ -895,39 +922,27 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
         :n "Q" #'reader-close-doc))
 
 ;; WSL specific setting
-(defun acml/wsl-p ()
-  "Return non-nil when running inside Windows Subsystem for Linux."
-  (and (featurep :system 'linux)
-       (or (getenv "WSL_DISTRO_NAME")
-           (file-exists-p "/proc/sys/fs/binfmt_misc/WSLInterop"))))
-
-(add-hook! doom-after-init-hook
-  (when (acml/wsl-p)
-    ;; teach Emacs how to open links with your default browser
-    (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
-          (cmd-args '("/c" "start")))
+(when my/wsl-p
+  (add-hook! 'doom-after-init-hook
+    (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe"))
       (when (file-exists-p cmd-exe)
         (setq browse-url-generic-program  cmd-exe
-              browse-url-generic-args     cmd-args
+              browse-url-generic-args     '("/c" "start")
               browse-url-browser-function 'browse-url-generic
-              search-web-default-browser 'browse-url-generic)))
-
+              search-web-default-browser  'browse-url-generic)))
     (when (display-graphic-p)
       (defun acml-set-keyboard ()
         (interactive)
-        (start-process "" nil "setxkbmap" "us" "-variant" "colemak")
-        (message "Switched to the Colemak Keyboard Layout"))
-
+        (start-process "" nil "setxkbmap" "us" "-variant" "colemak"))
       (map! "<f9>" #'acml-set-keyboard)
       (acml-set-keyboard))))
 
-(map! "<f5>" #'projectile-run-project)
-(map! "<f6>" #'previous-error)
-(map! "<f7>" #'next-error)
-(map! "<S-f8>" #'projectile-compile-project)
-(map! "<f8>" #'projectile-repeat-last-command)
+(map! "<f5>"   #'projectile-run-project
+      "<f6>"   #'previous-error
+      "<f7>"   #'next-error
+      "<S-f8>" #'projectile-compile-project
+      "<f8>"   #'projectile-repeat-last-command)
 ;; (map! "<f9>" #'acml-set-keyboard)
-;; F12
 
 (use-package! macher
   :defer t
@@ -1088,8 +1103,16 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   :commands copilot-mode
   :init
   (add-hook! 'doom-first-input-hook
-    (defun my/enable-copilot-everywhere ()
-      (add-hook 'prog-mode-hook #'copilot-mode)))
+    (defun my/defer-copilot-activation ()
+      "Attach copilot to prog-mode after a short idle period."
+      (run-with-idle-timer
+       1.0 nil
+       (lambda ()
+         (add-hook 'prog-mode-hook #'copilot-mode)
+         (dolist (buf (buffer-list))
+           (with-current-buffer buf
+             (when (derived-mode-p 'prog-mode)
+               (copilot-mode 1))))))))
   :config
   (map! :map copilot-completion-map
         "<tab>"   #'copilot-accept-completion
@@ -1201,9 +1224,6 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 (unless (daemonp)
   (initialize-mouse-mode))
 
-(unless (display-graphic-p)
-  (setopt xterm-extra-capabilities '(getSelection setSelection modifyOtherKeys)))
-
 ;; TUI prettification
 (unless (display-graphic-p)
   (when (version<= "31" emacs-version)
@@ -1220,7 +1240,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 
 ;; Load a file with the same name as the computer’s name. Just keep on going if
 ;; the requisite file isn't there.
-(load! (car (split-string (system-name) "\\.")) nil t)
+(load! (car (split-string my/host "\\.")) nil t)
 
 ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
 (load! (car (reverse (split-string (symbol-name system-type) "/"))) nil t)

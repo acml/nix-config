@@ -75,9 +75,8 @@ Must be side-effect-free: this runs inside a display :eval form."
     (when (and tab-bar-mode (bound-and-true-p persp-mode))
       (lkn-tab-bar--workspaces)))
 
-  (customize-set-variable 'global-mode-string
-                          '((:eval (lkn-tab-bar--workspaces-or-nil)) " "))
-  (customize-set-variable 'tab-bar-format '(tab-bar-format-global))
+  (setq global-mode-string '((:eval (lkn-tab-bar--workspaces-or-nil)) " ")
+        tab-bar-format     '(tab-bar-format-global))
 
   ;; ── tab-bar-mode lifecycle managed by explicit hooks, not during display ─────
   (defun lkn-tab-bar--sync-visibility (&rest _)

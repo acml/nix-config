@@ -98,15 +98,23 @@ Returns a list of directory paths suitable for `magit-repository-directories`."
 
     repositories))
 
+(defvar DINA5CG52813LW--magit-repo-cache (make-hash-table :test 'equal))
+
 (defadvice! DINA5CG52813LW--enhance-magit-repositories (fn &rest args)
-  "Enhance magit repository discovery with multi-repo project support."
   :around #'magit-list-repositories
   (if-let* ((project-root (projectile-project-root))
-            (main-folder (DINA5CG52813LW--get-project-main-folder project-root))
-            (xml-file (DINA5CG52813LW--get-project-config-path project-root)))
-      (let ((magit-repository-directories
-             (DINA5CG52813LW--collect-magit-repositories project-root main-folder xml-file)))
-        (apply fn args))
+            (main-folder  (DINA5CG52813LW--get-project-main-folder project-root))
+            (xml-file     (DINA5CG52813LW--get-project-config-path project-root))
+            (key          (list project-root
+                                (file-attribute-modification-time
+                                 (file-attributes xml-file))))
+            (magit-repository-directories
+             (or (gethash key DINA5CG52813LW--magit-repo-cache)
+                 (puthash key
+                          (DINA5CG52813LW--collect-magit-repositories
+                           project-root main-folder xml-file)
+                          DINA5CG52813LW--magit-repo-cache))))
+      (apply fn args)
     (apply fn args)))
 
 ;;; Projectile Integration
@@ -187,10 +195,12 @@ This prevents jka-compr from attempting LZMA decompression on those files."
 ;;; Search Integration
 
 (after! consult
-  (defadvice! DINA5CG52813LW--enhance-consult-grep (fn &rest args)
-    "Enhance consult-grep to handle LZMA files with preprocessing."
-    :around #'consult--grep
-    (let ((consult-ripgrep-args (concat consult-ripgrep-args " --pre-glob 'Makefile.lzma' --pre 'cat'")))
+  (defadvice! DINA5CG52813LW--enhance-consult-ripgrep (fn &rest args)
+    "Pre-process Makefile.lzma so ripgrep can search through it."
+    :around #'consult--ripgrep-make-builder
+    (let ((consult-ripgrep-args
+           (concat consult-ripgrep-args
+                   " --pre-glob 'Makefile.lzma' --pre 'cat'")))
       (apply fn args))))
 
 ;;; GPT Integration

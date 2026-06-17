@@ -43,8 +43,8 @@
 (push '(tool-bar-lines     . 0) default-frame-alist)
 (push '(vertical-scroll-bars  ) default-frame-alist)
 (push '(horizontal-scroll-bars) default-frame-alist)
-(push '(fullscreen . maximized) default-frame-alist) ; no resize flash at startup
-(push '(fullscreen . maximized) initial-frame-alist) ; no resize flash at startup
+;; (push '(fullscreen . maximized) default-frame-alist) ; no resize flash at startup
+;; (push '(fullscreen . maximized) initial-frame-alist) ; no resize flash at startup
 
 ;; ── JIT font-lock ──────────────────────────────────────────────────────────
 ;; Defer fontification until idle; stealth-fontify in the background afterward.
@@ -54,3 +54,6 @@
       jit-lock-stealth-time        1.0   ; background-fontify after 1 s idle
       jit-lock-stealth-nice        0.2   ; yield to input every 200 ms during stealth
       fast-but-imprecise-scrolling t)    ; skip fontification during wheel/page scroll
+
+;; Modern terminals: report selection, extended modifiers, mouse, etc.
+(setq xterm-extra-capabilities '(getSelection setSelection modifyOtherKeys))
