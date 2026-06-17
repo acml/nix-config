@@ -470,12 +470,40 @@ the sequences will be lost."
 (defvar-local acml/log-mode--colorized-to nil
   "Buffer position up to which ANSI colors have been applied.")
 
+(defvar-local acml/log-mode--colorize-timer nil
+  "Idle timer used to colorize large log files in the background.")
+
+(defcustom acml/log-eager-colorize-limit (* 2 1024 1024)
+  "Files larger than this are colorized incrementally during idle time."
+  :type 'integer
+  :group 'acml/log-mode)
+
+(defcustom acml/log-colorize-chunk-size (* 256 1024)
+  "Bytes to colorize per idle cycle for large log files."
+  :type 'integer
+  :group 'acml/log-mode)
+
+(defun acml/log-mode--colorize-chunk (buf)
+  "Colorize the next chunk of BUF; reschedule until end of buffer."
+  (when (buffer-live-p buf)
+    (with-current-buffer buf
+      (when (eq major-mode 'acml/log-mode)
+        (let* ((start  (or acml/log-mode--colorized-to (point-min)))
+               (target (min (+ start acml/log-colorize-chunk-size) (point-max)))
+               (end    (save-excursion (goto-char target) (line-end-position)))
+               (ansi-color-context-region nil))
+          (when (< start end)
+            (ansi-color-apply-on-region start end t)
+            (setq acml/log-mode--colorized-to end))
+          (setq acml/log-mode--colorize-timer
+                (and (< end (point-max))
+                     (run-with-idle-timer 0.1 nil
+                                          #'acml/log-mode--colorize-chunk buf))))))))
+
 (defun acml/ansi-color-tail ()
   "Colorize only newly appended content since last call."
   (let* ((prev (or acml/log-mode--colorized-to 0))
-         (beg  (if (> prev (point-max))
-                   (point-min)   ; file was truncated/rotated — restart
-                 prev))
+         (beg  (if (> prev (point-max)) (point-min) prev))
          (ansi-color-context-region nil))
     (ansi-color-apply-on-region beg (point-max) t)
     (setq acml/log-mode--colorized-to (point-max))))
@@ -483,10 +511,21 @@ the sequences will be lost."
 (define-derived-mode acml/log-mode fundamental-mode "Log"
   "Major mode for log files: strips DOS line endings and colorizes ANSI escapes."
   (acml/hide-dos-eol)
-  (acml/ansi-color)
-  (setq-local acml/log-mode--colorized-to (point-max))
-  (setq-local auto-revert-verbose nil)
+  (setq-local acml/log-mode--colorized-to (point-min)
+              auto-revert-verbose          nil)
+  (cond
+   ((< (buffer-size) acml/log-eager-colorize-limit)
+    (acml/ansi-color)
+    (setq-local acml/log-mode--colorized-to (point-max)))
+   (t
+    (message "acml/log-mode: incremental ANSI colorization (%d bytes)" (buffer-size))
+    (acml/log-mode--colorize-chunk (current-buffer))))
   (add-hook 'after-revert-hook #'acml/ansi-color-tail nil t)
+  (add-hook 'kill-buffer-hook
+            (lambda ()
+              (when (timerp acml/log-mode--colorize-timer)
+                (cancel-timer acml/log-mode--colorize-timer)))
+            nil t)
   (auto-revert-tail-mode 1))
 (add-to-list 'auto-mode-alist '("\\.log\\'" . acml/log-mode))
 
