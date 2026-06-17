@@ -55,6 +55,7 @@
       doom-serif-font (font-spec :family "BlexMono Nerd Font" :size my/font-size :weight 'light)
       auth-source-cache-expiry nil ; default is 7200 (2h)
       auto-revert-avoid-polling t  ; refresh buffers when files change on disk
+      auto-revert-check-vc-info nil; large compiled tags / treesit files: skip the “file changed on disk” poll
       auto-revert-use-notify t     ; use inotify instead of polling
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
       delete-by-moving-to-trash t  ; Delete files to trash
@@ -66,7 +67,8 @@
       undo-limit 80000000          ; Raise undo-limit to 80Mb
       window-combination-resize t  ; take new window space from all other windows (not just current)
       x-stretch-cursor t           ; Stretch cursor to the glyph width
-      vc-handled-backends          '(Git)
+      vc-handled-backends '(Git)
+      vc-follow-symlinks  t
       xref-history-storage 'xref-window-local-history)
 
 (defvar my/splash-images
@@ -142,20 +144,23 @@
 ;; (add-hook 'org-shiftright-final-hook 'windmove-right)
 
 (use-package! winum
-  :after-call doom-first-input-hook
-  :config
+  :defer t
+  :init
   (dotimes (i 9)
     (let* ((n (1+ i))
            (fn (intern (format "winum-select-window-%d" n))))
+      (autoload fn "winum" nil t)
       (map! :n (format "s-%d" n) fn
             :leader
             :n (number-to-string n) fn
-            :n (format "w%d" n) fn))))
+            :n (format "w%d" n) fn)))
+  :config
+  (winum-mode 1))
 
 (after! gcmh
-  (setq gcmh-high-cons-threshold    (* 64 1024 1024)  ; 64 MB, was 32 MB
+  (setq gcmh-high-cons-threshold (* 128 1024 1024)
         gcmh-idle-delay             'auto
-        gcmh-auto-idle-delay-factor 10))
+        gcmh-auto-idle-delay-factor 20))
 
 (map! ;; [remap just-one-space]  #'cycle-spacing
  [remap upcase-word]     #'upcase-dwim
@@ -214,10 +219,10 @@
         calendar-latitude 41.168602
         calendar-longitude 29.047024))
 
-(after! google-c-style
-  (add-hook! 'c-mode-common-hook
-    (google-set-c-style)
-    (google-make-newline-indent)))
+(add-hook! 'c-mode-common-hook
+  (require 'google-c-style)
+  (google-set-c-style)
+  (google-make-newline-indent))
 
 (after! compile
   (setq compilation-scroll-output 'first-error
@@ -249,12 +254,13 @@
   :config (setq dired-auto-readme-separator "\n")
   :hook (dired-mode . my/dired-auto-readme-maybe))
 
+(defconst my/readme-file-rx
+  "\\`[Rr][Ee][Aa][Dd][Mm][Ee]\\(?:\\.[A-Za-z]+\\)?\\'"
+  "Regex matching README files (any case, any extension).")
+
 (defun my/dired-auto-readme-maybe ()
   "Enable `dired-auto-readme-mode' only when a README exists here."
-  (when (seq-some
-         (lambda (n) (file-exists-p (expand-file-name n)))
-         '("README" "README.md" "README.org" "README.rst" "README.txt"
-           "readme" "readme.md" "readme.org" "readme.rst" "readme.txt"))
+  (when (directory-files default-directory nil my/readme-file-rx t 1)
     (dired-auto-readme-mode 1)))
 
 (use-package! page-break-lines
@@ -330,8 +336,8 @@
     (set-eglot-client! 'nix-ts-mode nil-lsp)))
 
 (after! eldoc
-  (setq eldoc-idle-delay 0.75
-        eldoc-echo-area-use-multiline-p nil))   ; one-liner echo, no resizing
+  (setq eldoc-idle-delay 0.4
+        eldoc-echo-area-use-multiline-p nil))
 
 (after! embark
   (setq prefix-help-command #'embark-prefix-help-command))
@@ -510,10 +516,12 @@ the sequences will be lost."
   :group 'acml/log-mode)
 
 (defun acml/log-mode--colorize-chunk (buf)
-  "Colorize the next chunk of BUF; reschedule until end of buffer."
   (when (buffer-live-p buf)
     (with-current-buffer buf
       (when (eq major-mode 'acml/log-mode)
+        (when (timerp acml/log-mode--colorize-timer)
+          (cancel-timer acml/log-mode--colorize-timer)
+          (setq acml/log-mode--colorize-timer nil))
         (let* ((start  (or acml/log-mode--colorized-to (point-min)))
                (target (min (+ start acml/log-colorize-chunk-size) (point-max)))
                (end    (save-excursion (goto-char target) (line-end-position)))
@@ -521,10 +529,10 @@ the sequences will be lost."
           (when (< start end)
             (ansi-color-apply-on-region start end t)
             (setq acml/log-mode--colorized-to end))
-          (setq acml/log-mode--colorize-timer
-                (and (< end (point-max))
-                     (run-with-idle-timer 0.1 nil
-                                          #'acml/log-mode--colorize-chunk buf))))))))
+          (when (< end (point-max))
+            (setq acml/log-mode--colorize-timer
+                  (run-with-idle-timer 0.1 nil
+                                       #'acml/log-mode--colorize-chunk buf))))))))
 
 (defun acml/ansi-color-tail ()
   "Colorize only newly appended content since last call."
@@ -603,12 +611,17 @@ the sequences will be lost."
           ("Path" 0 magit-repolist-column-path nil))))
 
 (use-package! magit-todos
-  :after magit
+  :defer t
+  :init
+  (add-hook 'magit-status-mode-hook
+            (defun my/magit-todos-once-h ()
+              (require 'magit-todos)
+              (magit-todos-mode 1)
+              (remove-hook 'magit-status-mode-hook #'my/magit-todos-once-h)))
   :config
   (setq magit-todos-max-items 30
         magit-todos-depth     5
-        magit-todos-scanner   #'magit-todos--scan-with-rg)
-  (magit-todos-mode 1))
+        magit-todos-scanner   #'magit-todos--scan-with-rg))
 
 (map! :leader
       (:prefix ("p" . "project")
@@ -616,19 +629,6 @@ the sequences will be lost."
 
 (after! git-commit
   (setq git-commit-summary-max-length 68))
-
-(use-package! gptel-magit
-  :after gptel magit
-  :unless my/work-host-p
-  ;; :config
-  ;; (setq gptel-magit-model 'google/gemini-2.0-flash-exp:free
-  ;;       gptel-magit-backend (gptel-make-openai "OpenRouter"
-  ;;                             :host "openrouter.ai"
-  ;;                             :endpoint "/api/v1/chat/completions"
-  ;;                             :stream t
-  ;;                             :key #'gptel-api-key-from-auth-source
-  ;;                             :models '(google/gemini-2.0-flash-exp:free)))
-  )
 
 (add-hook! '(org-mode-hook LaTeX-mode-hook markdown-mode-hook gfm-mode-hook Info-mode-hook)
            #'mixed-pitch-mode)
@@ -654,7 +654,11 @@ the sequences will be lost."
   :hook (org-mode . org-block-capf-add-to-completion-at-point-functions))
 
 (use-package! org-glossary
-  :hook (org-mode . org-glossary-mode))
+  :commands (org-glossary-mode org-glossary-insert-term-definition)
+  :init
+  (map! :map org-mode-map
+        :localleader
+        :desc "Glossary mode" "G" #'org-glossary-mode))
 
 (after! org-roam
   (setq org-roam-db-update-on-save nil)
@@ -1102,16 +1106,22 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   :defer t
   :commands copilot-mode
   :init
+  (defun my/copilot-eligible-p ()
+    (and (not buffer-read-only)
+         buffer-file-name
+         (< (buffer-size) 200000)))
+  (defun my/copilot-maybe ()
+    (when (my/copilot-eligible-p) (copilot-mode 1)))
   (add-hook! 'doom-first-input-hook
     (defun my/defer-copilot-activation ()
-      "Attach copilot to prog-mode after a short idle period."
       (run-with-idle-timer
        1.0 nil
        (lambda ()
-         (add-hook 'prog-mode-hook #'copilot-mode)
+         (add-hook 'prog-mode-hook #'my/copilot-maybe)
          (dolist (buf (buffer-list))
            (with-current-buffer buf
-             (when (derived-mode-p 'prog-mode)
+             (when (and (derived-mode-p 'prog-mode)
+                        (my/copilot-eligible-p))
                (copilot-mode 1))))))))
   :config
   (map! :map copilot-completion-map
@@ -1121,10 +1131,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
         "C-<tab>" #'copilot-accept-completion-by-word
         "C-n"     #'copilot-next-completion
         "C-p"     #'copilot-previous-completion)
-  (setq copilot-indentation-alist
-        '((prog-mode 2) (org-mode 2) (text-mode 2)
-          (clojure-mode 2) (emacs-lisp-mode 2))
-        copilot-max-char 100000))
+  (setq copilot-max-char 100000))
 
 (use-package! gt
   :defer t
@@ -1166,11 +1173,16 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   :config
   ;; Don't show the project/file name in the header, show only an icon
   (after! nerd-icons
+    (defvar-local my/breadcrumb-icon-cache nil)
+    (add-hook 'find-file-hook
+              (lambda () (setq my/breadcrumb-icon-cache nil)))
     (advice-add #'breadcrumb-project-crumbs :override
                 (lambda ()
-                  (concat " " (if-let* ((file buffer-file-name))
-                                  (nerd-icons-icon-for-file file)
-                                (nerd-icons-icon-for-mode major-mode)))))
+                  (or my/breadcrumb-icon-cache
+                      (setq my/breadcrumb-icon-cache
+                            (concat " " (if-let* ((f buffer-file-name))
+                                            (nerd-icons-icon-for-file f)
+                                          (nerd-icons-icon-for-mode major-mode)))))))
     (advice-add #'breadcrumb--format-ipath-node :around
                 (lambda (og p more &rest r)
                   "Icon for items"

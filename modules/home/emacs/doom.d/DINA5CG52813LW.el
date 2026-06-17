@@ -216,13 +216,6 @@ This prevents jka-compr from attempting LZMA decompression on those files."
   (when (fboundp 'macher-install)
     (macher-install)))
 
-(use-package! gptel-magit
-  :after gptel magit
-  :config
-  ;; (setq gptel-magit-model 'gpt-5.5
-  ;;       gptel-magit-backend (gptel-make-gh-copilot "Copilot"))
-  )
-
 (after! dirvish
   (setq dirvish-quick-access-entries
         (append dirvish-quick-access-entries '(("c" "/smb:z004cvhz%ad001.siemens.net@tristkfilesrv:/Data/008_Projects/CP1200/" "CP1200")))))

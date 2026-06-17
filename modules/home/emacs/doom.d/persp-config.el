@@ -184,8 +184,10 @@ clicked."
 
   (defun my--frame-title-invalidate (&rest _) (setq my--frame-title-cache nil))
 
-  (add-hook 'window-buffer-change-functions #'my--frame-title-invalidate)
-  (add-hook 'after-save-hook                #'my--frame-title-invalidate)
+  (add-hook 'window-buffer-change-functions  #'my--frame-title-invalidate)
+  (add-hook 'after-save-hook                 #'my--frame-title-invalidate)
+  (add-hook 'find-file-hook                  #'my--frame-title-invalidate)
+  (add-hook 'after-change-major-mode-hook    #'my--frame-title-invalidate)
 
   (defun my--frame-title-format ()
     (or my--frame-title-cache

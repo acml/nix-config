@@ -57,3 +57,18 @@
 
 ;; Modern terminals: report selection, extended modifiers, mouse, etc.
 (setq xterm-extra-capabilities '(getSelection setSelection modifyOtherKeys))
+
+;; Skip the cost of file-handler resolution for every `load' / `require'
+;; during startup; restore the original list once Emacs is up.
+(unless (or (daemonp) noninteractive)
+  (let ((old-value (default-toplevel-value 'file-name-handler-alist)))
+    (set-default-toplevel-value 'file-name-handler-alist nil)
+    (add-hook 'emacs-startup-hook
+              (lambda ()
+                (set-default-toplevel-value
+                 'file-name-handler-alist
+                 (delete-dups (append old-value file-name-handler-alist))))
+              101)))                            ; after Doom's own hooks
+
+;; Avoid the implicit `recentf-mode' / `savehist-mode' GC churn during init.
+(setq idle-update-delay 1.0)                    ; default 0.5
