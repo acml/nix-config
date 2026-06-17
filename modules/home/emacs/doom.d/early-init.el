@@ -11,10 +11,15 @@
 ;; Suppress the implicit frame resize fired when font metrics change during init.
 (setq frame-inhibit-implied-resize t)
 
+;; Don't render cursor / region in inactive windows.
+(setq-default cursor-in-non-selected-windows nil)
+(setq highlight-nonselected-windows         nil)
+
 ;; Resize by pixel rather than by character — set here so it takes effect
 ;; before any font or frame geometry calculation runs.
 (setq frame-resize-pixelwise t
-      window-resize-pixelwise t)
+      window-resize-pixelwise t
+      x-gtk-resize-child-frames 'resize-mode)   ; only meaningful under GTK
 
 ;; Prefer fresher bytecode over stale .elc during active development.
 (setq load-prefer-newer noninteractive)

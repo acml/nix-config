@@ -155,13 +155,11 @@
   (dotimes (i 9)
     (let* ((n (1+ i))
            (fn (intern (format "winum-select-window-%d" n))))
-      (autoload fn "winum" nil t)
       (map! :n (format "s-%d" n) fn
             :leader
             :n (number-to-string n) fn
-            :n (format "w%d" n) fn)))
-  :config
-  (winum-mode 1))
+            :n (format "w%d" n)     fn)))
+  :config (winum-mode 1))
 
 (after! gcmh
   (setq gcmh-high-cons-threshold (* 128 1024 1024)
@@ -248,7 +246,9 @@
     "u" 'daemons-systemd-toggle-user))
 
 (after! dired
-  (setq dired-listing-switches (concat dired-listing-switches " --time-style=long-iso")))
+  (unless (string-match-p "--time-style" dired-listing-switches)
+    (setq dired-listing-switches
+          (concat dired-listing-switches " --time-style=long-iso"))))
 
 (after! tramp
   ;; Prevent VC from invoking git/svn/etc over SSH on every remote buffer switch.
@@ -356,7 +356,7 @@ we're not the dirvish side window."
      +default/search-notes-for-symbol-at-point
      +default/search-emacsd
      consult-bookmark
-     :preview-key (list "C-SPC" :debounce 0.2 'any))
+     :preview-key '("C-SPC" :debounce 0.2 any))
     ;; (consult-customize consult-line consult-buffer
     ;;                    :preview-key '(:debounce 0.15 any))
     ))
@@ -477,11 +477,16 @@ we're not the dirvish side window."
 ;;         lsp-ui-sideline-show-symbol t))
 
 ;; https://stackoverflow.com/questions/730751/hiding-m-in-emacs
+(defvar acml/hide-dos-eol--table
+  (let ((tbl (make-display-table)))
+    (aset tbl ?\^M [])
+    tbl)
+  "Shared display table that hides ^M characters.")
+
 (defun acml/hide-dos-eol ()
   "Do not show ^M in files containing mixed UNIX and DOS line endings."
   (interactive)
-  (setq buffer-display-table (make-display-table))
-  (aset buffer-display-table ?\^M []))
+  (setq buffer-display-table acml/hide-dos-eol--table))
 
 ;; https://newbedev.com/how-do-i-display-ansi-color-codes-in-emacs-for-any-mode
 (defun acml/ansi-color ()
@@ -695,12 +700,12 @@ the sequences will be lost."
       org-startup-with-inline-images t
       org-agenda-files (list org-directory (expand-file-name "~/Documents/worg/")))
 
+(add-hook 'org-load-hook (lambda () (add-to-list 'org-modules 'org-habit)))
 (after! org
   (setq org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?)) " " nil)
         org-hide-emphasis-markers t
         org-latex-pdf-process '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f")
-        org-startup-folded 'show2levels)
-  (add-to-list 'org-modules 'org-habit))
+        org-startup-folded 'show2levels))
 
 (add-hook! 'org-mode-hook
   (unless (display-graphic-p)
@@ -729,7 +734,7 @@ the sequences will be lost."
         proced-descend t))
 
 (use-package! projectile
-  :commands (+default/discover-projects projectile-register-project-type)
+  :commands (projectile-register-project-type)
   :init
   (setq ;; projectile-switch-project-action 'projectile-dired
    projectile-project-root-functions '(projectile-root-local
@@ -1178,8 +1183,11 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   ;; Don't show the project/file name in the header, show only an icon
   (after! nerd-icons
     (defvar-local my/breadcrumb-icon-cache nil)
-    (add-hook 'find-file-hook
-              (lambda () (setq my/breadcrumb-icon-cache nil)))
+    (defun my/breadcrumb--invalidate-icon-cache (&rest _)
+      (setq my/breadcrumb-icon-cache nil))
+    ;; Buffer-local cache; only invalidate when an *existing* buffer's
+    ;; file changes (revert / rename), not on every find-file.
+    (add-hook 'after-revert-hook #'my/breadcrumb--invalidate-icon-cache)
     (advice-add #'breadcrumb-project-crumbs :override
                 (lambda ()
                   (or my/breadcrumb-icon-cache

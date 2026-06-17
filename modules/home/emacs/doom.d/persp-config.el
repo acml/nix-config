@@ -99,13 +99,15 @@ Must be side-effect-free: this runs inside a display :eval form."
   ;; tooltip or in the echo area
   (defun tooltip-help-tips (_event)
     "Hook function to display a help tooltip."
-    (when-let* ((msg tooltip-help-message)
-                ((stringp msg))
-                (wstr (mapconcat #'identity (lkn-tab-bar--workspaces) "")))
-      (unless (string= (string-trim (substring-no-properties msg))
-                       (string-trim (substring-no-properties wstr)))
-        (tooltip-show msg (not tooltip-mode))
-        t)))
+    (when (and tab-bar-mode
+               (stringp tooltip-help-message)
+               (bound-and-true-p persp-mode))
+      (when-let* ((workspaces (lkn-tab-bar--workspaces))
+                  (wstr (mapconcat #'identity workspaces "")))
+        (unless (string= (string-trim (substring-no-properties tooltip-help-message))
+                         (string-trim (substring-no-properties wstr)))
+          (tooltip-show tooltip-help-message (not tooltip-mode))
+          t))))
 
   (tooltip-mode)
 
