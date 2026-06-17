@@ -31,7 +31,13 @@ in
     # hegel's proven kernel+zfs combo; overrides the profile's mkDefault
     # linuxPackages_latest (ZFS lags mainline).
     kernelPackages = pkgs.linuxPackages_6_18;
-    zfs.package = pkgs.zfs_2_4;
+    zfs = {
+      package = pkgs.zfs_2_4;
+      # Import via partlabels so zpool status shows disko's disk-ebsN-zfs
+      # names instead of whichever of the ~4 by-id aliases udev's readdir
+      # order serves up first (mixed nvme-uuid/_1-suffixed serials).
+      devNodes = "/dev/disk/by-partlabel";
+    };
     kernelParams = [
       # EC2 serial console (aws ec2 get-console-output)
       "console=tty1"
@@ -119,10 +125,10 @@ in
       # Hardlinking on the hot path slows builds; batch it via the
       # nix-optimise timer below instead.
       auto-optimise-store = lib.mkForce false;
-      max-jobs = lib.mkForce 64;
+      max-jobs = lib.mkForce 32;
       # Mass substitution: default 16 paths in flight / 32 curl connections
       # leave most of the pipe idle when pulling 100k+ store paths.
-      max-substitution-jobs = 64;
+      max-substitution-jobs = 128;
       http-connections = lib.mkForce 128;
       # Don't ignore a substituter for an hour after a miss; hydra often
       # uploads moments after we first ask.
@@ -154,7 +160,7 @@ in
             sshUser = "builder-ssh";
             sshKey = "/etc/ssh/ssh_host_ed25519_key";
             maxJobs = 64;
-            speedFactor = 2;
+            speedFactor = 1;
             supportedFeatures = [
               "benchmark"
               "big-parallel"
