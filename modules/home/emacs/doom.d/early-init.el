@@ -43,7 +43,8 @@
 (push '(tool-bar-lines     . 0) default-frame-alist)
 (push '(vertical-scroll-bars  ) default-frame-alist)
 (push '(horizontal-scroll-bars) default-frame-alist)
-;; (push '(fullscreen . maximized) default-frame-alist) ; no resize flash at startup
+(push '(fullscreen . maximized) default-frame-alist) ; no resize flash at startup
+(push '(fullscreen . maximized) initial-frame-alist) ; no resize flash at startup
 
 ;; ── JIT font-lock ──────────────────────────────────────────────────────────
 ;; Defer fontification until idle; stealth-fontify in the background afterward.

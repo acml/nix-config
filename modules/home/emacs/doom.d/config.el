@@ -22,7 +22,7 @@
       ;; There are two ways to load a theme. Both assume the theme is installed and
       ;; available. You can either set `doom-theme' or manually load a theme with the
       ;; `load-theme' function. This is the default:
-      doom-theme (if (display-graphic-p) 'ef-eagle 'ef-dark)
+      ;; doom-theme (if (display-graphic-p) 'ef-eagle 'ef-dark)
       ;; modus-operandi modus-vivendi doom-one doom-gruvbox doom-tomorrow-night
 
       ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
@@ -105,16 +105,9 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-(custom-set-faces!
-  '(aw-leading-char-face
-    :foreground "white" :background "red"
-    :weight bold :height 2.5 :box (:line-width 10 :color "red")))
-
 ;; to hide autosave file from recent files
 (after! recentf
   (add-to-list 'recentf-exclude (regexp-quote (file-truename doom-local-dir))))
-
-(add-to-list 'initial-frame-alist '(fullscreen . maximized))
 
 ;; Directional window-selection routines
 (use-package! windmove
@@ -154,46 +147,38 @@
 
 ;; credit: yorickvP on Github
 ;; wl-copy integration for Wayland clipboard(need wl-clipboard package)
-
 (defvar wl-copy-process nil
   "Live wl-copy process, or nil when the clipboard is empty.")
 
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (when (or (getenv "WAYLAND_DISPLAY")
-                      (string= (getenv "XDG_SESSION_TYPE") "wayland"))
-              (let ((wl-copy-exe  (executable-find "wl-copy"))
-                    (wl-paste-exe (executable-find "wl-paste")))
-                (when (and wl-copy-exe wl-paste-exe)
-
-                  (defun wl-copy (text)
-                    (when (process-live-p wl-copy-process)
-                      (kill-process wl-copy-process))
-                    (setq wl-copy-process
-                          (make-process :name "wl-copy"
-                                        :buffer nil
-                                        :command `(,wl-copy-exe "-f" "-n")
-                                        :connection-type 'pipe
-                                        :coding 'utf-8-unix
-                                        :noquery t))
-                    (process-send-string wl-copy-process text)
-                    (process-send-eof    wl-copy-process))
-
-                  (defun wl-paste ()
-                    (unless (and wl-copy-process (process-live-p wl-copy-process))
-                      (with-temp-buffer
-                        (when (zerop (call-process wl-paste-exe nil t nil "-n"))
-                          (let ((result (string-trim-right (buffer-string) "[\r\n]+")))
-                            (unless (string-empty-p result) result))))))
-
-                  (add-hook 'kill-emacs-hook
-                            (lambda ()
-                              (when (process-live-p wl-copy-process)
-                                (kill-process wl-copy-process)
-                                (setq wl-copy-process nil))))
-
-                  (setq interprogram-cut-function  #'wl-copy
-                        interprogram-paste-function #'wl-paste))))))
+(when (or (getenv "WAYLAND_DISPLAY")
+          (string= (getenv "XDG_SESSION_TYPE") "wayland"))
+  (add-hook 'doom-first-input-hook
+            (defun my/wayland-clipboard-setup ()
+              (when-let* ((wl-copy-exe  (executable-find "wl-copy"))
+                          (wl-paste-exe (executable-find "wl-paste")))
+                (defun wl-copy (text)
+                  (when (process-live-p wl-copy-process)
+                    (kill-process wl-copy-process))
+                  (setq wl-copy-process
+                        (make-process :name "wl-copy" :buffer nil
+                                      :command `(,wl-copy-exe "-f" "-n")
+                                      :connection-type 'pipe
+                                      :coding 'utf-8-unix :noquery t))
+                  (process-send-string wl-copy-process text)
+                  (process-send-eof    wl-copy-process))
+                (defun wl-paste ()
+                  (unless (and wl-copy-process (process-live-p wl-copy-process))
+                    (with-temp-buffer
+                      (when (zerop (call-process wl-paste-exe nil t nil "-n"))
+                        (let ((s (string-trim-right (buffer-string) "[\r\n]+")))
+                          (unless (string-empty-p s) s))))))
+                (add-hook 'kill-emacs-hook
+                          (lambda ()
+                            (when (process-live-p wl-copy-process)
+                              (kill-process wl-copy-process)
+                              (setq wl-copy-process nil))))
+                (setq interprogram-cut-function   #'wl-copy
+                      interprogram-paste-function #'wl-paste)))))
 
 (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t)
                     ("^\\*\\(?:Wo\\)?Man " :size 82 :side right :select t :quit t)))
@@ -317,6 +302,10 @@
     (set-eglot-client! 'nix-mode    nil-lsp)
     (set-eglot-client! 'nix-ts-mode nil-lsp)))
 
+(after! eldoc
+  (setq eldoc-idle-delay 0.75
+        eldoc-echo-area-use-multiline-p nil))   ; one-liner echo, no resizing
+
 (after! embark
   (setq prefix-help-command #'embark-prefix-help-command))
 
@@ -348,6 +337,10 @@
 
 ;; :ui window-select settings, ignoring +numbers flag for now
 (after! ace-window
+  (custom-set-faces!
+    '(aw-leading-char-face
+      :foreground "white" :background "red"
+      :weight bold :height 2.5 :box (:line-width 10 :color "red")))
   (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)))
 
 (after! modus-themes
@@ -360,18 +353,17 @@
         '((border-mode-line-active unspecified)
           (border-mode-line-inactive unspecified))))
 
-(when (daemonp)
-  (setq doom-theme nil)
-  (add-hook 'after-make-frame-functions
-            (lambda (frame)
-              (with-selected-frame frame
-                (let ((theme (if (display-graphic-p) 'ef-eagle 'ef-dark)))
-                  ;; Only load if this theme isn't already active.
-                  ;; Without this guard every new emacsclient frame re-runs load-theme.
-                  (unless (memq theme custom-enabled-themes)
-                    (load-theme theme t)))
-                (when (display-graphic-p)
-                  (set-frame-parameter nil 'fullscreen 'maximized))))))
+(let ((my/theme (if (display-graphic-p) 'ef-eagle 'ef-dark)))
+  (if (daemonp)
+      (add-hook 'after-make-frame-functions
+                (lambda (frame)
+                  (with-selected-frame frame
+                    (let ((theme (if (display-graphic-p) 'ef-eagle 'ef-dark)))
+                      (unless (memq theme custom-enabled-themes)
+                        (load-theme theme t)))
+                    (when (display-graphic-p)
+                      (set-frame-parameter nil 'fullscreen 'maximized)))))
+    (setq doom-theme my/theme)))
 
 ;; (after! expand-region
 ;;   (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
@@ -498,6 +490,10 @@ the sequences will be lost."
   (auto-revert-tail-mode 1))
 (add-to-list 'auto-mode-alist '("\\.log\\'" . acml/log-mode))
 
+(defconst my/magit-fold-indicator
+  (if (char-displayable-p ?) "" "...")
+  "Cached fallback for magit-section-visibility-indicators.")
+
 (after! magit
   (setopt magit-format-file-function #'magit-format-file-nerd-icons
           magit-repository-directories '(("~/.nix-config" . 0)
@@ -518,8 +514,8 @@ the sequences will be lost."
   (add-hook! 'magit-mode-hook
     (setq-local
      left-fringe-width 16
-     magit-section-visibility-indicators
-     `((magit-fringe-bitmap> . magit-fringe-bitmapv) (,(if (char-displayable-p ?) "" "...") . t)))))
+     magit-section-visibility-indicators `((magit-fringe-bitmap> . magit-fringe-bitmapv)
+                                           (,my/magit-fold-indicator . t)))))
 
 (after! magit-repos
   (setq magit-repolist-columns
@@ -1049,7 +1045,12 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   (map! "<f1>" #'gptel-quick))
 
 (use-package! copilot
-  :hook (prog-mode . copilot-mode)
+  :defer t
+  :commands copilot-mode
+  :init
+  (add-hook! 'doom-first-input-hook
+    (defun my/enable-copilot-everywhere ()
+      (add-hook 'prog-mode-hook #'copilot-mode)))
   :config
   (map! :map copilot-completion-map
         "<tab>"   #'copilot-accept-completion
@@ -1059,11 +1060,8 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
         "C-n"     #'copilot-next-completion
         "C-p"     #'copilot-previous-completion)
   (setq copilot-indentation-alist
-        '((prog-mode        2)
-          (org-mode         2)
-          (text-mode        2)
-          (clojure-mode     2)
-          (emacs-lisp-mode  2))
+        '((prog-mode 2) (org-mode 2) (text-mode 2)
+          (clojure-mode 2) (emacs-lisp-mode 2))
         copilot-max-char 100000))
 
 (use-package! gt

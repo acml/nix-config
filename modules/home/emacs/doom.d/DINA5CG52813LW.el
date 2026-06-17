@@ -44,7 +44,7 @@
 (defun DINA5CG52813LW--parse-ini-file (file-path)
   "Parse INI file at FILE-PATH and return an alist of key-value pairs.
 Returns nil if file doesn't exist or parsing fails."
-  (when (and file-path (file-exists-p file-path) (file-readable-p file-path))
+  (when (and file-path (file-readable-p file-path))
     (condition-case err
         (with-temp-buffer
           (insert-file-contents file-path)
@@ -87,7 +87,7 @@ Returns a list of directory paths suitable for `magit-repository-directories`."
     (push (cons (expand-file-name (concat project-root main-folder)) 0) repositories)
 
     ;; Parse XML and add component folders
-    (when (and xml-file (file-exists-p xml-file))
+    (when (and xml-file (file-readable-p xml-file))
       (condition-case err
           (let ((parsed-xml (xml-parse-file xml-file)))
             (dolist (node (xml-get-children (car parsed-xml) 'component))

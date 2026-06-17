@@ -99,15 +99,13 @@ Must be side-effect-free: this runs inside a display :eval form."
   ;; These two things combined prevents the tab list to be printed either as a
   ;; tooltip or in the echo area
   (defun tooltip-help-tips (_event)
-    "Hook function to display a help tooltip.
-This is installed on the hook `tooltip-functions', which
-is run when the timer with id `tooltip-timeout-id' fires.
-Value is non-nil if this function handled the tip."
-    (let ((xf (lambda (str) (string-trim (substring-no-properties str)))))
-      (when (and
-             (stringp tooltip-help-message)
-             (not (string= (funcall xf tooltip-help-message) (funcall xf (format-mode-line (lkn-tab-bar--workspaces))))))
-        (tooltip-show tooltip-help-message (not tooltip-mode))
+    "Hook function to display a help tooltip."
+    (when-let* ((msg tooltip-help-message)
+                ((stringp msg))
+                (wstr (mapconcat #'identity (lkn-tab-bar--workspaces) "")))
+      (unless (string= (string-trim (substring-no-properties msg))
+                       (string-trim (substring-no-properties wstr)))
+        (tooltip-show msg (not tooltip-mode))
         t)))
 
   (tooltip-mode)
@@ -183,24 +181,29 @@ clicked."
         (my--mode-line-file-identifier buffer-file-name max-width)
       (propertize "%b" 'face 'mode-line-buffer-id)))
 
+  (defvar-local my--frame-title-cache nil)
+
+  (defun my--frame-title-invalidate (&rest _) (setq my--frame-title-cache nil))
+
+  (add-hook 'window-buffer-change-functions #'my--frame-title-invalidate)
+  (add-hook 'after-save-hook                #'my--frame-title-invalidate)
+
   (defun my--frame-title-format ()
-    (cond
-     ((and buffer-file-name (file-remote-p buffer-file-name))
-    (let ((v (tramp-dissect-file-name buffer-file-name)))
-      (concat (tramp-file-name-host v)
-              " — "
-              (abbreviate-file-name (tramp-file-name-localname v)))))
-     ((featurep 'projectile)
-    ;; Single projectile-project-root call: returns nil when not in a project,
-    ;; eliminating the separate projectile-project-p probe entirely.
-    (if-let* ((root (projectile-project-root)))
-        (concat (projectile-project-name)          ; re-uses cached root internally
-                " — "
-                (if buffer-file-name
-                    (file-relative-name buffer-file-name root)
-                  (buffer-name)))
-      (my--mode-line-buffer-identifier)))
-     (t (my--mode-line-buffer-identifier))))
+    (or my--frame-title-cache
+        (setq my--frame-title-cache
+              (cond
+               ((and buffer-file-name (file-remote-p buffer-file-name))
+                (let ((v (tramp-dissect-file-name buffer-file-name)))
+                  (concat (tramp-file-name-host v) " — "
+                          (abbreviate-file-name (tramp-file-name-localname v)))))
+               ((featurep 'projectile)
+                (if-let* ((root (projectile-project-root)))
+                    (concat (projectile-project-name) " — "
+                            (if buffer-file-name
+                                (file-relative-name buffer-file-name root)
+                              (buffer-name)))
+                  (my--mode-line-buffer-identifier)))
+               (t (my--mode-line-buffer-identifier))))))
 
   (setq frame-title-format '(:eval (my--frame-title-format))))
 
