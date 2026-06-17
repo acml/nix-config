@@ -26,48 +26,53 @@ Recomputed only when workspace list or active workspace changes.")
 
   (defun lkn-tab-bar--workspaces ()
     "Return workspace tab strings, caching the expensive pixel-width computation.
+Returns nil when fewer than 2 workspaces exist.
 A cache miss occurs only on workspace switch / add / remove."
     (let* ((names   (+workspace-list-names))
            (current (+workspace-current-name))
            (state   (cons names current)))
-      (if (equal state (car lkn-tab-bar--render-cache))
-          (cdr lkn-tab-bar--render-cache)
-        (let ((tabs (lkn-tab-bar--compute-workspaces names current)))
-          (setq lkn-tab-bar--render-cache (cons state tabs))
-          tabs))))
+      (when (< 1 (length names))          ; guard moved here; --or-nil no longer needs it
+        (if (equal state (car lkn-tab-bar--render-cache))
+            (cdr lkn-tab-bar--render-cache)
+          (let ((tabs (lkn-tab-bar--compute-workspaces names current)))
+            (setq lkn-tab-bar--render-cache (cons state tabs))
+            tabs)))))
 
   (defun lkn-tab-bar--compute-workspaces (persps persp)
     "Render workspace tab strings for PERSPS with PERSP as the active workspace."
     (when (< 1 (length persps))
       (nreverse
        (let ((show-help-function nil))
-       (seq-reduce
-        (lambda (acc elm)
-          (let* ((face     (if (equal persp elm) 'tab-bar-tab 'tab-bar-tab-inactive))
-                 (pos      (1+ (cl-position elm persps)))
-                 (edge-x   (get-text-property 0 'edge-x (car acc)))
-                 (tab-id   (format " %d" pos))
-                 (tab-name (format " %s " elm)))
-            (push (concat
-                   (propertize tab-id
-                               'id     pos
-                               'name   elm
-                               'edge-x (+ edge-x
-                                          (string-pixel-width tab-name)
-                                          (string-pixel-width tab-id))
-                               'face   `(:inherit ,face :weight bold))
-                   (propertize tab-name 'face `,face)
-                   " ")
-                  acc)
-            acc))
-        persps
-        `(,(propertize persp 'edge-x 0 'invisible t)))))))
+         (seq-reduce
+          (lambda (acc elm)
+            (let* ((face     (if (equal persp elm) 'tab-bar-tab 'tab-bar-tab-inactive))
+                   (pos      (1+ (cl-position elm persps)))
+                   (edge-x   (get-text-property 0 'edge-x (car acc)))
+                   (tab-id   (format " %d" pos))
+                   (tab-name (format " %s " elm)))
+              (push (concat
+                     (propertize tab-id
+                                 'id     pos
+                                 'name   elm
+                                 'edge-x (+ edge-x
+                                            (string-pixel-width tab-name)
+                                            (string-pixel-width tab-id))
+                                 'face   `(:inherit ,face :weight bold))
+                     (propertize tab-name 'face `,face)
+                     " ")
+                    acc)
+              acc))
+          persps
+          `(,(propertize persp 'edge-x 0 'invisible t)))))))
 
   (defun lkn-tab-bar--workspaces-or-nil ()
     "Return workspace tab strings when multiple workspaces exist, nil otherwise.
 Must be side-effect-free: this runs inside a display :eval form."
-    (when (and (bound-and-true-p persp-mode)
-               (< 1 (length (+workspace-list-names))))
+    ;; tab-bar-mode is managed by lkn-tab-bar--sync-visibility: it is non-nil
+    ;; iff there are 2+ workspaces.  This O(1) variable check avoids calling
+    ;; +workspace-list-names (and allocating a list) on every single mode-line
+    ;; update when only one workspace is open — by far the common case.
+    (when (and tab-bar-mode (bound-and-true-p persp-mode))
       (lkn-tab-bar--workspaces)))
 
   (customize-set-variable 'global-mode-string
@@ -181,18 +186,20 @@ clicked."
   (defun my--frame-title-format ()
     (cond
      ((and buffer-file-name (file-remote-p buffer-file-name))
-      (let ((tramp-vec (tramp-dissect-file-name buffer-file-name)))
-        (concat (tramp-file-name-host tramp-vec)
-                " — "
-                (abbreviate-file-name            ; was f-short
-                 (tramp-file-name-localname tramp-vec)))))
-     ((and (featurep 'projectile) (projectile-project-p))
-      (concat (projectile-project-name)
+    (let ((v (tramp-dissect-file-name buffer-file-name)))
+      (concat (tramp-file-name-host v)
               " — "
-              (if buffer-file-name
-                  (file-relative-name           ; was f-relative
-                   buffer-file-name (projectile-project-root))
-                (buffer-name))))
+              (abbreviate-file-name (tramp-file-name-localname v)))))
+     ((featurep 'projectile)
+    ;; Single projectile-project-root call: returns nil when not in a project,
+    ;; eliminating the separate projectile-project-p probe entirely.
+    (if-let* ((root (projectile-project-root)))
+        (concat (projectile-project-name)          ; re-uses cached root internally
+                " — "
+                (if buffer-file-name
+                    (file-relative-name buffer-file-name root)
+                  (buffer-name)))
+      (my--mode-line-buffer-identifier)))
      (t (my--mode-line-buffer-identifier))))
 
   (setq frame-title-format '(:eval (my--frame-title-format))))

@@ -52,6 +52,7 @@
       undo-limit 80000000          ; Raise undo-limit to 80Mb
       window-combination-resize t  ; take new window space from all other windows (not just current)
       x-stretch-cursor t           ; Stretch cursor to the glyph width
+      vc-handled-backends          '(Git)
       xref-history-storage 'xref-window-local-history)
 
 (add-hook! 'doom-after-init-hook
@@ -234,6 +235,11 @@
 
 (after! dired
   (setq dired-listing-switches (concat dired-listing-switches " --time-style=long-iso")))
+
+(after! tramp
+  ;; Prevent VC from invoking git/svn/etc over SSH on every remote buffer switch.
+  (setq vc-ignore-dir-regexp
+        (format "%s\\|%s" vc-ignore-dir-regexp tramp-file-name-regexp)))
 
 (use-package! dired-auto-readme
   :config (setq dired-auto-readme-separator "\n")

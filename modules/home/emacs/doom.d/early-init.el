@@ -21,6 +21,11 @@
 (setq native-comp-jit-compilation-deny-list
       '("\\(?:loaddefs\\|\\.dir-locals\\)\\.el\\'"))
 
+;; ── LSP / subprocess throughput ───────────────────────────────────────────────
+;; Read subprocess output immediately instead of waiting for the next scheduling
+;; cycle.  Noticeably faster eglot/LSP response, especially on large JSON chunks.
+(setq process-adaptive-read-buffering nil)
+
 ;; ── Bidirectional text scanning ───────────────────────────────────────────────
 ;; Emacs re-scans every displayed line for RTL characters by default.
 ;; For an LTR workflow this is pure overhead — the scan happens on every
@@ -41,10 +46,10 @@
 ;; (push '(fullscreen . maximized) default-frame-alist) ; no resize flash at startup
 
 ;; ── JIT font-lock ──────────────────────────────────────────────────────────
-;; Process pending input BEFORE refontifying. Single largest win for typing
-;; responsiveness in large/complex files. Set here so it applies before the
-;; first buffer is fontified, not after config.el runs.
-;; (setq jit-lock-defer-time      0      ; yield to input, then fontify
-;;       jit-lock-stealth-time    0.5    ; background-fontify after 0.5 s idle
-;;       jit-lock-stealth-nice    0.1    ; yield to input every 100 ms during stealth
-;;       fast-but-imprecise-scrolling t) ; skip refontification during wheel/page scroll
+;; Defer fontification until idle; stealth-fontify in the background afterward.
+;; Eliminates the micro-stutter when typing in large/complex files.
+;; Raise jit-lock-defer-time to 0.2 if you find the 0.1 s flash noticeable.
+(setq jit-lock-defer-time          0.1   ; wait 0.1 s idle before fontifying
+      jit-lock-stealth-time        1.0   ; background-fontify after 1 s idle
+      jit-lock-stealth-nice        0.2   ; yield to input every 200 ms during stealth
+      fast-but-imprecise-scrolling t)    ; skip fontification during wheel/page scroll
