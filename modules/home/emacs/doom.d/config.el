@@ -89,8 +89,9 @@
       (setq fancy-splash-image (seq-random-elt images))))
   (defun my/setup-global-modes ()
     ;; Defer everything; nothing here is needed for the first redisplay.
-    (run-with-idle-timer 0.3 nil #'repeat-mode 1)
-    (run-with-idle-timer 0.5 nil #'global-subword-mode 1)))
+    (run-with-idle-timer
+     0.5 nil
+     (lambda () (repeat-mode 1) (global-subword-mode 1)))))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 ;; Defer to after-init so customizations don't slow module loading.
@@ -392,14 +393,15 @@ we're not the dirvish side window."
 
 (setq doom-theme (if (display-graphic-p) 'ef-eagle 'ef-dark))
 (when (daemonp)
-  (add-hook 'after-make-frame-functions
-            (defun my/daemon-theme-setup (frame)
-              (with-selected-frame frame
-                (let ((theme (if (display-graphic-p) 'ef-eagle 'ef-dark)))
-                  (unless (memq theme custom-enabled-themes)
-                    (load-theme theme t)))
-                (when (display-graphic-p)
-                  (set-frame-parameter nil 'fullscreen 'maximized))))))
+  (defun my/daemon-load-gui-theme (frame)
+    "Load `ef-eagle` once for the first GUI frame, then remove the hook."
+    (with-selected-frame frame
+      (when (display-graphic-p)
+        (unless (memq 'ef-eagle custom-enabled-themes)
+          (load-theme 'ef-eagle t))
+        (remove-hook 'after-make-frame-functions
+                     #'my/daemon-load-gui-theme))))
+  (add-hook 'after-make-frame-functions #'my/daemon-load-gui-theme))
 
 ;; (after! expand-region
 ;;   (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
@@ -593,7 +595,8 @@ the sequences will be lost."
   ;; Only enable nerd-icons formatting after magit-status is opened once.
   (add-transient-hook! 'magit-status-mode-hook
     (require 'nerd-icons)
-    (setq magit-format-file-function #'magit-format-file-nerd-icons)))
+    (setq magit-format-file-function #'magit-format-file-nerd-icons
+          magit-revision-insert-related-refs nil)))
 
 (after! magit-repos
   (setq magit-repository-directories
@@ -626,8 +629,8 @@ the sequences will be lost."
               (magit-todos-mode 1)
               (remove-hook 'magit-status-mode-hook #'my/magit-todos-once-h)))
   :config
-  (setq magit-todos-max-items 30
-        magit-todos-depth     5
+  (setq magit-todos-max-items 20
+        magit-todos-depth     3
         magit-todos-scanner   #'magit-todos--scan-with-rg))
 
 (map! :leader
@@ -667,22 +670,20 @@ the sequences will be lost."
         :localleader
         :desc "Glossary mode" "G" #'org-glossary-mode))
 
+(defvar-local my/org-roam--sync-timer nil
+  "Timer handle for the debounced DB sync.")
+
+(defun my/org-roam-schedule-db-sync ()
+  "Cancel any pending sync; schedule a fresh one 2 s from now."
+  (when (timerp my/org-roam--sync-timer)
+    (cancel-timer my/org-roam--sync-timer))
+  (let ((file (buffer-file-name)))
+    (setq my/org-roam--sync-timer
+          (run-with-idle-timer
+           2 nil (lambda () (org-roam-db-update-file file))))))
+
 (after! org-roam
   (setq org-roam-db-update-on-save nil)
-
-  (defvar-local my/org-roam--sync-timer nil
-    "Timer handle for the debounced DB sync.")
-
-  (defun my/org-roam-schedule-db-sync ()
-    "Cancel any pending sync; schedule a fresh one 2 s from now."
-    (when (timerp my/org-roam--sync-timer)
-      (cancel-timer my/org-roam--sync-timer))
-    (let ((file (buffer-file-name)))
-      (setq my/org-roam--sync-timer
-            (run-with-idle-timer 2 nil
-                                 (lambda () (org-roam-db-update-file file))))))
-
-  ;; org-roam-find-file-hook fires only for roam files; no per-buffer predicate needed.
   (add-hook 'org-roam-find-file-hook
             (lambda ()
               (add-hook 'after-save-hook
@@ -878,10 +879,12 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
       :map vterm-mode-map
       "<deletechar>" #'vterm-send-delete)
 
+(defconst my/terminal-buffer-face '(:family "IosevkaTerm Nerd Font")
+  "Cached buffer-face for terminal-style buffers.")
+
 (add-hook! '(vterm-mode-hook ghostel-mode-hook)
   (defun my/setup-terminal-font ()
-    "Use a terminal-optimized font."
-    (setq-local buffer-face-mode-face '(:family "IosevkaTerm Nerd Font"))
+    (setq-local buffer-face-mode-face my/terminal-buffer-face)
     (buffer-face-mode t)))
 
 (after! which-key
@@ -1086,7 +1089,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   :after gptel
   :config
   ;; gptel-agent-update may make network requests — don't block gptel's load path.
-  (run-with-idle-timer 2 nil #'gptel-agent-update))
+  (run-with-idle-timer 5 nil #'gptel-agent-update))
 
 (use-package! gptel-quick
   :after gptel

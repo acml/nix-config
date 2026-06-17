@@ -1,5 +1,8 @@
 ;;; early-init.el -*- lexical-binding: t; -*-
 
+;; Add near the top of early-init.el
+(setq package-enable-at-startup nil)
+
 (setq auto-mode-case-fold nil)
 
 ;; Keep glyph bitmaps alive across GC — avoids re-rendering Nerd Icons on every GC.
