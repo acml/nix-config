@@ -36,7 +36,7 @@
       ;; There are two ways to load a theme. Both assume the theme is installed and
       ;; available. You can either set `doom-theme' or manually load a theme with the
       ;; `load-theme' function. This is the default:
-      ;; doom-theme (if (display-graphic-p) 'ef-eagle 'ef-dark)
+      doom-theme (if (display-graphic-p) 'ef-eagle 'ef-dark)
       ;; modus-operandi modus-vivendi doom-one doom-gruvbox doom-tomorrow-night
 
       ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
@@ -223,10 +223,20 @@
         calendar-latitude 41.168602
         calendar-longitude 29.047024))
 
-(add-hook! 'c-mode-common-hook
-  (require 'google-c-style)
-  (google-set-c-style)
-  (google-make-newline-indent))
+(use-package! google-c-style
+  :defer t
+  :init
+  (add-hook 'c-mode-common-hook
+            (defun my/google-c-style-once-h ()
+              (require 'google-c-style)
+              (google-set-c-style)
+              (google-make-newline-indent)
+              (remove-hook 'c-mode-common-hook #'my/google-c-style-once-h)
+              ;; Re-add the cheap parts as the real per-buffer hook:
+              (add-hook 'c-mode-common-hook
+                        (lambda ()
+                          (google-set-c-style)
+                          (google-make-newline-indent))))))
 
 (after! compile
   (setq compilation-scroll-output 'first-error
@@ -391,7 +401,6 @@ we're not the dirvish side window."
         '((border-mode-line-active unspecified)
           (border-mode-line-inactive unspecified))))
 
-(setq doom-theme (if (display-graphic-p) 'ef-eagle 'ef-dark))
 (when (daemonp)
   (defun my/daemon-load-gui-theme (frame)
     "Load `ef-eagle` once for the first GUI frame, then remove the hook."
@@ -417,10 +426,11 @@ we're not the dirvish side window."
   :defer t
   :init
   (setq highlight-parentheses-delay 0.2)
+  (add-hook 'doom-first-file-hook
+            (lambda ()
+              (add-hook 'prog-mode-hook #'highlight-parentheses-mode)))
   :config
-  (set-face-attribute 'hl-paren-face nil :weight 'ultra-bold)
-  :hook
-  (prog-mode . highlight-parentheses-mode))
+  (set-face-attribute 'hl-paren-face nil :weight 'ultra-bold))
 
 (after! indent-bars
   (setq
@@ -758,10 +768,12 @@ the sequences will be lost."
   ((css-mode scss-mode sass-mode less-css-mode web-mode conf-mode) . rainbow-mode))
 
 (use-package! scopeline
+  :defer t
   :commands (scopeline-mode)
-  ;; :config
-  ;; (add-to-list 'scopeline-targets '(makefile-mode "conditional"))
-  :hook (prog-mode . scopeline-mode))
+  :init
+  (add-hook 'doom-first-file-hook
+            (lambda ()
+              (add-hook 'prog-mode-hook #'scopeline-mode))))
 
 (map!
  (:leader
@@ -944,19 +956,21 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 
 ;; WSL specific setting
 (when my/wsl-p
-  (add-hook! 'doom-after-init-hook
-    (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe"))
-      (when (file-exists-p cmd-exe)
-        (setq browse-url-generic-program  cmd-exe
-              browse-url-generic-args     '("/c" "start")
-              browse-url-browser-function 'browse-url-generic
-              search-web-default-browser  'browse-url-generic)))
-    (when (display-graphic-p)
-      (defun acml-set-keyboard ()
-        (interactive)
-        (start-process "" nil "setxkbmap" "us" "-variant" "colemak"))
-      (map! "<f9>" #'acml-set-keyboard)
-      (acml-set-keyboard))))
+  (defun acml-set-keyboard ()
+    (interactive)
+    (start-process "" nil "setxkbmap" "us" "-variant" "colemak"))
+  (map! "<f9>" #'acml-set-keyboard)
+  (add-hook 'doom-after-init-hook
+            (lambda ()
+              (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe"))
+                (when (file-exists-p cmd-exe)
+                  (setq browse-url-generic-program  cmd-exe
+                        browse-url-generic-args     '("/c" "start")
+                        browse-url-browser-function 'browse-url-generic
+                        search-web-default-browser  'browse-url-generic)))
+              ;; Defer the actual xkb invocation off the critical path.
+              (when (display-graphic-p)
+                (run-with-idle-timer 2 nil #'acml-set-keyboard)))))
 
 (map! "<f5>"   #'projectile-run-project
       "<f6>"   #'previous-error
@@ -984,6 +998,72 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
      (display-buffer-in-side-window)
      (side . right))))
 
+(defvar my/openrouter-models
+  '(nvidia/nemotron-nano-9b-v2:free
+    openrouter/sonoma-dusk-alpha
+    openrouter/sonoma-sky-alpha
+    deepseek/deepseek-chat-v3.1:free
+    openai/gpt-oss-120b:free
+    openai/gpt-oss-20b:free
+    z-ai/glm-4.5-air:free
+    qwen/qwen3-coder:free
+    moonshotai/kimi-k2:free
+    lphin-mistral-24b-venice-edition:free
+    google/gemma-3n-e2b-it:free
+    tencent/hunyuan-a13b-instruct:free
+    tngtech/deepseek-r1t2-chimera:free
+    mistralai/mistral-small-3.2-24b-instruct:free
+    moonshotai/kimi-dev-72b:free
+    deepseek/deepseek-r1-0528-qwen3-8b:free
+    deepseek/deepseek-r1-0528:free
+    mistralai/devstral-small-2505:free
+    google/gemma-3n-e4b-it:free
+    meta-llama/llama-3.3-8b-instruct:free
+    qwen/qwen3-4b:free
+    qwen/qwen3-30b-a3b:free
+    qwen/qwen3-8b:free
+    qwen/qwen3-14b:free
+    qwen/qwen3-235b-a22b:free
+    tngtech/deepseek-r1t-chimera:free
+    microsoft/mai-ds-r1:free
+    shisa-ai/shisa-v2-llama3.3-70b:free
+    arliai/qwq-32b-arliai-rpr-v1:free
+    agentica-org/deepcoder-14b-preview:free
+    moonshotai/kimi-vl-a3b-thinking:free
+    meta-llama/llama-4-maverick:free
+    meta-llama/llama-4-scout:free
+    qwen/qwen2.5-vl-32b-instruct:free
+    deepseek/deepseek-chat-v3-0324:free
+    mistralai/mistral-small-3.1-24b-instruct:free
+    google/gemma-3-4b-it:free
+    google/gemma-3-12b-it:free
+    rekaai/reka-flash-3:free
+    google/gemma-3-27b-it:free
+    qwen/qwq-32b:free
+    nousresearch/deephermes-3-llama-3-8b-preview:free
+    cognitivecomputations/dolphin3.0-r1-mistral-24b:free
+    cognitivecomputations/dolphin3.0-mistral-24b:free
+    qwen/qwen2.5-vl-72b-instruct:free
+    mistralai/mistral-small-24b-instruct-2501:free
+    deepseek/deepseek-r1-distill-llama-70b:free
+    deepseek/deepseek-r1:free
+    google/gemini-2.0-flash-exp:free
+    meta-llama/llama-3.3-70b-instruct:free
+    qwen/qwen-2.5-coder-32b-instruct:free
+    meta-llama/llama-3.2-3b-instruct:free
+    qwen/qwen-2.5-72b-instruct:free
+    meta-llama/llama-3.1-405b-instruct:free
+    mistralai/mistral-nemo:free
+    google/gemma-2-9b-it:free
+    mistralai/mistral-7b-instruct:free))
+
+(defun my/gptel-register-openrouter ()
+  (unless (assoc "OpenRouter" gptel--known-backends)
+    (gptel-make-openai "OpenRouter"
+      :host "openrouter.ai" :endpoint "/api/v1/chat/completions"
+      :stream t :key #'gptel-api-key-from-auth-source
+      :models my/openrouter-models)))
+
 (use-package! gptel
   :defer t
   :if (not my/work-host-p)
@@ -1005,66 +1085,6 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
       :host "api.mistral.ai" :endpoint "/v1/chat/completions"
       :protocol "https" :key #'gptel-api-key-from-auth-source
       :models '("mistral-small"))
-    (gptel-make-openai "OpenRouter"
-      :host "openrouter.ai" :endpoint "/api/v1/chat/completions"
-      :stream t :key #'gptel-api-key-from-auth-source
-      :models '(nvidia/nemotron-nano-9b-v2:free
-                openrouter/sonoma-dusk-alpha
-                openrouter/sonoma-sky-alpha
-                deepseek/deepseek-chat-v3.1:free
-                openai/gpt-oss-120b:free
-                openai/gpt-oss-20b:free
-                z-ai/glm-4.5-air:free
-                qwen/qwen3-coder:free
-                moonshotai/kimi-k2:free
-                lphin-mistral-24b-venice-edition:free
-                google/gemma-3n-e2b-it:free
-                tencent/hunyuan-a13b-instruct:free
-                tngtech/deepseek-r1t2-chimera:free
-                mistralai/mistral-small-3.2-24b-instruct:free
-                moonshotai/kimi-dev-72b:free
-                deepseek/deepseek-r1-0528-qwen3-8b:free
-                deepseek/deepseek-r1-0528:free
-                mistralai/devstral-small-2505:free
-                google/gemma-3n-e4b-it:free
-                meta-llama/llama-3.3-8b-instruct:free
-                qwen/qwen3-4b:free
-                qwen/qwen3-30b-a3b:free
-                qwen/qwen3-8b:free
-                qwen/qwen3-14b:free
-                qwen/qwen3-235b-a22b:free
-                tngtech/deepseek-r1t-chimera:free
-                microsoft/mai-ds-r1:free
-                shisa-ai/shisa-v2-llama3.3-70b:free
-                arliai/qwq-32b-arliai-rpr-v1:free
-                agentica-org/deepcoder-14b-preview:free
-                moonshotai/kimi-vl-a3b-thinking:free
-                meta-llama/llama-4-maverick:free
-                meta-llama/llama-4-scout:free
-                qwen/qwen2.5-vl-32b-instruct:free
-                deepseek/deepseek-chat-v3-0324:free
-                mistralai/mistral-small-3.1-24b-instruct:free
-                google/gemma-3-4b-it:free
-                google/gemma-3-12b-it:free
-                rekaai/reka-flash-3:free
-                google/gemma-3-27b-it:free
-                qwen/qwq-32b:free
-                nousresearch/deephermes-3-llama-3-8b-preview:free
-                cognitivecomputations/dolphin3.0-r1-mistral-24b:free
-                cognitivecomputations/dolphin3.0-mistral-24b:free
-                qwen/qwen2.5-vl-72b-instruct:free
-                mistralai/mistral-small-24b-instruct-2501:free
-                deepseek/deepseek-r1-distill-llama-70b:free
-                deepseek/deepseek-r1:free
-                google/gemini-2.0-flash-exp:free
-                meta-llama/llama-3.3-70b-instruct:free
-                qwen/qwen-2.5-coder-32b-instruct:free
-                meta-llama/llama-3.2-3b-instruct:free
-                qwen/qwen-2.5-72b-instruct:free
-                meta-llama/llama-3.1-405b-instruct:free
-                mistralai/mistral-nemo:free
-                google/gemma-2-9b-it:free
-                mistralai/mistral-7b-instruct:free))
     (gptel-make-openai "Github Models"
       :host "models.inference.ai.azure.com" :endpoint "/chat/completions?api-version=2024-05-01-preview"
       :stream t :key #'gptel-api-key-from-auth-source
@@ -1086,6 +1106,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                 google/gemma-3-4b-it
                 google/gemma-3-1b-it
                 gpt-4o)))
+  (run-with-idle-timer 3 nil #'my/gptel-register-openrouter)
   (macher-install)
   :hook
   (gptel-post-stream-hook . gptel-auto-scroll))
@@ -1104,7 +1125,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 
 (use-package! copilot
   :defer t
-  :commands copilot-mode
+  :commands (copilot-mode copilot-complete)
   :init
   (defun my/copilot-eligible-p ()
     (and (not buffer-read-only)
@@ -1112,22 +1133,19 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
          (< (buffer-size) 200000)))
   (defun my/copilot-maybe ()
     (when (my/copilot-eligible-p) (copilot-mode 1)))
-  (add-hook! 'doom-first-input-hook
-    (defun my/defer-copilot-activation ()
-      (run-with-idle-timer
-       2.0 nil
-       (lambda ()
-         (add-hook 'prog-mode-hook #'my/copilot-maybe)
-         ;; One pass, one timer; yields between buffers via while-no-input.
-         (run-with-idle-timer
-          0.1 nil
-          (lambda ()
-            (dolist (buf (buffer-list))
-              (when (buffer-live-p buf)
-                (with-current-buffer buf
-                  (when (and (derived-mode-p 'prog-mode)
-                             (my/copilot-eligible-p))
-                    (while-no-input (copilot-mode 1))))))))))))
+  ;; Attach the hook only after the first real file is visited, then
+  ;; enable copilot for currently *visible* prog-mode buffers (cheap).
+  (add-hook 'doom-first-file-hook
+            (defun my/copilot-bootstrap-h ()
+              (run-with-idle-timer
+               1.5 nil
+               (lambda ()
+                 (add-hook 'prog-mode-hook #'my/copilot-maybe)
+                 (dolist (win (window-list nil 'no-mini))
+                   (with-current-buffer (window-buffer win)
+                     (when (and (derived-mode-p 'prog-mode)
+                                (my/copilot-eligible-p))
+                       (while-no-input (copilot-mode 1)))))))))
   :config
   (map! :map copilot-completion-map
         "<tab>"   #'copilot-accept-completion
@@ -1239,7 +1257,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 ;; mouse mode must be initialised for each new terminal
 ;; see http://stackoverflow.com/a/6798279/27782
 (defun initialize-mouse-mode (&optional frame)
-  (unless (display-graphic-p frame)
+  (unless (or (display-graphic-p frame) xterm-mouse-mode)
     (xterm-mouse-mode 1)))
 
 ;; Evaluate both now (for non-daemon emacs) and upon frame creation

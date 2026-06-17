@@ -2,8 +2,19 @@
 
 ;; Add near the top of early-init.el
 (setq package-enable-at-startup nil)
+;; Skip `package-quickstart' computation entirely; Doom doesn't use it.
+(setq package-quickstart nil)
 
 (setq auto-mode-case-fold nil)
+
+;; UI: don't ask Emacs to compute or print these during startup.
+(setq inhibit-startup-screen t
+      inhibit-startup-message t
+      initial-scratch-message nil
+      initial-major-mode 'fundamental-mode
+      ;; Suppress "Loading …" echoes that force redisplays during init.
+      inhibit-message t)
+(add-hook 'doom-after-init-hook (lambda () (setq inhibit-message nil)) 99)
 
 ;; Keep glyph bitmaps alive across GC — avoids re-rendering Nerd Icons on every GC.
 (setq inhibit-compacting-font-caches t)
@@ -52,6 +63,9 @@
 (push '(horizontal-scroll-bars) default-frame-alist)
 (push '(fullscreen . maximized) default-frame-alist) ; no resize flash at startup
 (push '(fullscreen . maximized) initial-frame-alist) ; no resize flash at startup
+
+;; Doom already maximises but also setting this avoids the second resize:
+(push '(fullscreen-restore . maximized) default-frame-alist)
 
 ;; ── JIT font-lock ──────────────────────────────────────────────────────────
 ;; Defer fontification until idle; stealth-fontify in the background afterward.
