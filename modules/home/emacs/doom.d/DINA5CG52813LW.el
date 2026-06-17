@@ -41,24 +41,35 @@
 
 ;;; Utility Functions
 
+(defvar DINA5CG52813LW--ini-cache (make-hash-table :test 'equal)
+  "Cache of parsed INI files, keyed by (file . mtime).")
+
 (defun DINA5CG52813LW--parse-ini-file (file-path)
   "Parse INI file at FILE-PATH and return an alist of key-value pairs.
-Returns nil if file doesn't exist or parsing fails."
+Cached by file modification time."
   (when (and file-path (file-readable-p file-path))
-    (condition-case err
-        (with-temp-buffer
-          (insert-file-contents file-path)
-          (let ((parsed-values '()))
-            (goto-char (point-min))
-            (while (re-search-forward "^\\s-*\\([^#;\n=]+\\)\\s-*=\\s-*\\([^\n]*\\)\\s-*$" nil t)
-              (let ((key (string-trim (match-string 1)))
-                    (value (string-trim (match-string 2))))
-                (unless (string-empty-p key)
-                  (push (cons (intern key) value) parsed-values))))
-            parsed-values))
-      (error
-       (message "Error parsing INI file %s: %s" file-path (error-message-string err))
-       nil))))
+    (let* ((mtime     (file-attribute-modification-time
+                       (file-attributes file-path)))
+           (cache-key (cons file-path mtime)))
+      (or (gethash cache-key DINA5CG52813LW--ini-cache)
+          (condition-case err
+              (with-temp-buffer
+                (insert-file-contents file-path)
+                (let (parsed)
+                  (goto-char (point-min))
+                  (while (re-search-forward
+                          "^\\s-*\\([^#;\n=]+\\)\\s-*=\\s-*\\([^\n]*\\)\\s-*$"
+                          nil t)
+                    (let ((key   (string-trim (match-string 1)))
+                          (value (string-trim (match-string 2))))
+                      (unless (string-empty-p key)
+                        (push (cons (intern key) value) parsed))))
+                  (puthash cache-key parsed DINA5CG52813LW--ini-cache)
+                  parsed))
+            (error
+             (message "Error parsing INI file %s: %s"
+                      file-path (error-message-string err))
+             nil))))))
 
 (defun DINA5CG52813LW--get-project-main-folder (project-root)
   "Get the main folder path from project configuration in PROJECT-ROOT.
@@ -79,6 +90,10 @@ Returns nil if configuration is not found."
 
 ;;; Magit Integration
 
+(defvar magit-repository-directories)
+
+(defvar DINA5CG52813LW--magit-repo-cache (make-hash-table :test 'equal))
+
 (defun DINA5CG52813LW--collect-magit-repositories (project-root main-folder xml-file)
   "Collect repository directories from PROJECT-ROOT, MAIN-FOLDER, and XML-FILE.
 Returns a list of directory paths suitable for `magit-repository-directories`."
@@ -98,25 +113,23 @@ Returns a list of directory paths suitable for `magit-repository-directories`."
 
     repositories))
 
-(defvar DINA5CG52813LW--magit-repo-cache (make-hash-table :test 'equal))
-
 (defadvice! DINA5CG52813LW--enhance-magit-repositories (fn &rest args)
-  :around #'magit-list-repositories
-  (if-let* ((project-root (projectile-project-root))
-            (main-folder  (DINA5CG52813LW--get-project-main-folder project-root))
-            (xml-file     (DINA5CG52813LW--get-project-config-path project-root))
-            (key          (list project-root
-                                (file-attribute-modification-time
-                                 (file-attributes xml-file))))
-            (magit-repository-directories
-             (or (gethash key DINA5CG52813LW--magit-repo-cache)
-                 (puthash key
-                          (DINA5CG52813LW--collect-magit-repositories
-                           project-root main-folder xml-file)
-                          DINA5CG52813LW--magit-repo-cache))))
-      (apply fn args)
+  "Use project-specific repository directories when available."
+  :around #'magit-repolist-setup
+  (let ((magit-repository-directories
+         (or (when-let* ((project-root (projectile-project-root))
+                        (main-folder  (DINA5CG52813LW--get-project-main-folder project-root))
+                        (xml-file     (DINA5CG52813LW--get-project-config-path project-root))
+                        (key          (list project-root
+                                            (file-attribute-modification-time
+                                             (file-attributes xml-file)))))
+               (or (gethash key DINA5CG52813LW--magit-repo-cache)
+                   (puthash key
+                            (DINA5CG52813LW--collect-magit-repositories
+                             project-root main-folder xml-file)
+                            DINA5CG52813LW--magit-repo-cache)))
+             magit-repository-directories)))
     (apply fn args)))
-
 ;;; Projectile Integration
 
 (defun DINA5CG52813LW--project-has-files-p (required-files excluded-files &optional dir)
