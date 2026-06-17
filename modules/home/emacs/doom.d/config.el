@@ -76,13 +76,20 @@
   (file-name-concat doom-user-dir "splash")
   "Directory containing splash-image candidates.")
 
+(defvar my/splash-images nil
+  "Cached splash-image candidates; computed lazily on first use.")
+
 (add-hook! 'doom-after-init-hook
   (defun my/set-random-splash-image ()
-    (when (file-directory-p my/splash-image-dir)
-      (when-let* ((images (directory-files my/splash-image-dir t "^[^.]" t)))
-        (setq fancy-splash-image (seq-random-elt images)))))
+    (when-let* (((file-directory-p my/splash-image-dir))
+                (images (or my/splash-images
+                            (setq my/splash-images
+                                  (directory-files
+                                   my/splash-image-dir t "^[^.]" t)))))
+      (setq fancy-splash-image (seq-random-elt images))))
   (defun my/setup-global-modes ()
-    (repeat-mode 1)
+    ;; Defer everything; nothing here is needed for the first redisplay.
+    (run-with-idle-timer 0.3 nil #'repeat-mode 1)
     (run-with-idle-timer 0.5 nil #'global-subword-mode 1)))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
@@ -565,8 +572,7 @@ the sequences will be lost."
   "Cached fallback for magit-section-visibility-indicators.")
 
 (after! magit
-  (setq magit-format-file-function   #'magit-format-file-nerd-icons
-        magit-save-repository-buffers nil
+  (setq magit-save-repository-buffers nil
         magit-inhibit-save-previous-winconf t
         transient-values '((magit-rebase "--autostash" "--autosquash")
                            (magit-pull   "--autostash" "--rebase")))
@@ -583,7 +589,11 @@ the sequences will be lost."
   (add-hook! 'magit-mode-hook
     (setq-local left-fringe-width 16
                 magit-section-visibility-indicators
-                my/magit-section-visibility-indicators)))
+                my/magit-section-visibility-indicators))
+  ;; Only enable nerd-icons formatting after magit-status is opened once.
+  (add-transient-hook! 'magit-status-mode-hook
+    (require 'nerd-icons)
+    (setq magit-format-file-function #'magit-format-file-nerd-icons)))
 
 (after! magit-repos
   (setq magit-repository-directories
@@ -696,7 +706,9 @@ the sequences will be lost."
     (setq-local xterm-set-window-title nil)))
 
 (after! persp-mode
-  (load! "persp-config"))
+  ;; Load on idle; frame-title-format and tab-bar setup are not on the
+  ;; critical path to first paint.
+  (run-with-idle-timer 0.1 nil (lambda () (load! "persp-config"))))
 
 (setq +workspaces-switch-project-function (lambda (project-directory)
                                             (dired project-directory)
@@ -968,121 +980,104 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   :defer t
   :if (not my/work-host-p)
   :config
-  (setq gptel-include-reasoning 'ignore)
-  (gptel-make-gemini "Gemini"
-    :key #'gptel-api-key-from-auth-source
-    :stream t)
-  (setq
-   gptel-model 'gpt-4.1
-   gptel-backend (gptel-make-gh-copilot "Copilot"))
-  (gptel-make-kagi "Kagi"
-    :key #'gptel-api-key-from-auth-source)
-  (gptel-make-openai "Groq"
-    :host "api.groq.com"
-    :endpoint "/openai/v1/chat/completions"
-    :stream t
-    :key #'gptel-api-key-from-auth-source
-    :models '(llama-3.1-70b-versatile
-              llama-3.1-8b-instant
-              llama3-70b-8192
-              llama3-8b-8192
-              mixtral-8x7b-32768
-              gemma-7b-it))
-  (gptel-make-openai "MistralLeChat"
-    :host "api.mistral.ai"
-    :endpoint "/v1/chat/completions"
-    :protocol "https"
-    :key #'gptel-api-key-from-auth-source
-    :models '("mistral-small"))
-  (gptel-make-openai "OpenRouter"
-    :host "openrouter.ai"
-    :endpoint "/api/v1/chat/completions"
-    :stream t
-    :key #'gptel-api-key-from-auth-source
-    :models '(nvidia/nemotron-nano-9b-v2:free
-              openrouter/sonoma-dusk-alpha
-              openrouter/sonoma-sky-alpha
-              deepseek/deepseek-chat-v3.1:free
-              openai/gpt-oss-120b:free
-              openai/gpt-oss-20b:free
-              z-ai/glm-4.5-air:free
-              qwen/qwen3-coder:free
-              moonshotai/kimi-k2:free
-              lphin-mistral-24b-venice-edition:free
-              google/gemma-3n-e2b-it:free
-              tencent/hunyuan-a13b-instruct:free
-              tngtech/deepseek-r1t2-chimera:free
-              mistralai/mistral-small-3.2-24b-instruct:free
-              moonshotai/kimi-dev-72b:free
-              deepseek/deepseek-r1-0528-qwen3-8b:free
-              deepseek/deepseek-r1-0528:free
-              mistralai/devstral-small-2505:free
-              google/gemma-3n-e4b-it:free
-              meta-llama/llama-3.3-8b-instruct:free
-              qwen/qwen3-4b:free
-              qwen/qwen3-30b-a3b:free
-              qwen/qwen3-8b:free
-              qwen/qwen3-14b:free
-              qwen/qwen3-235b-a22b:free
-              tngtech/deepseek-r1t-chimera:free
-              microsoft/mai-ds-r1:free
-              shisa-ai/shisa-v2-llama3.3-70b:free
-              arliai/qwq-32b-arliai-rpr-v1:free
-              agentica-org/deepcoder-14b-preview:free
-              moonshotai/kimi-vl-a3b-thinking:free
-              meta-llama/llama-4-maverick:free
-              meta-llama/llama-4-scout:free
-              qwen/qwen2.5-vl-32b-instruct:free
-              deepseek/deepseek-chat-v3-0324:free
-              mistralai/mistral-small-3.1-24b-instruct:free
-              google/gemma-3-4b-it:free
-              google/gemma-3-12b-it:free
-              rekaai/reka-flash-3:free
-              google/gemma-3-27b-it:free
-              qwen/qwq-32b:free
-              nousresearch/deephermes-3-llama-3-8b-preview:free
-              cognitivecomputations/dolphin3.0-r1-mistral-24b:free
-              cognitivecomputations/dolphin3.0-mistral-24b:free
-              qwen/qwen2.5-vl-72b-instruct:free
-              mistralai/mistral-small-24b-instruct-2501:free
-              deepseek/deepseek-r1-distill-llama-70b:free
-              deepseek/deepseek-r1:free
-              google/gemini-2.0-flash-exp:free
-              meta-llama/llama-3.3-70b-instruct:free
-              qwen/qwen-2.5-coder-32b-instruct:free
-              meta-llama/llama-3.2-3b-instruct:free
-              qwen/qwen-2.5-72b-instruct:free
-              meta-llama/llama-3.1-405b-instruct:free
-              mistralai/mistral-nemo:free
-              google/gemma-2-9b-it:free
-              mistralai/mistral-7b-instruct:free))
-  (gptel-make-openai "Github Models"
-    :host "models.inference.ai.azure.com"
-    :endpoint "/chat/completions?api-version=2024-05-01-preview"
-    :stream t
-    :key #'gptel-api-key-from-auth-source
-    :models '(gpt-4o))
-  (gptel-make-openai "NovitaAI"
-    :host "api.novita.ai"
-    :endpoint "/v3/openai"
-    :key #'gptel-api-key-from-auth-source
-    :stream t
-    :models '(;; has many more, check https://novita.ai/llm-api
-              meta-llama/llama-3.2-1b-instruct
-              qwen/qwen3-4b-fp8
-              baidu/ernie-4.5-0.3b
-              google/gemma-3-1b-it
-              baidu/ernie-4.5-0.3b))
-  (gptel-make-openai "AI/ML API"
-    :host "api.aimlapi.com"
-    :endpoint "/v1/chat/completions"
-    :stream t
-    :key #'gptel-api-key-from-auth-source
-    :models '(google/gemma-3n-e4b-it
-              google/gemma-3-12b-it
-              google/gemma-3-4b-it
-              google/gemma-3-1b-it
-              gpt-4o))
+  (setq gptel-include-reasoning 'ignore
+        gptel-model 'gpt-4.1
+        gptel-backend (gptel-make-gh-copilot "Copilot"))
+  ;; Heavy backends are only registered the first time the menu is opened.
+  (add-transient-hook! 'gptel-menu
+    (gptel-make-gemini "Gemini" :key #'gptel-api-key-from-auth-source :stream t)
+    (gptel-make-kagi   "Kagi"   :key #'gptel-api-key-from-auth-source)
+    (gptel-make-openai "Groq"
+      :host "api.groq.com" :endpoint "/openai/v1/chat/completions"
+      :stream t :key #'gptel-api-key-from-auth-source
+      :models '(llama-3.1-70b-versatile llama-3.1-8b-instant
+                llama3-70b-8192 llama3-8b-8192
+                mixtral-8x7b-32768 gemma-7b-it))
+    (gptel-make-openai "MistralLeChat"
+      :host "api.mistral.ai" :endpoint "/v1/chat/completions"
+      :protocol "https" :key #'gptel-api-key-from-auth-source
+      :models '("mistral-small"))
+    (gptel-make-openai "OpenRouter"
+      :host "openrouter.ai" :endpoint "/api/v1/chat/completions"
+      :stream t :key #'gptel-api-key-from-auth-source
+      :models '(nvidia/nemotron-nano-9b-v2:free
+                openrouter/sonoma-dusk-alpha
+                openrouter/sonoma-sky-alpha
+                deepseek/deepseek-chat-v3.1:free
+                openai/gpt-oss-120b:free
+                openai/gpt-oss-20b:free
+                z-ai/glm-4.5-air:free
+                qwen/qwen3-coder:free
+                moonshotai/kimi-k2:free
+                lphin-mistral-24b-venice-edition:free
+                google/gemma-3n-e2b-it:free
+                tencent/hunyuan-a13b-instruct:free
+                tngtech/deepseek-r1t2-chimera:free
+                mistralai/mistral-small-3.2-24b-instruct:free
+                moonshotai/kimi-dev-72b:free
+                deepseek/deepseek-r1-0528-qwen3-8b:free
+                deepseek/deepseek-r1-0528:free
+                mistralai/devstral-small-2505:free
+                google/gemma-3n-e4b-it:free
+                meta-llama/llama-3.3-8b-instruct:free
+                qwen/qwen3-4b:free
+                qwen/qwen3-30b-a3b:free
+                qwen/qwen3-8b:free
+                qwen/qwen3-14b:free
+                qwen/qwen3-235b-a22b:free
+                tngtech/deepseek-r1t-chimera:free
+                microsoft/mai-ds-r1:free
+                shisa-ai/shisa-v2-llama3.3-70b:free
+                arliai/qwq-32b-arliai-rpr-v1:free
+                agentica-org/deepcoder-14b-preview:free
+                moonshotai/kimi-vl-a3b-thinking:free
+                meta-llama/llama-4-maverick:free
+                meta-llama/llama-4-scout:free
+                qwen/qwen2.5-vl-32b-instruct:free
+                deepseek/deepseek-chat-v3-0324:free
+                mistralai/mistral-small-3.1-24b-instruct:free
+                google/gemma-3-4b-it:free
+                google/gemma-3-12b-it:free
+                rekaai/reka-flash-3:free
+                google/gemma-3-27b-it:free
+                qwen/qwq-32b:free
+                nousresearch/deephermes-3-llama-3-8b-preview:free
+                cognitivecomputations/dolphin3.0-r1-mistral-24b:free
+                cognitivecomputations/dolphin3.0-mistral-24b:free
+                qwen/qwen2.5-vl-72b-instruct:free
+                mistralai/mistral-small-24b-instruct-2501:free
+                deepseek/deepseek-r1-distill-llama-70b:free
+                deepseek/deepseek-r1:free
+                google/gemini-2.0-flash-exp:free
+                meta-llama/llama-3.3-70b-instruct:free
+                qwen/qwen-2.5-coder-32b-instruct:free
+                meta-llama/llama-3.2-3b-instruct:free
+                qwen/qwen-2.5-72b-instruct:free
+                meta-llama/llama-3.1-405b-instruct:free
+                mistralai/mistral-nemo:free
+                google/gemma-2-9b-it:free
+                mistralai/mistral-7b-instruct:free))
+    (gptel-make-openai "Github Models"
+      :host "models.inference.ai.azure.com" :endpoint "/chat/completions?api-version=2024-05-01-preview"
+      :stream t :key #'gptel-api-key-from-auth-source
+      :models '(gpt-4o))
+    (gptel-make-openai "NovitaAI"
+      :host "api.novita.ai" :endpoint "/v3/openai"
+      :key #'gptel-api-key-from-auth-source :stream t
+      :models '(;; has many more, check https://novita.ai/llm-api
+                meta-llama/llama-3.2-1b-instruct
+                qwen/qwen3-4b-fp8
+                baidu/ernie-4.5-0.3b
+                google/gemma-3-1b-it
+                baidu/ernie-4.5-0.3b))
+    (gptel-make-openai "AI/ML API"
+      :host "api.aimlapi.com" :endpoint "/v1/chat/completions"
+      :stream t :key #'gptel-api-key-from-auth-source
+      :models '(google/gemma-3n-e4b-it
+                google/gemma-3-12b-it
+                google/gemma-3-4b-it
+                google/gemma-3-1b-it
+                gpt-4o)))
   (macher-install)
   :hook
   (gptel-post-stream-hook . gptel-auto-scroll))
@@ -1109,31 +1104,22 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
          (< (buffer-size) 200000)))
   (defun my/copilot-maybe ()
     (when (my/copilot-eligible-p) (copilot-mode 1)))
-  (defun my/copilot--drain (buffers)
-    "Enable copilot in BUFFERS, one per idle cycle."
-    (let (timer)
-      (setq timer
-            (run-with-idle-timer
-             0.5 t
-             (lambda ()
-               (if (null buffers)
-                   (cancel-timer timer)
-                 (when-let* ((buf (pop buffers))
-                             ((buffer-live-p buf)))
-                   (with-current-buffer buf
-                     (when (my/copilot-eligible-p)
-                       (copilot-mode 1))))))))))
   (add-hook! 'doom-first-input-hook
     (defun my/defer-copilot-activation ()
       (run-with-idle-timer
        2.0 nil
        (lambda ()
          (add-hook 'prog-mode-hook #'my/copilot-maybe)
-         (my/copilot--drain
-          (cl-loop for buf in (buffer-list)
-                   when (with-current-buffer buf
-                          (derived-mode-p 'prog-mode))
-                   collect buf))))))
+         ;; One pass, one timer; yields between buffers via while-no-input.
+         (run-with-idle-timer
+          0.1 nil
+          (lambda ()
+            (dolist (buf (buffer-list))
+              (when (buffer-live-p buf)
+                (with-current-buffer buf
+                  (when (and (derived-mode-p 'prog-mode)
+                             (my/copilot-eligible-p))
+                    (while-no-input (copilot-mode 1))))))))))))
   :config
   (map! :map copilot-completion-map
         "<tab>"   #'copilot-accept-completion
@@ -1142,13 +1128,9 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
         "C-<tab>" #'copilot-accept-completion-by-word
         "C-n"     #'copilot-next-completion
         "C-p"     #'copilot-previous-completion)
-  (dolist (entry '((emacs-lisp-mode 2)
-                   (lisp-interaction-mode 2)
-                   (text-mode 2)
-                   (org-mode 2)
-                   (markdown-mode 2)
-                   (gfm-mode 2)
-                   (default 2)))
+  (dolist (entry '((emacs-lisp-mode 2) (lisp-interaction-mode 2)
+                   (text-mode 2) (org-mode 2) (markdown-mode 2)
+                   (gfm-mode 2) (default 2)))
     (add-to-list 'copilot-indentation-alist entry))
   (setq copilot-max-char 100000))
 

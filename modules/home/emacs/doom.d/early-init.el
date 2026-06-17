@@ -1,6 +1,5 @@
 ;;; early-init.el -*- lexical-binding: t; -*-
 
-(setq native-comp-async-report-warnings-errors 'silent)
 (setq auto-mode-case-fold nil)
 
 ;; Keep glyph bitmaps alive across GC — avoids re-rendering Nerd Icons on every GC.
@@ -16,10 +15,6 @@
 
 ;; Prefer fresher bytecode over stale .elc during active development.
 (setq load-prefer-newer noninteractive)
-
-;; Don't JIT-compile files that are loaded once and never edited.
-(setq native-comp-jit-compilation-deny-list
-      '("\\(?:loaddefs\\|\\.dir-locals\\)\\.el\\'"))
 
 ;; ── LSP / subprocess throughput ───────────────────────────────────────────────
 ;; Read subprocess output immediately instead of waiting for the next scheduling
@@ -59,8 +54,28 @@
       jit-lock-stealth-nice        0.2   ; yield to input every 200 ms during stealth
       fast-but-imprecise-scrolling t)    ; skip fontification during wheel/page scroll
 
+;; Don't JIT-compile files that are loaded once and never edited.
+(setq native-comp-jit-compilation-deny-list
+      '("\\(?:loaddefs\\|\\.dir-locals\\)\\.el\\'"))
+
+;; Don't warn about missing native-comp source — accelerates first GUI frame
+;; on systems where some .eln-cache entries lack matching .el files.
+(setq native-comp-warning-on-missing-source nil)
+(setq native-comp-async-report-warnings-errors 'silent)
+
 ;; Modern terminals: report selection, extended modifiers, mouse, etc.
 (setq xterm-extra-capabilities '(getSelection setSelection modifyOtherKeys))
+
+;; Avoid the implicit `recentf-mode' / `savehist-mode' GC churn during init.
+(setq idle-update-delay 1.0)                    ; default 0.5
+
+;; Skip site-start.el and default.el (rarely useful for user-managed installs).
+(setq site-run-file nil
+      inhibit-default-init t)
+
+;; No GUI dialogs: avoids GTK/X dialog initialization costs.
+(setq use-dialog-box nil
+      use-file-dialog nil)
 
 ;; Skip the cost of file-handler resolution for every `load' / `require'
 ;; during startup; restore the original list once Emacs is up.
@@ -74,5 +89,11 @@
                  (delete-dups (append old-value file-name-handler-alist))))
               101)))                            ; after Doom's own hooks
 
-;; Avoid the implicit `recentf-mode' / `savehist-mode' GC churn during init.
-(setq idle-update-delay 1.0)                    ; default 0.5
+;; Same idea as your file-name-handler-alist trick, but for vc-handled-backends:
+;; nil during init means "ask no VC questions about init files".
+(unless (or (daemonp) noninteractive)
+  (let ((old-vc vc-handled-backends))
+    (setq vc-handled-backends nil)
+    (add-hook 'emacs-startup-hook
+              (lambda () (setq vc-handled-backends old-vc))
+              101)))
