@@ -60,7 +60,6 @@
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
       delete-by-moving-to-trash t  ; Delete files to trash
       display-line-numbers-type 'relative
-      read-process-output-max (* 4 1024 1024) ; 4 MB — eglot/LSP sends large JSON chunks
       scroll-margin                         3
       scroll-preserve-screen-position       t
       truncate-string-ellipsis "…" ; Unicode ellispis are nicer than "...", and also save /precious/ space
@@ -71,20 +70,18 @@
       vc-follow-symlinks  t
       xref-history-storage 'xref-window-local-history)
 
-(defvar my/splash-images
-  (when-let* ((dir (file-name-concat doom-user-dir "splash"))
-              ((file-directory-p dir)))
-    (directory-files dir t "^[^.]" t))
-  "Cached splash image candidates.")
-
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
+
+(defvar my/splash-image-dir
+  (file-name-concat doom-user-dir "splash")
+  "Directory containing splash-image candidates.")
 
 (add-hook! 'doom-after-init-hook
   (defun my/set-random-splash-image ()
-    (when my/splash-images
-      (setq fancy-splash-image (seq-random-elt my/splash-images))))
+    (when (file-directory-p my/splash-image-dir)
+      (when-let* ((images (directory-files my/splash-image-dir t "^[^.]" t)))
+        (setq fancy-splash-image (seq-random-elt images)))))
   (defun my/setup-global-modes ()
-    "Enable repeat-mode immediately; defer subword-mode to idle."
     (repeat-mode 1)
     (run-with-idle-timer 0.5 nil #'global-subword-mode 1)))
 
@@ -128,7 +125,8 @@
 
 ;; to hide autosave file from recent files
 (after! recentf
-  (add-to-list 'recentf-exclude (regexp-quote (file-truename doom-local-dir))))
+  (add-to-list 'recentf-exclude
+               (regexp-quote (expand-file-name doom-local-dir))))
 
 ;; Directional window-selection routines
 (use-package! windmove
@@ -259,19 +257,15 @@
   "Regex matching README files (any case, any extension).")
 
 (defun my/dired-auto-readme-maybe ()
-  "Enable `dired-auto-readme-mode' only when a README exists here."
-  (when (directory-files default-directory nil my/readme-file-rx t 1)
-    (dired-auto-readme-mode 1)))
+  "Enable `dired-auto-readme-mode' iff a README exists here and
+we're not the dirvish side window."
+  (unless (and (fboundp 'dirvish-side-session-visible-p)
+               (eq (dirvish-side-session-visible-p) (selected-window)))
+    (when (directory-files default-directory nil my/readme-file-rx t 1)
+      (dired-auto-readme-mode 1))))
 
 (use-package! page-break-lines
   :hook (dired-auto-readme-mode . page-break-lines-mode))
-
-;; run normally unless the selected window IS the dirvish side window.
-(defadvice! acml/dired-auto-readme-mode (fn &rest args)
-  :around #'dired-auto-readme-mode
-  (unless (and (fboundp 'dirvish-side-session-visible-p)
-               (eq (dirvish-side-session-visible-p) (selected-window)))
-    (apply fn args)))
 
 (defadvice! acml/dirvish-subtree-toggle (fn &rest args)
   :around #'dirvish-subtree-toggle (save-excursion (apply fn args)))
@@ -354,7 +348,10 @@
      +default/search-notes-for-symbol-at-point
      +default/search-emacsd
      consult-bookmark
-     :preview-key (list "C-SPC" :debounce 0.2 'any))))
+     :preview-key (list "C-SPC" :debounce 0.2 'any))
+    ;; (consult-customize consult-line consult-buffer
+    ;;                    :preview-key '(:debounce 0.15 any))
+    ))
 
 (use-package! exercism :commands (exercism)
               :init
@@ -568,15 +565,11 @@ the sequences will be lost."
   "Cached fallback for magit-section-visibility-indicators.")
 
 (after! magit
-  (setq magit-format-file-function #'magit-format-file-nerd-icons
-        magit-repository-directories '(("~/.nix-config" . 0)
-                                       ("~/.nixpkgs" . 0)
-                                       ("~/Projects" . 3))
+  (setq magit-format-file-function   #'magit-format-file-nerd-icons
         magit-save-repository-buffers nil
-        ;; Don't restore the wconf after quitting magit, it's jarring
         magit-inhibit-save-previous-winconf t
         transient-values '((magit-rebase "--autostash" "--autosquash")
-                           (magit-pull "--autostash" "--rebase")))
+                           (magit-pull   "--autostash" "--rebase")))
   (magit-add-section-hook 'magit-status-sections-hook
                           'magit-insert-worktrees
                           'magit-insert-status-headers t)
@@ -593,7 +586,11 @@ the sequences will be lost."
                 my/magit-section-visibility-indicators)))
 
 (after! magit-repos
-  (setq magit-repolist-columns
+  (setq magit-repository-directories
+        '(("~/.nix-config" . 0)
+          ("~/.nixpkgs"    . 0)
+          ("~/Projects"    . 3))
+        magit-repolist-columns
         '(("Name" 24 magit-repolist-column-ident nil)
           ("Version" 58 magit-repolist-column-version
            ((:sort magit-repolist-version<)))
@@ -969,7 +966,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 
 (use-package! gptel
   :defer t
-  :if (not (string= (system-name) "DINA5CG52813LW"))
+  :if (not my/work-host-p)
   :config
   (setq gptel-include-reasoning 'ignore)
   (gptel-make-gemini "Gemini"
@@ -1112,17 +1109,31 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
          (< (buffer-size) 200000)))
   (defun my/copilot-maybe ()
     (when (my/copilot-eligible-p) (copilot-mode 1)))
+  (defun my/copilot--drain (buffers)
+    "Enable copilot in BUFFERS, one per idle cycle."
+    (let (timer)
+      (setq timer
+            (run-with-idle-timer
+             0.5 t
+             (lambda ()
+               (if (null buffers)
+                   (cancel-timer timer)
+                 (when-let* ((buf (pop buffers))
+                             ((buffer-live-p buf)))
+                   (with-current-buffer buf
+                     (when (my/copilot-eligible-p)
+                       (copilot-mode 1))))))))))
   (add-hook! 'doom-first-input-hook
     (defun my/defer-copilot-activation ()
       (run-with-idle-timer
-       1.0 nil
+       2.0 nil
        (lambda ()
          (add-hook 'prog-mode-hook #'my/copilot-maybe)
-         (dolist (buf (buffer-list))
-           (with-current-buffer buf
-             (when (and (derived-mode-p 'prog-mode)
-                        (my/copilot-eligible-p))
-               (copilot-mode 1))))))))
+         (my/copilot--drain
+          (cl-loop for buf in (buffer-list)
+                   when (with-current-buffer buf
+                          (derived-mode-p 'prog-mode))
+                   collect buf))))))
   :config
   (map! :map copilot-completion-map
         "<tab>"   #'copilot-accept-completion
@@ -1131,6 +1142,14 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
         "C-<tab>" #'copilot-accept-completion-by-word
         "C-n"     #'copilot-next-completion
         "C-p"     #'copilot-previous-completion)
+  (dolist (entry '((emacs-lisp-mode 2)
+                   (lisp-interaction-mode 2)
+                   (text-mode 2)
+                   (org-mode 2)
+                   (markdown-mode 2)
+                   (gfm-mode 2)
+                   (default 2)))
+    (add-to-list 'copilot-indentation-alist entry))
   (setq copilot-max-char 100000))
 
 (use-package! gt

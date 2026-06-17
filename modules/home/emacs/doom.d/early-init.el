@@ -24,7 +24,8 @@
 ;; ── LSP / subprocess throughput ───────────────────────────────────────────────
 ;; Read subprocess output immediately instead of waiting for the next scheduling
 ;; cycle.  Noticeably faster eglot/LSP response, especially on large JSON chunks.
-(setq process-adaptive-read-buffering nil)
+(setq process-adaptive-read-buffering nil
+      read-process-output-max (* 4 1024 1024)) ; 4 MB — eglot/LSP sends large JSON chunks
 
 ;; ── Bidirectional text scanning ───────────────────────────────────────────────
 ;; Emacs re-scans every displayed line for RTL characters by default.
@@ -35,6 +36,9 @@
               bidi-paragraph-direction 'left-to-right)
 (setq bidi-inhibit-bpa t)   ; also disable the Bidi Parentheses Algorithm
 
+;; Don't fontify while you're typing; keeps input snappy on large files.
+(setq redisplay-skip-fontification-on-input t)
+
 ;; ── Frame defaults (belt-and-suspenders alongside Doom) ───────────────────────
 ;; Doom sets these in its own early-init; mirroring them here ensures they apply
 ;; to the very first frame before Doom's machinery runs, eliminating any flicker
@@ -43,8 +47,8 @@
 (push '(tool-bar-lines     . 0) default-frame-alist)
 (push '(vertical-scroll-bars  ) default-frame-alist)
 (push '(horizontal-scroll-bars) default-frame-alist)
-;; (push '(fullscreen . maximized) default-frame-alist) ; no resize flash at startup
-;; (push '(fullscreen . maximized) initial-frame-alist) ; no resize flash at startup
+(push '(fullscreen . maximized) default-frame-alist) ; no resize flash at startup
+(push '(fullscreen . maximized) initial-frame-alist) ; no resize flash at startup
 
 ;; ── JIT font-lock ──────────────────────────────────────────────────────────
 ;; Defer fontification until idle; stealth-fontify in the background afterward.
