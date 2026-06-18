@@ -1201,7 +1201,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
         "C-<tab>" #'copilot-accept-completion-by-word
         "C-n"     #'copilot-next-completion
         "C-p"     #'copilot-previous-completion)
-  (dolist (entry '((emacs-lisp-mode 2) (lisp-interaction-mode 2)
+  (dolist (entry '((nix-ts-mode 2)(emacs-lisp-mode 2) (lisp-interaction-mode 2)
                    (text-mode 2) (org-mode 2) (markdown-mode 2)
                    (gfm-mode 2) (default 2)))
     (add-to-list 'copilot-indentation-alist entry))

@@ -16,7 +16,8 @@ in
       viAlias = true;
       vimAlias = true;
 
-      nixpkgs.config.allowUnfree = true;
+      # nixpkgs.config.allowUnfree = true;
+      nixpkgs.useGlobalPackages = true;
       package = inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
       colorschemes = {

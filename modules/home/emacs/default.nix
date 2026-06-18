@@ -102,8 +102,8 @@ let
           src = pkgs.fetchFromGitHub {
             owner = "dakra";
             repo = "ghostel";
-            rev = "b197c1695b7cd887dd72b2aab8ff575be68cd5d3";
-            hash = "sha256-GbbxnG5I/QPfoaK4g8S6tLVLeM1nTrl8x5vl8JBau4g=";
+            rev = "cd67d113f9ab041727cf9dc67b96fd655f930d2c";
+            hash = "sha256-bhMPK0Lpob+dE6drp3x5YXsxWhoYyTdurG98OshnBZM=";
           };
 
           module = pkgs.stdenv.mkDerivation (finalAttrs: {
