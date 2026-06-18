@@ -87,7 +87,7 @@
 
 ;; Don't JIT-compile files that are loaded once and never edited.
 (setq native-comp-jit-compilation-deny-list
-      '("\\(?:loaddefs\\|\\.dir-locals\\)\\.el\\'"))
+      '("\\(?:loaddefs\\|\\.dir-locals\\|init\\|custom\\|packages\\)\\.el\\'"))
 
 ;; Don't warn about missing native-comp source — accelerates first GUI frame
 ;; on systems where some .eln-cache entries lack matching .el files.

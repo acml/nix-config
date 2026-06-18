@@ -95,18 +95,25 @@ Must be side-effect-free: this runs inside a display :eval form."
   ;; dirvish re-creates its window; re-sync visibility there too.
   (add-hook! 'dirvish-setup-hook #'lkn-tab-bar--sync-visibility)
 
-  ;; These two things combined prevents the tab list to be printed either as a
-  ;; tooltip or in the echo area
+  (defvar lkn-tab-bar--tooltip-cache nil
+    "Cons (STATE . STRING) mirroring `lkn-tab-bar--render-cache'.")
+
   (defun tooltip-help-tips (_event)
-    "Display workspace tabs in tooltip only when relevant."
     (and tab-bar-mode
          (bound-and-true-p persp-mode)
          (stringp tooltip-help-message)
          (when-let* ((ws (lkn-tab-bar--workspaces))
-                     (s  (string-trim
-                        (substring-no-properties
-                         (mapconcat #'identity ws "")))))
-           (unless (string= (string-trim (substring-no-properties tooltip-help-message)) s)
+                     (key (car lkn-tab-bar--render-cache))
+                     (s   (if (equal key (car lkn-tab-bar--tooltip-cache))
+                            (cdr lkn-tab-bar--tooltip-cache)
+                          (let ((v (string-trim
+                                    (substring-no-properties
+                                     (mapconcat #'identity ws "")))))
+                            (setq lkn-tab-bar--tooltip-cache (cons key v))
+                            v))))
+           (unless (string= (string-trim
+                           (substring-no-properties tooltip-help-message))
+                          s)
            (tooltip-show tooltip-help-message (not tooltip-mode))
            t))))
 

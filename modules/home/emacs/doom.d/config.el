@@ -61,7 +61,9 @@
       auth-source-cache-expiry nil ; default is 7200 (2h)
       auto-revert-avoid-polling t  ; refresh buffers when files change on disk
       auto-revert-check-vc-info nil; large compiled tags / treesit files: skip the “file changed on disk” poll
+      auto-revert-interval            5   ; only matters when notify is unavailable
       auto-revert-remote-files nil ; so TRAMP buffers don’t silently spawn checks
+      auto-revert-stop-on-user-input  t
       auto-revert-use-notify t     ; use inotify instead of polling
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
       delete-by-moving-to-trash t  ; Delete files to trash
@@ -75,6 +77,13 @@
       vc-handled-backends '(Git)
       vc-follow-symlinks  t
       xref-history-storage 'xref-window-local-history)
+
+(after! vc-hooks
+  (define-advice vc-refresh-state (:around (fn) my/skip-heavy)
+    (when (and buffer-file-name
+               (not (file-remote-p buffer-file-name))
+               (< (buffer-size) 1000000))
+      (funcall fn))))
 
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 
@@ -139,8 +148,18 @@
 
 ;; to hide autosave file from recent files
 (after! recentf
+  (setq recentf-auto-cleanup    'never        ; skip startup cleanup
+        recentf-max-saved-items 200)
   (add-to-list 'recentf-exclude
-               (regexp-quote (expand-file-name doom-local-dir))))
+               (lambda (file)
+                 (string-prefix-p (expand-file-name doom-local-dir)
+                                  (expand-file-name file)))))
+
+(after! savehist
+  (setq history-length              200
+        savehist-autosave-interval  300)     ; default 5 s — way too eager
+  (dolist (v '(kill-ring search-ring regexp-search-ring))
+    (add-to-list 'savehist-additional-variables v)))
 
 ;; Directional window-selection routines
 (use-package! windmove
@@ -310,7 +329,7 @@ we're not the dirvish side window."
         dirvish-subtree-prefix "  "
         dirvish-subtree-state-style 'nerd)
   ;; (dirvish-peek-mode)
-  (dirvish-side-follow-mode))
+  (run-with-idle-timer 1 nil #'dirvish-side-follow-mode))
 
 (after! dirvish-side
   (setq dirvish-side-display-alist
@@ -459,9 +478,6 @@ we're not the dirvish side window."
   (setq-hook! 'go-ts-mode-hook
     eglot-workspace-configuration
     '(:gopls (:staticcheck t))))
-
-(after! treesit
-  (setq treesit-font-lock-level 3))
 
 ;; (after! lsp-mode
 ;;   (setq lsp-enable-file-watchers t
@@ -656,8 +672,11 @@ the sequences will be lost."
 (after! git-commit
   (setq git-commit-summary-max-length 68))
 
-(add-hook! '(org-mode-hook LaTeX-mode-hook markdown-mode-hook gfm-mode-hook Info-mode-hook)
-           #'mixed-pitch-mode)
+(add-hook! '(org-mode-hook LaTeX-mode-hook markdown-mode-hook
+             gfm-mode-hook Info-mode-hook)
+  (defun my/mixed-pitch-on ()
+    (require 'mixed-pitch)
+    (mixed-pitch-mode 1)))
 
 (add-hook! markdown-mode
   (add-hook! before-save :local #'markdown-toc-refresh-toc))
@@ -772,9 +791,14 @@ the sequences will be lost."
   :defer t
   :commands (scopeline-mode)
   :init
+  (defun my/scopeline-maybe ()
+    "Enable `scopeline-mode' only in small, local prog buffers."
+    (when (and (not (file-remote-p default-directory))
+               (< (buffer-size) 250000))   ; 250 KB
+      (scopeline-mode 1)))
   (add-hook 'doom-first-file-hook
             (lambda ()
-              (add-hook 'prog-mode-hook #'scopeline-mode))))
+              (add-hook 'prog-mode-hook #'my/scopeline-maybe))))
 
 (map!
  (:leader
@@ -1289,6 +1313,12 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
     (add-hook 'server-after-make-frame-hook #'my/tui-glyph-setup)
   (my/tui-glyph-setup))
 
+(when (and my/gui-init-p (fboundp 'pixel-scroll-precision-mode))
+  (add-hook 'doom-first-input-hook #'pixel-scroll-precision-mode))
+
+(when (>= emacs-major-version 28)
+  (setq read-extended-command-predicate #'command-completion-default-include-p))
+
 (add-hook 'doom-after-init-hook
           (lambda ()
             ;; Load a file with the same name as the computer’s name. Just keep on going if
@@ -1296,4 +1326,4 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
             (load! (car (split-string my/host "\\.")) nil t)
             ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
             (load! (car (last (split-string (symbol-name system-type) "/"))) nil t))
-          75)
+          95)
