@@ -13,6 +13,14 @@
 (defconst my/host (system-name)
   "Cached `system-name'.")
 
+(defconst my/host-config-name
+  (car (split-string my/host "\\."))
+  "Filename (without extension) of host-specific config.")
+
+(defconst my/system-type-name
+  (car (last (split-string (symbol-name system-type) "/")))
+  "Filename (without extension) of OS-specific config.")
+
 (defconst my/work-host-p
   (string-equal-ignore-case my/host "DINA5CG52813LW")
   "Non-nil on the DINA5CG52813LW work machine.")
@@ -24,8 +32,9 @@
   "Cached WSL detection.")
 
 (defconst my/gui-init-p
-  (or (display-graphic-p)
-      (and (daemonp) (memq window-system '(x w32 ns pgtk))))
+  ;; A daemon almost always serves a GUI client; treat it as graphical.
+  ;; The few users who only ever use `emacsclient -t' can override.
+  (or (display-graphic-p) (daemonp))
   "Non-nil if the very first frame is, or will be, graphical.")
 
 (defconst my/font-size
@@ -111,7 +120,7 @@
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 ;; Defer to after-init so customizations don't slow module loading.
 (add-hook 'doom-after-init-hook
-          (lambda () (when (file-exists-p custom-file) (load custom-file)))
+          (lambda () (load custom-file 'noerror 'nomessage))
           90)
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
@@ -148,12 +157,13 @@
 
 ;; to hide autosave file from recent files
 (after! recentf
-  (setq recentf-auto-cleanup    'never        ; skip startup cleanup
+  (setq recentf-auto-cleanup    'never
         recentf-max-saved-items 200)
-  (add-to-list 'recentf-exclude
-               (lambda (file)
-                 (string-prefix-p (expand-file-name doom-local-dir)
-                                  (expand-file-name file)))))
+  (let ((local-dir (file-name-as-directory
+                    (expand-file-name doom-local-dir))))
+    (add-to-list 'recentf-exclude
+                 (lambda (file)
+                   (string-prefix-p local-dir (expand-file-name file))))))
 
 (after! savehist
   (setq history-length              200
@@ -284,16 +294,20 @@
   :config (setq dired-auto-readme-separator "\n")
   :hook (dired-mode . my/dired-auto-readme-maybe))
 
-(defconst my/readme-file-rx
-  "\\`[Rr][Ee][Aa][Dd][Mm][Ee]\\(?:\\.[A-Za-z]+\\)?\\'"
-  "Regex matching README files (any case, any extension).")
+(defconst my/readme-candidate-bases '("README" "Readme" "readme"))
+(defconst my/readme-candidate-exts
+  '("" ".org" ".md" ".markdown" ".txt" ".rst" ".adoc"))
 
 (defun my/dired-auto-readme-maybe ()
-  "Enable `dired-auto-readme-mode' iff a README exists here and
-we're not the dirvish side window."
+  "Enable `dired-auto-readme-mode' iff a README exists here."
   (unless (and (fboundp 'dirvish-side-session-visible-p)
                (eq (dirvish-side-session-visible-p) (selected-window)))
-    (when (directory-files default-directory nil my/readme-file-rx t 1)
+    (when (cl-loop for base in my/readme-candidate-bases
+                   thereis
+                   (cl-loop for ext in my/readme-candidate-exts
+                            thereis (file-exists-p
+                                     (expand-file-name (concat base ext)
+                                                       default-directory))))
       (dired-auto-readme-mode 1))))
 
 (use-package! page-break-lines
@@ -329,7 +343,7 @@ we're not the dirvish side window."
         dirvish-subtree-prefix "  "
         dirvish-subtree-state-style 'nerd)
   ;; (dirvish-peek-mode)
-  (run-with-idle-timer 1 nil #'dirvish-side-follow-mode))
+  (add-hook 'doom-first-input-hook #'dirvish-side-follow-mode))
 
 (after! dirvish-side
   (setq dirvish-side-display-alist
@@ -343,7 +357,7 @@ we're not the dirvish side window."
          ([remap dired-smart-shell-command]    . dwim-shell-command))
   :config
   ;; Heavy: ~hundreds of preset commands; pull them in on idle.
-  (run-with-idle-timer 2 nil (lambda () (require 'dwim-shell-commands))))
+  (run-with-idle-timer 30 nil (lambda () (require 'dwim-shell-commands))))
 
 (after! eglot
   ;; jsonrpc--log-event is called on every LSP message; with the events buffer
@@ -391,7 +405,6 @@ we're not the dirvish side window."
               :config
               (setq exercism-directory "~/Projects/exercism"))
 
-(setq evil-want-fine-undo t)   ; By default while in insert all changes are one big blob. Be more granular
 (after! evil
   (setq
    evil-vsplit-window-right t  ; Switch to the new window after splitting
@@ -414,17 +427,6 @@ we're not the dirvish side window."
         modus-themes-common-palette-overrides
         '((border-mode-line-active unspecified)
           (border-mode-line-inactive unspecified))))
-
-(when (daemonp)
-  (defun my/daemon-load-gui-theme (frame)
-    "Load `ef-eagle` once for the first GUI frame, then remove the hook."
-    (with-selected-frame frame
-      (when my/gui-init-p
-        (unless (memq 'ef-eagle custom-enabled-themes)
-          (load-theme 'ef-eagle t))
-        (remove-hook 'after-make-frame-functions
-                     #'my/daemon-load-gui-theme))))
-  (add-hook 'after-make-frame-functions #'my/daemon-load-gui-theme))
 
 ;; (after! expand-region
 ;;   (define-key evil-visual-state-map (kbd "v") 'er/expand-region))
@@ -602,6 +604,8 @@ the sequences will be lost."
       (setq my/magit-fold-indicator
             (if (char-displayable-p ?) "" "..."))))
 
+(defvar my/magit-section-visibility-indicators nil)
+
 (after! magit
   (setq magit-save-repository-buffers nil
         magit-inhibit-save-previous-winconf t
@@ -614,11 +618,15 @@ the sequences will be lost."
                           'magit-insert-ignored-files
                           'magit-insert-untracked-files
                           nil)
-  (add-hook! 'magit-mode-hook
-    (setq-local left-fringe-width 16
-                magit-section-visibility-indicators
-                `((magit-fringe-bitmap> . magit-fringe-bitmapv)
-                  (,(my/magit-fold-indicator) . t))))
+  (add-hook 'magit-mode-hook
+            (defun my/magit-mode-setup-h ()
+              (unless my/magit-section-visibility-indicators
+                (setq my/magit-section-visibility-indicators
+                      `((magit-fringe-bitmap> . magit-fringe-bitmapv)
+                        (,(my/magit-fold-indicator) . t))))
+              (setq-local left-fringe-width 16
+                          magit-section-visibility-indicators
+                          my/magit-section-visibility-indicators)))
   (add-transient-hook! 'magit-status-mode-hook
     (require 'nerd-icons)
     (setq magit-format-file-function #'magit-format-file-nerd-icons
@@ -727,7 +735,6 @@ the sequences will be lost."
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory (expand-file-name "~/Documents/org/")
-      org-startup-with-inline-images t
       org-agenda-files (list org-directory (expand-file-name "~/Documents/worg/")))
 
 (add-hook 'org-load-hook (lambda () (add-to-list 'org-modules 'org-habit)))
@@ -735,7 +742,11 @@ the sequences will be lost."
   (setq org-ellipsis (if (and my/gui-init-p (char-displayable-p ?)) " " nil)
         org-hide-emphasis-markers t
         org-latex-pdf-process '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f")
-        org-startup-folded 'show2levels))
+        org-startup-folded 'show2levels
+        org-startup-with-inline-images nil)
+  (add-hook 'org-mode-hook
+            (defun my/org-images-h ()
+              (run-with-idle-timer 0.3 nil #'org-display-inline-images))))
 
 (unless my/gui-init-p
   (add-hook 'org-mode-hook
@@ -1144,7 +1155,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   :after gptel
   :config
   ;; gptel-agent-update may make network requests — don't block gptel's load path.
-  (run-with-idle-timer 5 nil #'gptel-agent-update))
+  (run-with-idle-timer 30 nil #'gptel-agent-update))
 
 (use-package! gptel-quick
   :commands (gptel-quick)
@@ -1166,11 +1177,11 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                1.5 nil
                (lambda ()
                  (add-hook 'prog-mode-hook #'my/copilot-maybe)
-                 ;; Only consider currently visible buffers – fast.
-                 (dolist (win (window-list nil 'no-mini))
-                   (with-current-buffer (window-buffer win)
-                   (when (and (derived-mode-p 'prog-mode)
-                              (my/copilot-eligible-p))
+                 (dolist (buf (buffer-list))
+                   (with-current-buffer buf
+                     (when (and (derived-mode-p 'prog-mode)
+                              (my/copilot-eligible-p)
+                              (get-buffer-window buf 'visible))
                      (while-no-input (copilot-mode 1)))))))))
   :config
   (map! :map copilot-completion-map
@@ -1313,8 +1324,10 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
     (add-hook 'server-after-make-frame-hook #'my/tui-glyph-setup)
   (my/tui-glyph-setup))
 
-(when (and my/gui-init-p (fboundp 'pixel-scroll-precision-mode))
-  (add-hook 'doom-first-input-hook #'pixel-scroll-precision-mode))
+(when (fboundp 'pixel-scroll-precision-mode)
+  (add-hook 'doom-first-input-hook
+            (lambda () (when (display-graphic-p)
+                    (pixel-scroll-precision-mode 1)))))
 
 (when (>= emacs-major-version 28)
   (setq read-extended-command-predicate #'command-completion-default-include-p))
@@ -1323,7 +1336,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
           (lambda ()
             ;; Load a file with the same name as the computer’s name. Just keep on going if
             ;; the requisite file isn't there.
-            (load! (car (split-string my/host "\\.")) nil t)
+            (load! my/host-config-name nil t)
             ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
-            (load! (car (last (split-string (symbol-name system-type) "/"))) nil t))
+            (load! my/system-type-name nil t))
           95)

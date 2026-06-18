@@ -120,11 +120,4 @@
                  (delete-dups (append old-value file-name-handler-alist))))
               101)))                            ; after Doom's own hooks
 
-;; Same idea as your file-name-handler-alist trick, but for vc-handled-backends:
-;; nil during init means "ask no VC questions about init files".
-(unless (or (daemonp) noninteractive)
-  (let ((old-vc vc-handled-backends))
-    (setq vc-handled-backends nil)
-    (add-hook 'emacs-startup-hook
-              (lambda () (setq vc-handled-backends old-vc))
-              101)))
+(setq vc-handled-backends nil)
