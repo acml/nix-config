@@ -98,18 +98,19 @@ Must be side-effect-free: this runs inside a display :eval form."
   ;; These two things combined prevents the tab list to be printed either as a
   ;; tooltip or in the echo area
   (defun tooltip-help-tips (_event)
-    "Hook function to display a help tooltip."
-    (when (and tab-bar-mode
-               (stringp tooltip-help-message)
-               (bound-and-true-p persp-mode))
-      (when-let* ((workspaces (lkn-tab-bar--workspaces))
-                  (wstr (mapconcat #'identity workspaces "")))
-        (unless (string= (string-trim (substring-no-properties tooltip-help-message))
-                         (string-trim (substring-no-properties wstr)))
-          (tooltip-show tooltip-help-message (not tooltip-mode))
-          t))))
+    "Display workspace tabs in tooltip only when relevant."
+    (and tab-bar-mode
+         (bound-and-true-p persp-mode)
+         (stringp tooltip-help-message)
+         (when-let* ((ws (lkn-tab-bar--workspaces))
+                     (s  (string-trim
+                        (substring-no-properties
+                         (mapconcat #'identity ws "")))))
+           (unless (string= (string-trim (substring-no-properties tooltip-help-message)) s)
+           (tooltip-show tooltip-help-message (not tooltip-mode))
+           t))))
 
-  (tooltip-mode)
+  (run-with-idle-timer 1 nil #'tooltip-mode)
 
   (defun lkn-tab-bar--event-to-item (event)
     "Given a click EVENT, translate to a tab.

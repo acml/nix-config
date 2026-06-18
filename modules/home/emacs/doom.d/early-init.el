@@ -12,15 +12,24 @@
       inhibit-startup-message t
       initial-scratch-message nil
       initial-major-mode 'fundamental-mode
+      ;; Skip the expensive automatic theme/face recomputation during init.
+      inhibit-redisplay t
       ;; Suppress "Loading …" echoes that force redisplays during init.
       inhibit-message t)
-(add-hook 'doom-after-init-hook (lambda () (setq inhibit-message nil)) 99)
+(add-hook 'doom-after-init-hook
+          (lambda ()
+            (setq inhibit-redisplay nil
+                  inhibit-message   nil)
+            (redisplay))
+          99)
 
 ;; Keep glyph bitmaps alive across GC — avoids re-rendering Nerd Icons on every GC.
 (setq inhibit-compacting-font-caches t)
 
 ;; Suppress the implicit frame resize fired when font metrics change during init.
-(setq frame-inhibit-implied-resize t)
+(setq frame-inhibit-implied-resize t
+      x-gtk-use-system-tooltips     nil) ; tooltips: stay inside Emacs
+
 
 ;; Don't render cursor / region in inactive windows.
 (setq-default cursor-in-non-selected-windows nil)

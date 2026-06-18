@@ -157,15 +157,15 @@
 
 (use-package! winum
   :after-call doom-first-input-hook
-  :init
+  :config
+  (winum-mode 1)
   (dotimes (i 9)
-    (let* ((n (1+ i))
+    (let* ((n  (1+ i))
            (fn (intern (format "winum-select-window-%d" n))))
       (map! :n (format "s-%d" n) fn
             :leader
             :n (number-to-string n) fn
-            :n (format "w%d" n)     fn)))
-  :config (winum-mode 1))
+            :n (format "w%d" n)     fn))))
 
 (after! gcmh
   (setq gcmh-high-cons-threshold (* 128 1024 1024)
@@ -635,12 +635,18 @@ the sequences will be lost."
   :init
   (add-hook 'magit-status-mode-hook
             (defun my/magit-todos-once-h ()
-              (require 'magit-todos)
-              (magit-todos-mode 1)
-              (remove-hook 'magit-status-mode-hook #'my/magit-todos-once-h)))
+              (remove-hook 'magit-status-mode-hook #'my/magit-todos-once-h)
+              (run-with-idle-timer
+               0 nil
+               (lambda ()
+                 (require 'magit-todos)
+                 (magit-todos-mode 1)
+                 (when-let ((buf (magit-get-mode-buffer 'magit-status-mode)))
+                   (with-current-buffer buf (magit-refresh)))))))
   :config
   (setq magit-todos-max-items 20
         magit-todos-depth     3
+        magit-todos-update    t
         magit-todos-scanner   #'magit-todos--scan-with-rg))
 
 (map! :leader
@@ -712,9 +718,9 @@ the sequences will be lost."
         org-latex-pdf-process '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f")
         org-startup-folded 'show2levels))
 
-(add-hook! 'org-mode-hook
-  (unless my/gui-init-p
-    (setq-local xterm-set-window-title nil)))
+(unless my/gui-init-p
+  (add-hook 'org-mode-hook
+            (lambda () (setq-local xterm-set-window-title nil))))
 
 (after! persp-mode
   ;; Load on idle; frame-title-format and tab-bar setup are not on the
@@ -999,71 +1005,68 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
      (display-buffer-in-side-window)
      (side . right))))
 
-(defvar my/openrouter-models
-  '(nvidia/nemotron-nano-9b-v2:free
-    openrouter/sonoma-dusk-alpha
-    openrouter/sonoma-sky-alpha
-    deepseek/deepseek-chat-v3.1:free
-    openai/gpt-oss-120b:free
-    openai/gpt-oss-20b:free
-    z-ai/glm-4.5-air:free
-    qwen/qwen3-coder:free
-    moonshotai/kimi-k2:free
-    lphin-mistral-24b-venice-edition:free
-    google/gemma-3n-e2b-it:free
-    tencent/hunyuan-a13b-instruct:free
-    tngtech/deepseek-r1t2-chimera:free
-    mistralai/mistral-small-3.2-24b-instruct:free
-    moonshotai/kimi-dev-72b:free
-    deepseek/deepseek-r1-0528-qwen3-8b:free
-    deepseek/deepseek-r1-0528:free
-    mistralai/devstral-small-2505:free
-    google/gemma-3n-e4b-it:free
-    meta-llama/llama-3.3-8b-instruct:free
-    qwen/qwen3-4b:free
-    qwen/qwen3-30b-a3b:free
-    qwen/qwen3-8b:free
-    qwen/qwen3-14b:free
-    qwen/qwen3-235b-a22b:free
-    tngtech/deepseek-r1t-chimera:free
-    microsoft/mai-ds-r1:free
-    shisa-ai/shisa-v2-llama3.3-70b:free
-    arliai/qwq-32b-arliai-rpr-v1:free
-    agentica-org/deepcoder-14b-preview:free
-    moonshotai/kimi-vl-a3b-thinking:free
-    meta-llama/llama-4-maverick:free
-    meta-llama/llama-4-scout:free
-    qwen/qwen2.5-vl-32b-instruct:free
-    deepseek/deepseek-chat-v3-0324:free
-    mistralai/mistral-small-3.1-24b-instruct:free
-    google/gemma-3-4b-it:free
-    google/gemma-3-12b-it:free
-    rekaai/reka-flash-3:free
-    google/gemma-3-27b-it:free
-    qwen/qwq-32b:free
-    nousresearch/deephermes-3-llama-3-8b-preview:free
-    cognitivecomputations/dolphin3.0-r1-mistral-24b:free
-    cognitivecomputations/dolphin3.0-mistral-24b:free
-    qwen/qwen2.5-vl-72b-instruct:free
-    mistralai/mistral-small-24b-instruct-2501:free
-    deepseek/deepseek-r1-distill-llama-70b:free
-    deepseek/deepseek-r1:free
-    google/gemini-2.0-flash-exp:free
-    meta-llama/llama-3.3-70b-instruct:free
-    qwen/qwen-2.5-coder-32b-instruct:free
-    meta-llama/llama-3.2-3b-instruct:free
-    qwen/qwen-2.5-72b-instruct:free
-    meta-llama/llama-3.1-405b-instruct:free
-    mistralai/mistral-nemo:free
-    google/gemma-2-9b-it:free
-    mistralai/mistral-7b-instruct:free))
-
 (defun my/gptel-register-openrouter ()
   (unless (assoc "OpenRouter" gptel--known-backends)
     (gptel-make-openai "OpenRouter"
       :host "openrouter.ai" :endpoint "/api/v1/chat/completions"
       :stream t :key #'gptel-api-key-from-auth-source
-      :models my/openrouter-models)))
+      :models '(nvidia/nemotron-nano-9b-v2:free
+                openrouter/sonoma-dusk-alpha
+                openrouter/sonoma-sky-alpha
+                deepseek/deepseek-chat-v3.1:free
+                openai/gpt-oss-120b:free
+                openai/gpt-oss-20b:free
+                z-ai/glm-4.5-air:free
+                qwen/qwen3-coder:free
+                moonshotai/kimi-k2:free
+                lphin-mistral-24b-venice-edition:free
+                google/gemma-3n-e2b-it:free
+                tencent/hunyuan-a13b-instruct:free
+                tngtech/deepseek-r1t2-chimera:free
+                mistralai/mistral-small-3.2-24b-instruct:free
+                moonshotai/kimi-dev-72b:free
+                deepseek/deepseek-r1-0528-qwen3-8b:free
+                deepseek/deepseek-r1-0528:free
+                mistralai/devstral-small-2505:free
+                google/gemma-3n-e4b-it:free
+                meta-llama/llama-3.3-8b-instruct:free
+                qwen/qwen3-4b:free
+                qwen/qwen3-30b-a3b:free
+                qwen/qwen3-8b:free
+                qwen/qwen3-14b:free
+                qwen/qwen3-235b-a22b:free
+                tngtech/deepseek-r1t-chimera:free
+                microsoft/mai-ds-r1:free
+                shisa-ai/shisa-v2-llama3.3-70b:free
+                arliai/qwq-32b-arliai-rpr-v1:free
+                agentica-org/deepcoder-14b-preview:free
+                moonshotai/kimi-vl-a3b-thinking:free
+                meta-llama/llama-4-maverick:free
+                meta-llama/llama-4-scout:free
+                qwen/qwen2.5-vl-32b-instruct:free
+                deepseek/deepseek-chat-v3-0324:free
+                mistralai/mistral-small-3.1-24b-instruct:free
+                google/gemma-3-4b-it:free
+                google/gemma-3-12b-it:free
+                rekaai/reka-flash-3:free
+                google/gemma-3-27b-it:free
+                qwen/qwq-32b:free
+                nousresearch/deephermes-3-llama-3-8b-preview:free
+                cognitivecomputations/dolphin3.0-r1-mistral-24b:free
+                cognitivecomputations/dolphin3.0-mistral-24b:free
+                qwen/qwen2.5-vl-72b-instruct:free
+                mistralai/mistral-small-24b-instruct-2501:free
+                deepseek/deepseek-r1-distill-llama-70b:free
+                deepseek/deepseek-r1:free
+                google/gemini-2.0-flash-exp:free
+                meta-llama/llama-3.3-70b-instruct:free
+                qwen/qwen-2.5-coder-32b-instruct:free
+                meta-llama/llama-3.2-3b-instruct:free
+                qwen/qwen-2.5-72b-instruct:free
+                meta-llama/llama-3.1-405b-instruct:free
+                mistralai/mistral-nemo:free
+                google/gemma-2-9b-it:free
+                mistralai/mistral-7b-instruct:free))))
 
 (use-package! gptel
   :defer t
@@ -1133,19 +1136,18 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
          (< (buffer-size) 200000)))
   (defun my/copilot-maybe ()
     (when (my/copilot-eligible-p) (copilot-mode 1)))
-  ;; Attach the hook only after the first real file is visited, then
-  ;; enable copilot for currently *visible* prog-mode buffers (cheap).
   (add-hook 'doom-first-file-hook
             (defun my/copilot-bootstrap-h ()
               (run-with-idle-timer
                1.5 nil
                (lambda ()
                  (add-hook 'prog-mode-hook #'my/copilot-maybe)
-                 (dolist (buf (buffer-list))
-                   (with-current-buffer buf
-                     (when (and (derived-mode-p 'prog-mode)
-                                (my/copilot-eligible-p))
-                       (while-no-input (copilot-mode 1)))))))))
+                 ;; Only consider currently visible buffers – fast.
+                 (dolist (win (window-list nil 'no-mini))
+                   (with-current-buffer (window-buffer win)
+                   (when (and (derived-mode-p 'prog-mode)
+                              (my/copilot-eligible-p))
+                     (while-no-input (copilot-mode 1)))))))))
   :config
   (map! :map copilot-completion-map
         "<tab>"   #'copilot-accept-completion
@@ -1213,10 +1215,12 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                 (lambda ()
                   (or my/breadcrumb-icon-cache
                       (setq my/breadcrumb-icon-cache
-                            (concat " "
-                                    (if buffer-file-name
-                                        (nerd-icons-icon-for-file buffer-file-name)
-                                      (nerd-icons-icon-for-mode major-mode)))))))
+                            (if (display-graphic-p)
+                                (concat " "
+                                        (if buffer-file-name
+                                            (nerd-icons-icon-for-file buffer-file-name)
+                                          (nerd-icons-icon-for-mode major-mode)))
+                              "")))))
     (advice-add #'breadcrumb--format-ipath-node :around
                 (lambda (og p more &rest r)
                   "Icon for items"
@@ -1285,9 +1289,11 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
     (add-hook 'server-after-make-frame-hook #'my/tui-glyph-setup)
   (my/tui-glyph-setup))
 
-;; Load a file with the same name as the computer’s name. Just keep on going if
-;; the requisite file isn't there.
-(load! (car (split-string my/host "\\.")) nil t)
-
-;; Load a file with the name of the OS type ("gnu/linux" → "linux")
-(load! (car (reverse (split-string (symbol-name system-type) "/"))) nil t)
+(add-hook 'doom-after-init-hook
+          (lambda ()
+            ;; Load a file with the same name as the computer’s name. Just keep on going if
+            ;; the requisite file isn't there.
+            (load! (car (split-string my/host "\\.")) nil t)
+            ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
+            (load! (car (last (split-string (symbol-name system-type) "/"))) nil t))
+          75)
