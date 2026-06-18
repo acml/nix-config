@@ -72,16 +72,21 @@
       auto-revert-use-notify t     ; use inotify instead of polling
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
       delete-by-moving-to-trash t  ; Delete files to trash
-      display-line-numbers-type 'relative
+      display-line-numbers-type    'relative
+      display-line-numbers-grow-only t
+      display-line-numbers-width-start t
       scroll-margin                         3
       scroll-preserve-screen-position       t
       truncate-string-ellipsis "…" ; Unicode ellispis are nicer than "...", and also save /precious/ space
       undo-limit 80000000          ; Raise undo-limit to 80Mb
       window-combination-resize t  ; take new window space from all other windows (not just current)
       x-stretch-cursor t           ; Stretch cursor to the glyph width
-      vc-handled-backends '(Git)
-      vc-follow-symlinks  t
       xref-history-storage 'xref-window-local-history)
+
+(add-hook 'doom-first-file-hook
+          (defun my/enable-vc-h ()
+            (setq vc-handled-backends '(Git)
+                  vc-follow-symlinks  t)))
 
 (after! vc-hooks
   (define-advice vc-refresh-state (:around (fn) my/skip-heavy)
@@ -99,14 +104,17 @@
 (defvar my/splash-images nil
   "Cached splash-image candidates; computed lazily on first use.")
 
+(when my/gui-init-p
+  (add-hook! 'doom-after-init-hook
+    (defun my/set-random-splash-image ()
+      (when-let* (((file-directory-p my/splash-image-dir))
+                  (images (or my/splash-images
+                              (setq my/splash-images
+                                    (directory-files
+                                     my/splash-image-dir t "^[^.]" t)))))
+        (setq fancy-splash-image (seq-random-elt images))))))
+
 (add-hook! 'doom-after-init-hook
-  (defun my/set-random-splash-image ()
-    (when-let* (((file-directory-p my/splash-image-dir))
-                (images (or my/splash-images
-                            (setq my/splash-images
-                                  (directory-files
-                                   my/splash-image-dir t "^[^.]" t)))))
-      (setq fancy-splash-image (seq-random-elt images))))
   (defun my/setup-global-modes ()
     ;; Defer everything; nothing here is needed for the first redisplay.
     (run-with-idle-timer
@@ -597,7 +605,12 @@ the sequences will be lost."
   (setq magit-save-repository-buffers nil
         magit-inhibit-save-previous-winconf t
         transient-values '((magit-rebase "--autostash" "--autosquash")
-                           (magit-pull   "--autostash" "--rebase")))
+                           (magit-pull   "--autostash" "--rebase"))
+        magit-refresh-verbose              nil
+        magit-revision-insert-related-refs nil
+        magit-diff-refine-hunk            nil      ; was implicit 'all
+        magit-log-section-commit-count    10       ; default 10 already, but make explicit
+        magit-status-show-hashes-in-headers nil)
   (magit-add-section-hook 'magit-status-sections-hook
                           'magit-insert-worktrees
                           'magit-insert-status-headers t)
@@ -670,8 +683,14 @@ the sequences will be lost."
 (add-hook! '(org-mode-hook LaTeX-mode-hook markdown-mode-hook
              gfm-mode-hook Info-mode-hook)
   (defun my/mixed-pitch-on ()
-    (require 'mixed-pitch)
-    (mixed-pitch-mode 1)))
+    (let ((buf (current-buffer)))
+      (run-with-idle-timer
+       0.4 nil
+       (lambda ()
+         (when (buffer-live-p buf)
+           (with-current-buffer buf
+             (require 'mixed-pitch)
+             (mixed-pitch-mode 1))))))))
 
 (add-hook! markdown-mode
   (add-hook! before-save :local #'markdown-toc-refresh-toc))
@@ -1137,9 +1156,9 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                 google/gemma-3-4b-it
                 google/gemma-3-1b-it
                 gpt-4o))
-    (my/gptel-register-openrouter))
-  (when (fboundp 'macher-install)
-    (run-with-idle-timer 1 nil #'macher-install))
+    (my/gptel-register-openrouter)
+    (when (fboundp 'macher-install)
+      (run-with-idle-timer 1 nil #'macher-install)))
   :hook
   (gptel-post-stream-hook . gptel-auto-scroll))
 
@@ -1294,11 +1313,10 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   (unless (or (display-graphic-p frame) xterm-mouse-mode)
     (xterm-mouse-mode 1)))
 
-;; Evaluate both now (for non-daemon emacs) and upon frame creation
-;; (for new terminals via emacsclient).
+(add-hook 'doom-first-input-hook
+          (defun my/xterm-mouse-h ()
+            (unless (display-graphic-p) (xterm-mouse-mode 1))))
 (add-hook 'after-make-frame-functions #'initialize-mouse-mode)
-(unless (daemonp)
-  (initialize-mouse-mode))
 
 ;; TUI prettification
 (defun my/tui-glyph-setup (&optional frame)
@@ -1324,10 +1342,13 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
 (add-hook 'doom-after-init-hook
-          (lambda ()
-            ;; Load a file with the same name as the computer’s name. Just keep on going if
-            ;; the requisite file isn't there.
-            (load! my/host nil t)
-            ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
-            (load! my/system-type-name nil t))
+          (defun my/load-host-config-h ()
+            (run-with-idle-timer
+             1 nil
+             (lambda ()
+               ;; Load a file with the same name as the computer’s name. Just keep on going if
+               ;; the requisite file isn't there.
+               (load! my/host nil t)
+               ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
+               (load! my/system-type-name nil t))))
           95)

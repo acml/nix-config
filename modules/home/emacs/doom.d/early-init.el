@@ -7,6 +7,14 @@
 
 (setq auto-mode-case-fold nil)
 
+;; Skip per-buffer GC during init entirely.
+(setq gc-cons-threshold most-positive-fixnum
+      gc-cons-percentage 0.6)
+;; Doom restores sensible defaults via gcmh later.
+
+;; Skip the user-init-file modification-time check (saves one stat()).
+(setq user-init-file (or load-file-name buffer-file-name))
+
 ;; UI: don't ask Emacs to compute or print these during startup.
 (setq inhibit-startup-screen t
       inhibit-startup-message t
