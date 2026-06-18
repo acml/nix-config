@@ -225,9 +225,8 @@ This prevents jka-compr from attempting LZMA decompression on those files."
         (cl-remove "ChatGPT" gptel--known-backends :key #'car :test #'equal))
   (setq gptel-model 'claude-opus-4.7
         gptel-backend (gptel-make-gh-copilot "Copilot"))
-  ;; Only call macher-install if it exists
   (when (fboundp 'macher-install)
-    (macher-install)))
+    (run-with-idle-timer 1 nil #'macher-install)))
 
 (after! dirvish
   (setq dirvish-quick-access-entries

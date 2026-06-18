@@ -198,3 +198,5 @@
        :config
        ;;literate
        (default +bindings +smartparens))
+
+(setq evil-want-fine-undo t)

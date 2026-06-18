@@ -184,9 +184,11 @@ clicked."
 
   (defvar-local my--frame-title-cache nil)
 
-  (defun my--frame-title-invalidate (&rest _) (setq my--frame-title-cache nil))
+  (defun my--frame-title-invalidate (&optional _win &rest _)
+    "Clear the per-buffer frame-title cache."
+    (setq my--frame-title-cache nil))
 
-  (add-hook 'window-buffer-change-functions #'my/frame-title-invalidate)
+  (add-hook 'window-buffer-change-functions #'my--frame-title-invalidate)
 
   (defun my--frame-title-format ()
     (or my--frame-title-cache

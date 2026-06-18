@@ -23,6 +23,11 @@
            (file-exists-p "/proc/sys/fs/binfmt_misc/WSLInterop")))
   "Cached WSL detection.")
 
+(defconst my/gui-init-p
+  (or (display-graphic-p)
+      (and (daemonp) (memq window-system '(x w32 ns pgtk))))
+  "Non-nil if the very first frame is, or will be, graphical.")
+
 (defconst my/font-size
   (cond ((featurep :system 'macos) 13.0)
         (my/work-host-p            10.8)
@@ -36,7 +41,7 @@
       ;; There are two ways to load a theme. Both assume the theme is installed and
       ;; available. You can either set `doom-theme' or manually load a theme with the
       ;; `load-theme' function. This is the default:
-      doom-theme (if (display-graphic-p) 'ef-eagle 'ef-dark)
+      doom-theme (if my/gui-init-p 'ef-eagle 'ef-dark)
       ;; modus-operandi modus-vivendi doom-one doom-gruvbox doom-tomorrow-night
 
       ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
@@ -56,6 +61,7 @@
       auth-source-cache-expiry nil ; default is 7200 (2h)
       auto-revert-avoid-polling t  ; refresh buffers when files change on disk
       auto-revert-check-vc-info nil; large compiled tags / treesit files: skip the “file changed on disk” poll
+      auto-revert-remote-files nil ; so TRAMP buffers don’t silently spawn checks
       auto-revert-use-notify t     ; use inotify instead of polling
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
       delete-by-moving-to-trash t  ; Delete files to trash
@@ -150,7 +156,7 @@
 ;; (add-hook 'org-shiftright-final-hook 'windmove-right)
 
 (use-package! winum
-  :defer t
+  :after-call doom-first-input-hook
   :init
   (dotimes (i 9)
     (let* ((n (1+ i))
@@ -224,19 +230,8 @@
         calendar-longitude 29.047024))
 
 (use-package! google-c-style
-  :defer t
-  :init
-  (add-hook 'c-mode-common-hook
-            (defun my/google-c-style-once-h ()
-              (require 'google-c-style)
-              (google-set-c-style)
-              (google-make-newline-indent)
-              (remove-hook 'c-mode-common-hook #'my/google-c-style-once-h)
-              ;; Re-add the cheap parts as the real per-buffer hook:
-              (add-hook 'c-mode-common-hook
-                        (lambda ()
-                          (google-set-c-style)
-                          (google-make-newline-indent))))))
+  :hook ((c-mode-common . google-set-c-style)
+         (c-mode-common . google-make-newline-indent)))
 
 (after! compile
   (setq compilation-scroll-output 'first-error
@@ -322,14 +317,14 @@ we're not the dirvish side window."
         '((side . right) (slot . -1))))
 
 (use-package! dwim-shell-command
-  :bind (([remap shell-command] . dwim-shell-command)
+  :bind (([remap shell-command]               . dwim-shell-command)
          :map dired-mode-map
          ([remap dired-do-async-shell-command] . dwim-shell-command)
-         ([remap dired-do-shell-command] . dwim-shell-command)
-         ([remap dired-smart-shell-command] . dwim-shell-command))
+         ([remap dired-do-shell-command]       . dwim-shell-command)
+         ([remap dired-smart-shell-command]    . dwim-shell-command))
   :config
-  ;; Also make available all the utility functions provided by Xenodium
-  (require 'dwim-shell-commands))
+  ;; Heavy: ~hundreds of preset commands; pull them in on idle.
+  (run-with-idle-timer 2 nil (lambda () (require 'dwim-shell-commands))))
 
 (after! eglot
   ;; jsonrpc--log-event is called on every LSP message; with the events buffer
@@ -405,7 +400,7 @@ we're not the dirvish side window."
   (defun my/daemon-load-gui-theme (frame)
     "Load `ef-eagle` once for the first GUI frame, then remove the hook."
     (with-selected-frame frame
-      (when (display-graphic-p)
+      (when my/gui-init-p
         (unless (memq 'ef-eagle custom-enabled-themes)
           (load-theme 'ef-eagle t))
         (remove-hook 'after-make-frame-functions
@@ -584,9 +579,12 @@ the sequences will be lost."
   (auto-revert-tail-mode 1))
 (add-to-list 'auto-mode-alist '("\\.log\\'" . acml/log-mode))
 
-(defconst my/magit-fold-indicator
-  (if (char-displayable-p ?) "" "...")
-  "Cached fallback for magit-section-visibility-indicators.")
+(defvar my/magit-fold-indicator nil)
+
+(defun my/magit-fold-indicator ()
+  (or my/magit-fold-indicator
+      (setq my/magit-fold-indicator
+            (if (char-displayable-p ?) "" "..."))))
 
 (after! magit
   (setq magit-save-repository-buffers nil
@@ -600,14 +598,11 @@ the sequences will be lost."
                           'magit-insert-ignored-files
                           'magit-insert-untracked-files
                           nil)
-  (defconst my/magit-section-visibility-indicators
-    `((magit-fringe-bitmap> . magit-fringe-bitmapv)
-      (,my/magit-fold-indicator . t)))
   (add-hook! 'magit-mode-hook
     (setq-local left-fringe-width 16
                 magit-section-visibility-indicators
-                my/magit-section-visibility-indicators))
-  ;; Only enable nerd-icons formatting after magit-status is opened once.
+                `((magit-fringe-bitmap> . magit-fringe-bitmapv)
+                  (,(my/magit-fold-indicator) . t))))
   (add-transient-hook! 'magit-status-mode-hook
     (require 'nerd-icons)
     (setq magit-format-file-function #'magit-format-file-nerd-icons
@@ -712,13 +707,13 @@ the sequences will be lost."
 
 (add-hook 'org-load-hook (lambda () (add-to-list 'org-modules 'org-habit)))
 (after! org
-  (setq org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?)) " " nil)
+  (setq org-ellipsis (if (and my/gui-init-p (char-displayable-p ?)) " " nil)
         org-hide-emphasis-markers t
         org-latex-pdf-process '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f")
         org-startup-folded 'show2levels))
 
 (add-hook! 'org-mode-hook
-  (unless (display-graphic-p)
+  (unless my/gui-init-p
     (setq-local xterm-set-window-title nil)))
 
 (after! persp-mode
@@ -792,16 +787,24 @@ the sequences will be lost."
   (treemacs-define-RET-action 'file-node-closed #'treemacs-visit-node-in-most-recently-used-window)
 
   (defvar treemacs-file-ignore-extensions '())
-  (defvar treemacs-file-ignore-regexps '())
-  (defun treemacs-file-ignore-generate-regexps ()
-    (setq treemacs-file-ignore-regexps (mapcar #'dired-glob-regexp treemacs-file-ignore-globs)))
+  (defvar treemacs-file-ignore-regexp nil
+    "Single combined regex from `treemacs-file-ignore-globs'.")
+
   (setq treemacs-file-ignore-globs
         '("*/_minted-*" "*/.auctex-auto" "*/_region_.log" "*/_region_.tex"))
+
+  (defun treemacs-file-ignore-generate-regexps ()
+    (setq treemacs-file-ignore-regexp
+          (when treemacs-file-ignore-globs
+            (mapconcat #'dired-glob-regexp
+                       treemacs-file-ignore-globs "\\|"))))
   (treemacs-file-ignore-generate-regexps)
+
   (defun treemacs-ignore-filter (file full-path)
     (or (member (file-name-extension file) treemacs-file-ignore-extensions)
-        (seq-some (lambda (re) (string-match-p re full-path))
-                  treemacs-file-ignore-regexps)))
+        (and treemacs-file-ignore-regexp
+             (string-match-p treemacs-file-ignore-regexp full-path))))
+
   (add-to-list 'treemacs-ignored-file-predicates #'treemacs-ignore-filter)
 
   (setq treemacs-file-ignore-extensions
@@ -823,9 +826,7 @@ the sequences will be lost."
 
 (use-package! ghostel-compile
   :after-call doom-first-buffer-hook
-  :defer t
-  :config
-  (ghostel-compile-global-mode 1))
+  :config (ghostel-compile-global-mode 1))
 
 ;; (use-package! evil-ghostel
 ;;   :after (ghostel evil)
@@ -969,7 +970,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                         browse-url-browser-function 'browse-url-generic
                         search-web-default-browser  'browse-url-generic)))
               ;; Defer the actual xkb invocation off the critical path.
-              (when (display-graphic-p)
+              (when my/gui-init-p
                 (run-with-idle-timer 2 nil #'acml-set-keyboard)))))
 
 (map! "<f5>"   #'projectile-run-project
@@ -1107,7 +1108,8 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                 google/gemma-3-1b-it
                 gpt-4o)))
   (run-with-idle-timer 3 nil #'my/gptel-register-openrouter)
-  (macher-install)
+  (when (fboundp 'macher-install)
+    (run-with-idle-timer 1 nil #'macher-install))
   :hook
   (gptel-post-stream-hook . gptel-auto-scroll))
 
@@ -1118,13 +1120,11 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   (run-with-idle-timer 5 nil #'gptel-agent-update))
 
 (use-package! gptel-quick
-  :after gptel
   :commands (gptel-quick)
   :init
   (map! "<f1>" #'gptel-quick))
 
 (use-package! copilot
-  :defer t
   :commands (copilot-mode copilot-complete)
   :init
   (defun my/copilot-eligible-p ()
@@ -1141,8 +1141,8 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                1.5 nil
                (lambda ()
                  (add-hook 'prog-mode-hook #'my/copilot-maybe)
-                 (dolist (win (window-list nil 'no-mini))
-                   (with-current-buffer (window-buffer win)
+                 (dolist (buf (buffer-list))
+                   (with-current-buffer buf
                      (when (and (derived-mode-p 'prog-mode)
                                 (my/copilot-eligible-p))
                        (while-no-input (copilot-mode 1)))))))))
@@ -1158,7 +1158,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                    (text-mode 2) (org-mode 2) (markdown-mode 2)
                    (gfm-mode 2) (default 2)))
     (add-to-list 'copilot-indentation-alist entry))
-  (setq copilot-max-char 100000))
+  (setq copilot-max-char 1000000))
 
 (use-package! gt
   :defer t
@@ -1201,18 +1201,22 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   ;; Don't show the project/file name in the header, show only an icon
   (after! nerd-icons
     (defvar-local my/breadcrumb-icon-cache nil)
+
     (defun my/breadcrumb--invalidate-icon-cache (&rest _)
       (setq my/breadcrumb-icon-cache nil))
-    ;; Buffer-local cache; only invalidate when an *existing* buffer's
-    ;; file changes (revert / rename), not on every find-file.
-    (add-hook 'after-revert-hook #'my/breadcrumb--invalidate-icon-cache)
+
+    ;; rename of file (and revert) is the only thing that can change the icon.
+    (add-hook 'after-revert-hook        #'my/breadcrumb--invalidate-icon-cache)
+    (add-hook 'after-set-visited-file-name-hook #'my/breadcrumb--invalidate-icon-cache)
+
     (advice-add #'breadcrumb-project-crumbs :override
                 (lambda ()
                   (or my/breadcrumb-icon-cache
                       (setq my/breadcrumb-icon-cache
-                            (concat " " (if-let* ((f buffer-file-name))
-                                            (nerd-icons-icon-for-file f)
-                                          (nerd-icons-icon-for-mode major-mode)))))))
+                            (concat " "
+                                    (if buffer-file-name
+                                        (nerd-icons-icon-for-file buffer-file-name)
+                                      (nerd-icons-icon-for-mode major-mode)))))))
     (advice-add #'breadcrumb--format-ipath-node :around
                 (lambda (og p more &rest r)
                   "Icon for items"
@@ -1267,18 +1271,19 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   (initialize-mouse-mode))
 
 ;; TUI prettification
-(unless (display-graphic-p)
-  (when (version<= "31" emacs-version)
-    (standard-display-unicode-special-glyphs))
-  (set-display-table-slot standard-display-table 5 ?│)  ;; ?┃ ?┆ ?┇
-  (set-display-table-slot standard-display-table
-                          'box-down-right (make-glyph-code #x256d))
-  (set-display-table-slot standard-display-table
-                          'box-down-left (make-glyph-code #x256e))
-  (set-display-table-slot standard-display-table
-                          'box-up-right (make-glyph-code #x2570))
-  (set-display-table-slot standard-display-table
-                          'box-up-left (make-glyph-code #x256f)))
+(defun my/tui-glyph-setup (&optional frame)
+  (unless (display-graphic-p frame)
+    (when (version<= "31" emacs-version)
+      (standard-display-unicode-special-glyphs))
+    (set-display-table-slot standard-display-table 5 ?│)
+    (set-display-table-slot standard-display-table 'box-down-right (make-glyph-code #x256d))
+    (set-display-table-slot standard-display-table 'box-down-left  (make-glyph-code #x256e))
+    (set-display-table-slot standard-display-table 'box-up-right   (make-glyph-code #x2570))
+    (set-display-table-slot standard-display-table 'box-up-left    (make-glyph-code #x256f))))
+
+(if (daemonp)
+    (add-hook 'server-after-make-frame-hook #'my/tui-glyph-setup)
+  (my/tui-glyph-setup))
 
 ;; Load a file with the same name as the computer’s name. Just keep on going if
 ;; the requisite file isn't there.
