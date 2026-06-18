@@ -13,17 +13,13 @@
 (defconst my/host (system-name)
   "Cached `system-name'.")
 
-(defconst my/host-config-name
-  (car (split-string my/host "\\."))
-  "Filename (without extension) of host-specific config.")
+(defconst my/work-host-p
+  (string-equal-ignore-case my/host "DINA5CG52813LW")
+  "Non-nil on the DINA5CG52813LW work machine.")
 
 (defconst my/system-type-name
   (car (last (split-string (symbol-name system-type) "/")))
   "Filename (without extension) of OS-specific config.")
-
-(defconst my/work-host-p
-  (string-equal-ignore-case my/host "DINA5CG52813LW")
-  "Non-nil on the DINA5CG52813LW work machine.")
 
 (defconst my/wsl-p
   (and (featurep :system 'linux)
@@ -114,7 +110,7 @@
   (defun my/setup-global-modes ()
     ;; Defer everything; nothing here is needed for the first redisplay.
     (run-with-idle-timer
-     0.5 nil
+     2 nil
      (lambda () (repeat-mode 1) (global-subword-mode 1)))))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
@@ -294,21 +290,17 @@
   :config (setq dired-auto-readme-separator "\n")
   :hook (dired-mode . my/dired-auto-readme-maybe))
 
-(defconst my/readme-candidate-bases '("README" "Readme" "readme"))
-(defconst my/readme-candidate-exts
-  '("" ".org" ".md" ".markdown" ".txt" ".rst" ".adoc"))
+(defconst my/readme-regexp
+  "\\`[Rr][Ee][Aa][Dd][Mm][Ee]\\(?:\\.\\(?:org\\|md\\|markdown\\|txt\\|rst\\|adoc\\)\\)?\\'"
+  "Regexp matching README candidate filenames.")
 
 (defun my/dired-auto-readme-maybe ()
-  "Enable `dired-auto-readme-mode' iff a README exists here."
+  "Enable `dired-auto-readme-mode' if a README exists here."
   (unless (and (fboundp 'dirvish-side-session-visible-p)
                (eq (dirvish-side-session-visible-p) (selected-window)))
-    (when (cl-loop for base in my/readme-candidate-bases
-                   thereis
-                   (cl-loop for ext in my/readme-candidate-exts
-                            thereis (file-exists-p
-                                     (expand-file-name (concat base ext)
-                                                       default-directory))))
-      (dired-auto-readme-mode 1))))
+    (let ((case-fold-search t))
+      (when (directory-files default-directory nil my/readme-regexp t 1)
+        (dired-auto-readme-mode 1)))))
 
 (use-package! page-break-lines
   :hook (dired-auto-readme-mode . page-break-lines-mode))
@@ -395,8 +387,8 @@
      +default/search-emacsd
      consult-bookmark
      :preview-key '("C-SPC" :debounce 0.2 any))
-    ;; (consult-customize consult-line consult-buffer
-    ;;                    :preview-key '(:debounce 0.15 any))
+    (consult-customize consult-line consult-buffer consult-imenu
+                       :preview-key '(:debounce 0.2 any))
     ))
 
 (use-package! exercism :commands (exercism)
@@ -439,14 +431,9 @@
         :v "V" #'expreg-contract))
 
 (use-package! highlight-parentheses
-  :defer t
-  :init
-  (setq highlight-parentheses-delay 0.2)
-  (add-hook 'doom-first-file-hook
-            (lambda ()
-              (add-hook 'prog-mode-hook #'highlight-parentheses-mode)))
-  :config
-  (set-face-attribute 'hl-paren-face nil :weight 'ultra-bold))
+  :hook (prog-mode . highlight-parentheses-mode)
+  :init (setq highlight-parentheses-delay 0.2)
+  :config (set-face-attribute 'hl-paren-face nil :weight 'ultra-bold))
 
 (after! indent-bars
   (setq
@@ -695,12 +682,12 @@ the sequences will be lost."
   (map! (:leader :desc "Obvious (Toggle Comments)" :n "to" #'obvious-mode)))
 
 (use-package! deft
-  :after (org org-roam)
-  :custom
-  (deft-recursive t)
-  (deft-use-filter-string-for-filename t)
-  (deft-default-extension "org")
-  (deft-directory org-roam-directory))
+  :commands (deft)
+  :config
+  (setq deft-recursive t
+        deft-use-filter-string-for-filename t
+        deft-default-extension "org"
+        deft-directory (or (bound-and-true-p org-roam-directory) org-directory)))
 
 (use-package! org-block-capf
   :after org
@@ -737,7 +724,6 @@ the sequences will be lost."
 (setq org-directory (expand-file-name "~/Documents/org/")
       org-agenda-files (list org-directory (expand-file-name "~/Documents/worg/")))
 
-(add-hook 'org-load-hook (lambda () (add-to-list 'org-modules 'org-habit)))
 (after! org
   (setq org-ellipsis (if (and my/gui-init-p (char-displayable-p ?)) " " nil)
         org-hide-emphasis-markers t
@@ -746,7 +732,14 @@ the sequences will be lost."
         org-startup-with-inline-images nil)
   (add-hook 'org-mode-hook
             (defun my/org-images-h ()
-              (run-with-idle-timer 0.3 nil #'org-display-inline-images))))
+              (let ((buf (current-buffer)))
+                (run-with-idle-timer
+                 0.3 nil
+                 (lambda ()
+                     (when (buffer-live-p buf)
+                   (with-current-buffer buf
+                     (org-display-inline-images))))))))
+  (add-to-list 'org-modules 'org-habit))
 
 (unless my/gui-init-p
   (add-hook 'org-mode-hook
@@ -827,7 +820,6 @@ the sequences will be lost."
   (treemacs-define-RET-action 'file-node-open   #'treemacs-visit-node-in-most-recently-used-window)
   (treemacs-define-RET-action 'file-node-closed #'treemacs-visit-node-in-most-recently-used-window)
 
-  (defvar treemacs-file-ignore-extensions '())
   (defvar treemacs-file-ignore-regexp nil
     "Single combined regex from `treemacs-file-ignore-globs'.")
 
@@ -866,7 +858,7 @@ the sequences will be lost."
   (set-evil-initial-state! 'ghostel-mode 'emacs))
 
 (use-package! ghostel-compile
-  :after-call doom-first-buffer-hook
+  :after-call doom-first-input-hook
   :config (ghostel-compile-global-mode 1))
 
 ;; (use-package! evil-ghostel
@@ -1144,8 +1136,8 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                 google/gemma-3-12b-it
                 google/gemma-3-4b-it
                 google/gemma-3-1b-it
-                gpt-4o)))
-  (run-with-idle-timer 3 nil #'my/gptel-register-openrouter)
+                gpt-4o))
+    (my/gptel-register-openrouter))
   (when (fboundp 'macher-install)
     (run-with-idle-timer 1 nil #'macher-install))
   :hook
@@ -1154,8 +1146,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 (use-package! gptel-agent
   :after gptel
   :config
-  ;; gptel-agent-update may make network requests — don't block gptel's load path.
-  (run-with-idle-timer 30 nil #'gptel-agent-update))
+  (add-transient-hook! 'gptel-menu (gptel-agent-update)))
 
 (use-package! gptel-quick
   :commands (gptel-quick)
@@ -1180,9 +1171,9 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                  (dolist (buf (buffer-list))
                    (with-current-buffer buf
                      (when (and (derived-mode-p 'prog-mode)
-                              (my/copilot-eligible-p)
-                              (get-buffer-window buf 'visible))
-                     (while-no-input (copilot-mode 1)))))))))
+                                (my/copilot-eligible-p)
+                                (get-buffer-window buf 'visible))
+                       (while-no-input (copilot-mode 1)))))))))
   :config
   (map! :map copilot-completion-map
         "<tab>"   #'copilot-accept-completion
@@ -1336,7 +1327,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
           (lambda ()
             ;; Load a file with the same name as the computer’s name. Just keep on going if
             ;; the requisite file isn't there.
-            (load! my/host-config-name nil t)
+            (load! my/host nil t)
             ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
             (load! my/system-type-name nil t))
           95)

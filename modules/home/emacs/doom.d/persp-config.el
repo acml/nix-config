@@ -98,24 +98,14 @@ Must be side-effect-free: this runs inside a display :eval form."
   (defvar lkn-tab-bar--tooltip-cache nil
     "Cons (STATE . STRING) mirroring `lkn-tab-bar--render-cache'.")
 
-  (defun tooltip-help-tips (_event)
-    (and tab-bar-mode
-         (bound-and-true-p persp-mode)
-         (stringp tooltip-help-message)
-         (when-let* ((ws (lkn-tab-bar--workspaces))
-                     (key (car lkn-tab-bar--render-cache))
-                     (s   (if (equal key (car lkn-tab-bar--tooltip-cache))
-                            (cdr lkn-tab-bar--tooltip-cache)
-                          (let ((v (string-trim
-                                    (substring-no-properties
-                                     (mapconcat #'identity ws "")))))
-                            (setq lkn-tab-bar--tooltip-cache (cons key v))
-                            v))))
-           (unless (string= (string-trim
-                           (substring-no-properties tooltip-help-message))
-                          s)
-           (tooltip-show tooltip-help-message (not tooltip-mode))
-           t))))
+  (defun my/tab-bar-tooltip-tips (&rest _)
+    (and tab-bar-mode (bound-and-true-p persp-mode)
+         (when-let* ((ws (lkn-tab-bar--workspaces)))
+           (tooltip-show
+          (string-trim (substring-no-properties (mapconcat #'identity ws "")))
+          (not tooltip-mode))
+           t)))
+  (advice-add 'tooltip-help-tips :before-until #'my/tab-bar-tooltip-tips)
 
   (run-with-idle-timer 1 nil #'tooltip-mode)
 
