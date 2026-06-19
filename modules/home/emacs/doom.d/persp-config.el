@@ -25,17 +25,15 @@
 Recomputed only when workspace list or active workspace changes.")
 
   (defun lkn-tab-bar--workspaces ()
-    "Return workspace tab strings, caching the expensive pixel-width computation.
-Returns nil when fewer than 2 workspaces exist.
-A cache miss occurs only on workspace switch / add / remove."
     (let* ((names   (+workspace-list-names))
            (current (+workspace-current-name))
-           (state   (cons names current)))
-      (when (< 1 (length names))          ; guard moved here; --or-nil no longer needs it
-        (if (equal state (car lkn-tab-bar--render-cache))
-            (cdr lkn-tab-bar--render-cache)
+           (cache   lkn-tab-bar--render-cache))
+      (when (< 1 (length names))
+        (if (and (eq current (cadr cache))
+                 (equal names (car cache)))
+            (cddr cache)
           (let ((tabs (lkn-tab-bar--compute-workspaces names current)))
-            (setq lkn-tab-bar--render-cache (cons state tabs))
+            (setq lkn-tab-bar--render-cache (cons names (cons current tabs)))
             tabs)))))
 
   (defun lkn-tab-bar--compute-workspaces (persps persp)

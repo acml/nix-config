@@ -23,9 +23,7 @@
       ;; Suppress "Loading …" echoes that force redisplays during init.
       inhibit-message t)
 (add-hook 'doom-after-init-hook
-          (lambda ()
-            (setq inhibit-message nil)
-            (redisplay))
+          (lambda () (setq inhibit-message nil))
           99)
 
 ;; Keep glyph bitmaps alive across GC — avoids re-rendering Nerd Icons on every GC.

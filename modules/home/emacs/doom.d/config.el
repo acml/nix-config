@@ -22,6 +22,8 @@
   (car (last (split-string (symbol-name system-type) "/")))
   "Filename (without extension) of OS-specific config.")
 
+(defconst my/macos-p (featurep :system 'macos))
+
 (defconst my/wsl-p
   (and (featurep :system 'linux)
        (or (getenv "WSL_DISTRO_NAME")
@@ -41,11 +43,20 @@
                   (load-theme want t))))))
 
 (defconst my/font-size
-  (cond ((featurep :system 'macos) 13.0)
-        (my/work-host-p            10.8)
-        (t                         12.0)))
+  (cond (my/macos-p     13.0)
+        (my/work-host-p 10.8)
+        (t              12.0)))
 
-(defconst my/nerd-glyphs-p (char-displayable-p ?))
+(defvar my/nerd-glyphs-p nil
+  "Whether Nerd-font glyphs are displayable in any active frame.")
+
+(defun my/--update-nerd-glyphs-p (&optional frame)
+  (with-selected-frame (or frame (selected-frame))
+    (setq my/nerd-glyphs-p (char-displayable-p ?))))
+
+(if my/daemon-p
+    (add-hook 'server-after-make-frame-hook #'my/--update-nerd-glyphs-p)
+  (my/--update-nerd-glyphs-p))
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
@@ -69,7 +80,7 @@
       ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
       ;; font string. You generally only need these two:
       doom-font (font-spec :family "Iosevka Comfy" :size my/font-size)
-      doom-big-font (font-spec :family "Iosevka Comfy" :size (if (featurep :system 'macos) 26.0 20.0))
+      doom-big-font (font-spec :family "Iosevka Comfy" :size (if my/macos-p 26.0 20.0))
       doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size my/font-size)
       doom-serif-font (font-spec :family "BlexMono Nerd Font" :size my/font-size :weight 'light)
       auth-source-cache-expiry nil ; default is 7200 (2h)
@@ -126,12 +137,10 @@
                                      my/splash-image-dir t "^[^.]" t)))))
         (setq fancy-splash-image (seq-random-elt images))))))
 
-(add-hook! 'doom-after-init-hook
-  (defun my/setup-global-modes ()
-    ;; Defer everything; nothing here is needed for the first redisplay.
-    (run-with-idle-timer
-     2 nil
-     (lambda () (repeat-mode 1) (global-subword-mode 1)))))
+(add-hook! 'doom-first-input-hook
+  (defun my/setup-global-modes-h ()
+    (run-with-idle-timer 3 nil (lambda () (global-subword-mode 1)))
+    (run-with-idle-timer 5 nil (lambda () (repeat-mode 1)))))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 ;; Defer to after-init so customizations don't slow module loading.
@@ -225,11 +234,15 @@
 
 ;; credit: yorickvP on Github
 ;; wl-copy integration for Wayland clipboard(need wl-clipboard package)
+(defconst my/wayland-p
+  (or (getenv "WAYLAND_DISPLAY")
+      (string= (getenv "XDG_SESSION_TYPE") "wayland"))
+  "Cached Wayland detection.")
+
 (defvar wl-copy-process nil
   "Live wl-copy process, or nil when the clipboard is empty.")
 
-(when (or (getenv "WAYLAND_DISPLAY")
-          (string= (getenv "XDG_SESSION_TYPE") "wayland"))
+(when my/wayland-p
   (add-hook 'doom-first-input-hook
             (defun my/wayland-clipboard-setup ()
               (when-let* ((wl-copy-exe  (executable-find "wl-copy"))
@@ -301,7 +314,10 @@
           (concat dired-listing-switches " --time-style=long-iso"))))
 
 (after! tramp
-  ;; Prevent VC from invoking git/svn/etc over SSH on every remote buffer switch.
+  (setq tramp-verbose 1                              ; default 3
+        tramp-use-scp-direct-remote-copying t        ; faster copies
+        remote-file-name-inhibit-locks t             ; avoid stat() of .#lock
+        remote-file-name-inhibit-cache 60)           ; reuse for a minute
   (setq vc-ignore-dir-regexp
         (format "%s\\|%s" vc-ignore-dir-regexp tramp-file-name-regexp)))
 
@@ -319,12 +335,13 @@
   "Most common README filenames — checked via stat() first.")
 
 (defun my/dired-auto-readme-maybe ()
-  "Enable `dired-auto-readme-mode' on idle if a README exists."
-  (unless (and (fboundp 'dirvish-side-session-visible-p)
-               (eq (dirvish-side-session-visible-p) (selected-window)))
+  "Enable `dired-auto-readme-mode' on idle if a *local* README exists."
+  (unless (or (file-remote-p default-directory)
+              (and (fboundp 'dirvish-side-session-visible-p)
+                   (eq (dirvish-side-session-visible-p) (selected-window))))
     (let ((buf (current-buffer)))
       (run-with-idle-timer
-       0.4 nil
+       0.2 nil
        (lambda ()
          (when (and (buffer-live-p buf)
                     (with-current-buffer buf (derived-mode-p 'dired-mode)))
@@ -782,14 +799,14 @@ the sequences will be lost."
                  0.3 nil
                  (lambda ()
                    (when (buffer-live-p buf)
-                   (with-current-buffer buf
-                     (when (save-excursion
-                             (goto-char (point-min))
-                             (re-search-forward
-                              "\\[\\[\\(?:file:\\)?[^]]+\\.\\(?:png\\|jpe?g\\|svg\\|gif\\|webp\\)"
-                              (min (point-max) (+ (point-min) (* 256 1024)))
-                              t))
-                       (org-display-inline-images))))))))))
+                     (with-current-buffer buf
+                       (when (save-excursion
+                               (goto-char (point-min))
+                               (re-search-forward
+                                "\\[\\[\\(?:file:\\)?[^]]+\\.\\(?:png\\|jpe?g\\|svg\\|gif\\|webp\\)"
+                                (min (point-max) (+ (point-min) (* 256 1024)))
+                                t))
+                         (org-display-inline-images))))))))))
 
 (unless my/gui-init-p
   (add-hook 'org-mode-hook
@@ -900,17 +917,17 @@ the sequences will be lost."
 (use-package! turkish :commands (turkish-mode))
 
 (use-package! ghostel
-  :after-call doom-first-input-hook
+  :defer t
+  :commands (ghostel ghostel-project)
   :hook (ghostel-mode . (lambda ()
                           (when (fboundp 'hide-mode-line-mode)
                             (hide-mode-line-mode 1))))
-  :commands (ghostel ghostel-project)
   :init
   (set-popup-rule! "^\\*doom:ghostel-popup:" :size 0.25 :vslot -4 :select t :quit nil :ttl 0)
   (set-evil-initial-state! 'ghostel-mode 'emacs))
 
 (use-package! ghostel-compile
-  :after-call doom-first-input-hook
+  :after compile
   :config (ghostel-compile-global-mode 1))
 
 ;; (use-package! evil-ghostel
@@ -1008,7 +1025,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
         ztree-show-number-of-children t))
 
 (use-package! reader
-  :unless (featurep :system 'macos)
+  :unless my/macos-p
   :mode (("\\.pdf\\'" . reader-mode)
          ("\\.epub\\'" . reader-mode)
          ("\\.mobi\\'" . reader-mode)
@@ -1067,85 +1084,80 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 
 (use-package! macher
   :defer t
-  :custom
-  ;; The org UI has structured navigation and nice content folding.
-  (macher-action-buffer-ui 'org)
-
+  :commands (macher macher-discuss macher-action macher-install)
+  :custom (macher-action-buffer-ui 'org)
   :config
-  ;; Adjust buffer positioning to taste.
-  ;; (add-to-list
-  ;;  'display-buffer-alist
-  ;;  '("\\*macher:.*\\*"
-  ;;    (display-buffer-in-side-window)
-  ;;    (side . bottom)))
-  (add-to-list
-   'display-buffer-alist
-   '("\\*macher-patch:.*\\*"
-     (display-buffer-in-side-window)
-     (side . right))))
+  (add-to-list 'display-buffer-alist
+               '("\\*macher-patch:.*\\*"
+                 (display-buffer-in-side-window)
+                 (side . right))))
+
+(defconst my/gptel-openrouter-models
+  '(nvidia/nemotron-nano-9b-v2:free
+    openrouter/sonoma-dusk-alpha
+    openrouter/sonoma-sky-alpha
+    deepseek/deepseek-chat-v3.1:free
+    openai/gpt-oss-120b:free
+    openai/gpt-oss-20b:free
+    z-ai/glm-4.5-air:free
+    qwen/qwen3-coder:free
+    moonshotai/kimi-k2:free
+    lphin-mistral-24b-venice-edition:free
+    google/gemma-3n-e2b-it:free
+    tencent/hunyuan-a13b-instruct:free
+    tngtech/deepseek-r1t2-chimera:free
+    mistralai/mistral-small-3.2-24b-instruct:free
+    moonshotai/kimi-dev-72b:free
+    deepseek/deepseek-r1-0528-qwen3-8b:free
+    deepseek/deepseek-r1-0528:free
+    mistralai/devstral-small-2505:free
+    google/gemma-3n-e4b-it:free
+    meta-llama/llama-3.3-8b-instruct:free
+    qwen/qwen3-4b:free
+    qwen/qwen3-30b-a3b:free
+    qwen/qwen3-8b:free
+    qwen/qwen3-14b:free
+    qwen/qwen3-235b-a22b:free
+    tngtech/deepseek-r1t-chimera:free
+    microsoft/mai-ds-r1:free
+    shisa-ai/shisa-v2-llama3.3-70b:free
+    arliai/qwq-32b-arliai-rpr-v1:free
+    agentica-org/deepcoder-14b-preview:free
+    moonshotai/kimi-vl-a3b-thinking:free
+    meta-llama/llama-4-maverick:free
+    meta-llama/llama-4-scout:free
+    qwen/qwen2.5-vl-32b-instruct:free
+    deepseek/deepseek-chat-v3-0324:free
+    mistralai/mistral-small-3.1-24b-instruct:free
+    google/gemma-3-4b-it:free
+    google/gemma-3-12b-it:free
+    rekaai/reka-flash-3:free
+    google/gemma-3-27b-it:free
+    qwen/qwq-32b:free
+    nousresearch/deephermes-3-llama-3-8b-preview:free
+    cognitivecomputations/dolphin3.0-r1-mistral-24b:free
+    cognitivecomputations/dolphin3.0-mistral-24b:free
+    qwen/qwen2.5-vl-72b-instruct:free
+    mistralai/mistral-small-24b-instruct-2501:free
+    deepseek/deepseek-r1-distill-llama-70b:free
+    deepseek/deepseek-r1:free
+    google/gemini-2.0-flash-exp:free
+    meta-llama/llama-3.3-70b-instruct:free
+    qwen/qwen-2.5-coder-32b-instruct:free
+    meta-llama/llama-3.2-3b-instruct:free
+    qwen/qwen-2.5-72b-instruct:free
+    meta-llama/llama-3.1-405b-instruct:free
+    mistralai/mistral-nemo:free
+    google/gemma-2-9b-it:free
+    mistralai/mistral-7b-instruct:free)
+  "OpenRouter free models, declared once at top level.")
 
 (defun my/gptel-register-openrouter ()
   (unless (assoc "OpenRouter" gptel--known-backends)
     (gptel-make-openai "OpenRouter"
       :host "openrouter.ai" :endpoint "/api/v1/chat/completions"
       :stream t :key #'gptel-api-key-from-auth-source
-      :models '(nvidia/nemotron-nano-9b-v2:free
-                openrouter/sonoma-dusk-alpha
-                openrouter/sonoma-sky-alpha
-                deepseek/deepseek-chat-v3.1:free
-                openai/gpt-oss-120b:free
-                openai/gpt-oss-20b:free
-                z-ai/glm-4.5-air:free
-                qwen/qwen3-coder:free
-                moonshotai/kimi-k2:free
-                lphin-mistral-24b-venice-edition:free
-                google/gemma-3n-e2b-it:free
-                tencent/hunyuan-a13b-instruct:free
-                tngtech/deepseek-r1t2-chimera:free
-                mistralai/mistral-small-3.2-24b-instruct:free
-                moonshotai/kimi-dev-72b:free
-                deepseek/deepseek-r1-0528-qwen3-8b:free
-                deepseek/deepseek-r1-0528:free
-                mistralai/devstral-small-2505:free
-                google/gemma-3n-e4b-it:free
-                meta-llama/llama-3.3-8b-instruct:free
-                qwen/qwen3-4b:free
-                qwen/qwen3-30b-a3b:free
-                qwen/qwen3-8b:free
-                qwen/qwen3-14b:free
-                qwen/qwen3-235b-a22b:free
-                tngtech/deepseek-r1t-chimera:free
-                microsoft/mai-ds-r1:free
-                shisa-ai/shisa-v2-llama3.3-70b:free
-                arliai/qwq-32b-arliai-rpr-v1:free
-                agentica-org/deepcoder-14b-preview:free
-                moonshotai/kimi-vl-a3b-thinking:free
-                meta-llama/llama-4-maverick:free
-                meta-llama/llama-4-scout:free
-                qwen/qwen2.5-vl-32b-instruct:free
-                deepseek/deepseek-chat-v3-0324:free
-                mistralai/mistral-small-3.1-24b-instruct:free
-                google/gemma-3-4b-it:free
-                google/gemma-3-12b-it:free
-                rekaai/reka-flash-3:free
-                google/gemma-3-27b-it:free
-                qwen/qwq-32b:free
-                nousresearch/deephermes-3-llama-3-8b-preview:free
-                cognitivecomputations/dolphin3.0-r1-mistral-24b:free
-                cognitivecomputations/dolphin3.0-mistral-24b:free
-                qwen/qwen2.5-vl-72b-instruct:free
-                mistralai/mistral-small-24b-instruct-2501:free
-                deepseek/deepseek-r1-distill-llama-70b:free
-                deepseek/deepseek-r1:free
-                google/gemini-2.0-flash-exp:free
-                meta-llama/llama-3.3-70b-instruct:free
-                qwen/qwen-2.5-coder-32b-instruct:free
-                meta-llama/llama-3.2-3b-instruct:free
-                qwen/qwen-2.5-72b-instruct:free
-                meta-llama/llama-3.1-405b-instruct:free
-                mistralai/mistral-nemo:free
-                google/gemma-2-9b-it:free
-                mistralai/mistral-7b-instruct:free))))
+      :models my/gptel-openrouter-models)))
 
 (use-package! gptel
   :defer t
@@ -1284,15 +1296,13 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   :when (modulep! :tools lsp +eglot)
   :hook (prog-mode . my/breadcrumb-maybe)
   :config
-  ;; Don't show the project/file name in the header, show only an icon
   (after! nerd-icons
     (defvar-local my/breadcrumb-icon-cache nil)
 
     (defun my/breadcrumb--invalidate-icon-cache (&rest _)
       (setq my/breadcrumb-icon-cache nil))
 
-    ;; rename of file (and revert) is the only thing that can change the icon.
-    (add-hook 'after-revert-hook        #'my/breadcrumb--invalidate-icon-cache)
+    (add-hook 'after-revert-hook                #'my/breadcrumb--invalidate-icon-cache)
     (add-hook 'after-set-visited-file-name-hook #'my/breadcrumb--invalidate-icon-cache)
 
     (advice-add #'breadcrumb-project-crumbs :override
@@ -1307,7 +1317,6 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                               "")))))
     (advice-add #'breadcrumb--format-ipath-node :around
                 (lambda (og p more &rest r)
-                  "Icon for items"
                   (let ((string (apply og p more r)))
                     (if (not more)
                         (propertize
@@ -1332,7 +1341,6 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                           for seplen = (if more (length separator) 0)
                           for shorten-p = (unless (get-text-property 0 'breadcrumb-dont-shorten c)
                                             (> (+ (length c) seplen) available))
-                          ;; NOTE: Include icon and first character
                           for toadd = (if shorten-p
                                           (if (get-text-property 0 'breadcrumb-with-icon c)
                                               (substring c 0 3)
@@ -1340,11 +1348,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                                         c)
                           sum (+ (length toadd) seplen) into used
                           collect toadd)))
-                    (string-join (reverse rcrumbs) separator)))))
-  :hook
-  (prog-mode . breadcrumb-local-mode)
-  ;; (text-mode . breadcrumb-local-mode)
-  )
+                    (string-join (reverse rcrumbs) separator))))))
 
 ;; mouse mode must be initialised for each new terminal
 ;; see http://stackoverflow.com/a/6798279/27782
@@ -1380,14 +1384,11 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 (when (>= emacs-major-version 28)
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
-(add-hook 'doom-first-buffer-hook
+(add-hook 'doom-first-file-hook
           (defun my/load-host-config-h ()
-            (run-with-idle-timer
-             2 nil
-             (lambda ()
-               ;; Load a file with the same name as the computer’s name. Just keep on going if
-               ;; the requisite file isn't there.
-               (load! my/host nil t)
-               ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
-               (load! my/system-type-name nil t))))
+            ;; Load a file with the same name as the computer’s name. Just keep on going if
+            ;; the requisite file isn't there.
+            (load! my/host nil t)
+            ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
+            (load! my/system-type-name nil t))
           95)
