@@ -137,8 +137,8 @@
 
 (add-hook! 'doom-first-input-hook
   (defun my/setup-global-modes-h ()
-    (run-with-idle-timer 1 nil #'global-subword-mode)
-    (run-with-idle-timer 3 nil #'repeat-mode)))
+    (run-with-idle-timer 1 nil (lambda () (global-subword-mode 1)))
+    (run-with-idle-timer 3 nil (lambda () (repeat-mode         1)))))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 (defun my/load-custom-h () (load custom-file 'noerror 'nomessage))
@@ -180,11 +180,12 @@
 (after! recentf
   (setq recentf-auto-cleanup    'never
         recentf-max-saved-items 80)
-  (add-to-list 'recentf-exclude
-               (concat "\\`"
-                       (regexp-quote
-                        (file-name-as-directory
-                         (expand-file-name doom-local-dir))))))
+  (dolist (re (list (concat "\\`" (regexp-quote (file-name-as-directory
+                                                 (expand-file-name doom-local-dir))))
+                    "/tmp/"
+                    "\\.gz\\'" "\\.zst\\'" "\\.elc\\'" "\\.eln\\'"
+                    "/log/build-[0-9TZ:+-]+\\.log\\'"))
+    (add-to-list 'recentf-exclude re)))
 
 (after! savehist
   (setq history-length 200)
@@ -312,10 +313,13 @@
           (concat dired-listing-switches " --time-style=long-iso"))))
 
 (after! tramp
-  (setq tramp-verbose 1                              ; default 3
-        tramp-use-scp-direct-remote-copying t        ; faster copies
-        remote-file-name-inhibit-locks t             ; avoid stat() of .#lock
-        remote-file-name-inhibit-cache 60))          ; reuse for a minute
+  (setq tramp-verbose                                1
+        tramp-use-scp-direct-remote-copying          t
+        remote-file-name-inhibit-locks               t
+        remote-file-name-inhibit-cache               60
+        tramp-completion-reread-directory-timeout    nil
+        tramp-default-method                         "ssh"
+        vc-ignore-dir-regexp                         vc-ignore-dir-regexp))
 
 (use-package! dired-auto-readme
   :commands dired-auto-readme-mode
@@ -337,8 +341,7 @@
          (hit   (gethash dir my/--readme-cache)))
     (if (and hit (equal (car hit) mtime))
         (cdr hit)
-      (let* ((case-fold-search t)
-             (found (and (directory-files dir nil my/readme-regexp t 1) t)))
+      (let ((found (and (directory-files dir nil my/readme-regexp t 1) t)))
         (puthash dir (cons mtime found) my/--readme-cache)
         found))))
 
@@ -396,7 +399,10 @@
         dirvish-subtree-prefix "  "
         dirvish-subtree-state-style 'nerd)
   ;; (dirvish-peek-mode)
-  (dirvish-side-follow-mode +1))
+  (advice-add #'dirvish-side :before
+              (defun my/dirvish-side-follow-bootstrap (&rest _)
+                (advice-remove #'dirvish-side #'my/dirvish-side-follow-bootstrap)
+                (dirvish-side-follow-mode +1))))
 
 (after! dirvish-side
   (setq dirvish-side-display-alist
@@ -676,20 +682,20 @@ the sequences will be lost."
         magit-status-show-hashes-in-headers nil
         my/magit-section-visibility-indicators `((magit-fringe-bitmap> . magit-fringe-bitmapv)
                                                  (,(if (my/nerd-glyphs-p) "" "...") . t)))
-  (magit-add-section-hook 'magit-status-sections-hook
-                          'magit-insert-worktrees
-                          'magit-insert-status-headers t)
-  (magit-add-section-hook 'magit-status-sections-hook
-                          'magit-insert-ignored-files
-                          'magit-insert-untracked-files
-                          nil)
+  (add-transient-hook! 'magit-status-mode-hook
+    (magit-add-section-hook 'magit-status-sections-hook
+                            'magit-insert-worktrees
+                            'magit-insert-status-headers t)
+    (magit-add-section-hook 'magit-status-sections-hook
+                            'magit-insert-ignored-files
+                            'magit-insert-untracked-files
+                            nil)
+    (setq magit-format-file-function #'magit-format-file-nerd-icons))
   (add-hook 'magit-mode-hook
             (defun my/magit-mode-setup-h ()
               (setq-local left-fringe-width 16
                           magit-section-visibility-indicators
-                          my/magit-section-visibility-indicators)))
-  (add-transient-hook! 'magit-status-mode-hook
-    (setq magit-format-file-function #'magit-format-file-nerd-icons)))
+                          my/magit-section-visibility-indicators))))
 
 (after! magit-repos
   (setq magit-repository-directories
@@ -766,8 +772,17 @@ the sequences will be lost."
         deft-directory (or (bound-and-true-p org-roam-directory) org-directory)))
 
 (use-package! org-block-capf
-  :after org
-  :hook (org-mode . org-block-capf-add-to-completion-at-point-functions))
+  :defer t
+  :init
+  (add-hook 'org-mode-hook
+            (defun my/org-block-capf-maybe ()
+              (let ((buf (current-buffer)))
+                (run-with-idle-timer
+                 0.5 nil
+                 (lambda ()
+                   (when (buffer-live-p buf)
+                     (with-current-buffer buf
+                       (org-block-capf-add-to-completion-at-point-functions)))))))))
 
 (use-package! org-glossary
   :commands (org-glossary-mode org-glossary-insert-term-definition)
@@ -800,7 +815,7 @@ the sequences will be lost."
       org-agenda-files (list org-directory (expand-file-name "~/Documents/worg/")))
 
 (after! org
-  (setq org-ellipsis (if (and my/gui-init-p my/nerd-glyphs-p) " " nil)
+  (setq org-ellipsis (if (and my/gui-init-p (my/nerd-glyphs-p)) " " nil)
         org-hide-emphasis-markers t
         org-latex-pdf-process '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f")
         org-startup-folded 'show2levels
@@ -1224,9 +1239,12 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   (gptel-post-stream-hook . gptel-auto-scroll))
 
 (use-package! gptel-agent
-  :after gptel
-  :config
-  (add-transient-hook! 'gptel-menu (gptel-agent-update)))
+  :defer t
+  :init
+  (after! gptel
+    (add-transient-hook! 'gptel-menu
+      (require 'gptel-agent)
+      (gptel-agent-update))))
 
 (use-package! gptel-quick
   :commands (gptel-quick)
@@ -1245,14 +1263,11 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
     (when (my/copilot-eligible-p) (copilot-mode 1)))
   (add-hook 'doom-first-input-hook
             (defun my/copilot-bootstrap-h ()
-              (run-with-idle-timer
-               2 nil
-               (lambda ()
-               (add-hook 'prog-mode-hook #'my/copilot-maybe)
-               (dolist (buf (buffer-list))
-                 (with-current-buffer buf
-                   (when (derived-mode-p 'prog-mode)
-                     (my/copilot-maybe))))))))
+              (add-hook 'prog-mode-hook #'my/copilot-maybe)
+              (dolist (buf (buffer-list))               ; for `emacs file.el`
+                (with-current-buffer buf
+                  (when (derived-mode-p 'prog-mode)
+                    (my/copilot-maybe))))))
   :config
   (map! :map copilot-completion-map
         "<tab>"   #'copilot-accept-completion

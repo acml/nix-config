@@ -191,10 +191,8 @@ DIR defaults to current project root."
 
 ;;; File Type Associations
 
-(setq auto-mode-alist
-      (append (mapcar (lambda (ext) (cons ext 'makefile-gmake-mode))
-                      DINA5CG52813LW-makefile-extensions)
-              auto-mode-alist))
+(dolist (ext DINA5CG52813LW-makefile-extensions)
+  (add-to-list 'auto-mode-alist (cons ext 'makefile-gmake-mode)))
 
 ;;; Compression Handling
 
@@ -212,12 +210,12 @@ This prevents jka-compr from attempting LZMA decompression on those files."
 ;;; Search Integration
 
 (after! consult
+  (defvar DINA5CG52813LW--ripgrep-extra
+    " --pre-glob 'Makefile.lzma' --pre 'cat'")
   (defadvice! DINA5CG52813LW--enhance-consult-ripgrep (fn &rest args)
-    "Pre-process Makefile.lzma so ripgrep can search through it."
     :around #'consult--ripgrep-make-builder
     (let ((consult-ripgrep-args
-           (concat consult-ripgrep-args
-                   " --pre-glob 'Makefile.lzma' --pre 'cat'")))
+           (concat consult-ripgrep-args DINA5CG52813LW--ripgrep-extra)))
       (apply fn args))))
 
 ;;; GPT Integration
