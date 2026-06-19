@@ -20,14 +20,11 @@
       inhibit-startup-message t
       initial-scratch-message nil
       initial-major-mode 'fundamental-mode
-      ;; Skip the expensive automatic theme/face recomputation during init.
-      inhibit-redisplay t
       ;; Suppress "Loading …" echoes that force redisplays during init.
       inhibit-message t)
 (add-hook 'doom-after-init-hook
           (lambda ()
-            (setq inhibit-redisplay nil
-                  inhibit-message   nil)
+            (setq inhibit-message nil)
             (redisplay))
           99)
 
@@ -88,9 +85,10 @@
 ;; Defer fontification until idle; stealth-fontify in the background afterward.
 ;; Eliminates the micro-stutter when typing in large/complex files.
 ;; Raise jit-lock-defer-time to 0.2 if you find the 0.1 s flash noticeable.
-(setq jit-lock-defer-time          0.1   ; wait 0.1 s idle before fontifying
+(setq jit-lock-defer-time          0     ; fontify immediately when idle
       jit-lock-stealth-time        1.0   ; background-fontify after 1 s idle
-      jit-lock-stealth-nice        0.2   ; yield to input every 200 ms during stealth
+      jit-lock-stealth-nice        0.1   ; yield to input every 200 ms during stealth
+      jit-lock-chunk-size          4096  ; default 500; fewer chunks → fewer timers
       fast-but-imprecise-scrolling t)    ; skip fontification during wheel/page scroll
 
 ;; Don't JIT-compile files that are loaded once and never edited.
@@ -129,3 +127,8 @@
               101)))                            ; after Doom's own hooks
 
 (setq vc-handled-backends nil)
+
+(when (and (fboundp 'native-comp-available-p) (native-comp-available-p))
+  (setq native-comp-async-jobs-number (max 1 (1- (num-processors)))))
+
+(setq inhibit-x-resources t) ; Avoid X resources lookup (saves one stat() and one X roundtrip

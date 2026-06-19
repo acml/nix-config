@@ -10,8 +10,9 @@
 ;;   (add-hook 'after-init-hook #'benchmark-init/deactivate))
 
 ;;; Cached environment predicates ------------------------------------------------
-(defconst my/host (system-name)
-  "Cached `system-name'.")
+(defconst my/host
+  (or (getenv "HOSTNAME") (system-name))
+  "Cached host name.")
 
 (defconst my/work-host-p
   (string-equal-ignore-case my/host "DINA5CG52813LW")
@@ -78,7 +79,9 @@
       scroll-margin                         3
       scroll-preserve-screen-position       t
       truncate-string-ellipsis "…" ; Unicode ellispis are nicer than "...", and also save /precious/ space
-      undo-limit 80000000          ; Raise undo-limit to 80Mb
+      undo-limit         16000000
+      undo-strong-limit  24000000
+      undo-outer-limit  240000000
       window-combination-resize t  ; take new window space from all other windows (not just current)
       x-stretch-cursor t           ; Stretch cursor to the glyph width
       xref-history-storage 'xref-window-local-history)
@@ -163,11 +166,11 @@
 (after! recentf
   (setq recentf-auto-cleanup    'never
         recentf-max-saved-items 200)
-  (let ((local-dir (file-name-as-directory
-                    (expand-file-name doom-local-dir))))
-    (add-to-list 'recentf-exclude
-                 (lambda (file)
-                   (string-prefix-p local-dir (expand-file-name file))))))
+  (defvar my/recentf-doom-local-dir
+    (file-name-as-directory (expand-file-name doom-local-dir)))
+  (defun my/recentf-exclude-doom-local-p (file)
+    (string-prefix-p my/recentf-doom-local-dir file))
+  (add-to-list 'recentf-exclude #'my/recentf-exclude-doom-local-p))
 
 (after! savehist
   (setq history-length              200
@@ -201,9 +204,9 @@
             :n (format "w%d" n)     fn))))
 
 (after! gcmh
-  (setq gcmh-high-cons-threshold (* 128 1024 1024)
+  (setq gcmh-high-cons-threshold (* 32 1024 1024)
         gcmh-idle-delay             'auto
-        gcmh-auto-idle-delay-factor 20))
+        gcmh-auto-idle-delay-factor 10))
 
 (map! ;; [remap just-one-space]  #'cycle-spacing
  [remap upcase-word]     #'upcase-dwim
@@ -302,13 +305,20 @@
   "\\`[Rr][Ee][Aa][Dd][Mm][Ee]\\(?:\\.\\(?:org\\|md\\|markdown\\|txt\\|rst\\|adoc\\)\\)?\\'"
   "Regexp matching README candidate filenames.")
 
+(defconst my/readme-fast-candidates
+  '("README.org" "README.md" "README")
+  "Most common README filenames — checked via stat() first.")
+
 (defun my/dired-auto-readme-maybe ()
   "Enable `dired-auto-readme-mode' if a README exists here."
   (unless (and (fboundp 'dirvish-side-session-visible-p)
                (eq (dirvish-side-session-visible-p) (selected-window)))
-    (let ((case-fold-search t))
-      (when (directory-files default-directory nil my/readme-regexp t 1)
-        (dired-auto-readme-mode 1)))))
+    (when (or (cl-some (lambda (n)
+                         (file-exists-p (expand-file-name n)))
+                       my/readme-fast-candidates)
+              (let ((case-fold-search t))
+                (directory-files default-directory nil my/readme-regexp t 1)))
+      (dired-auto-readme-mode 1))))
 
 (use-package! page-break-lines
   :hook (dired-auto-readme-mode . page-break-lines-mode))
@@ -589,7 +599,9 @@ the sequences will be lost."
               (when (timerp acml/log-mode--colorize-timer)
                 (cancel-timer acml/log-mode--colorize-timer)))
             nil t)
-  (auto-revert-tail-mode 1))
+  (when (and buffer-file-name
+             (not (file-remote-p buffer-file-name)))
+    (auto-revert-tail-mode 1)))
 (add-to-list 'auto-mode-alist '("\\.log\\'" . acml/log-mode))
 
 (defvar my/magit-fold-indicator nil)
@@ -628,9 +640,7 @@ the sequences will be lost."
                           magit-section-visibility-indicators
                           my/magit-section-visibility-indicators)))
   (add-transient-hook! 'magit-status-mode-hook
-    (require 'nerd-icons)
-    (setq magit-format-file-function #'magit-format-file-nerd-icons
-          magit-revision-insert-related-refs nil)))
+    (setq magit-format-file-function #'magit-format-file-nerd-icons)))
 
 (after! magit-repos
   (setq magit-repository-directories
@@ -743,6 +753,10 @@ the sequences will be lost."
 (setq org-directory (expand-file-name "~/Documents/org/")
       org-agenda-files (list org-directory (expand-file-name "~/Documents/worg/")))
 
+(setq org-modules-load-list '(org-habit))
+(add-hook 'org-load-hook
+          (lambda () (add-to-list 'org-modules 'org-habit)))
+
 (after! org
   (setq org-ellipsis (if (and my/gui-init-p (char-displayable-p ?)) " " nil)
         org-hide-emphasis-markers t
@@ -755,10 +769,14 @@ the sequences will be lost."
                 (run-with-idle-timer
                  0.3 nil
                  (lambda ()
-                     (when (buffer-live-p buf)
-                   (with-current-buffer buf
-                     (org-display-inline-images))))))))
-  (add-to-list 'org-modules 'org-habit))
+                   (when (buffer-live-p buf)
+                     (with-current-buffer buf
+                       (when (save-excursion
+                               (goto-char (point-min))
+                               (re-search-forward
+                                "\\[\\[\\(?:file:\\)?[^]]+\\.\\(?:png\\|jpe?g\\|svg\\|gif\\|webp\\)"
+                                nil t))
+                         (org-display-inline-images))))))))))
 
 (unless my/gui-init-p
   (add-hook 'org-mode-hook
@@ -870,7 +888,9 @@ the sequences will be lost."
 
 (use-package! ghostel
   :after-call doom-first-input-hook
-  :hook (ghostel-mode . mode-line-invisible-mode)
+  :hook (ghostel-mode . (lambda ()
+                          (when (fboundp 'hide-mode-line-mode)
+                            (hide-mode-line-mode 1))))
   :commands (ghostel ghostel-project)
   :init
   (set-popup-rule! "^\\*doom:ghostel-popup:" :size 0.25 :vslot -4 :select t :quit nil :ttl 0)
@@ -1178,6 +1198,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   (defun my/copilot-eligible-p ()
     (and (not buffer-read-only)
          buffer-file-name
+         (not (file-remote-p buffer-file-name))
          (< (buffer-size) 200000)))
   (defun my/copilot-maybe ()
     (when (my/copilot-eligible-p) (copilot-mode 1)))
@@ -1187,11 +1208,10 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                1.5 nil
                (lambda ()
                  (add-hook 'prog-mode-hook #'my/copilot-maybe)
-                 (dolist (buf (buffer-list))
-                   (with-current-buffer buf
+                 (dolist (win (window-list nil 'no-mini))
+                   (with-current-buffer (window-buffer win)
                      (when (and (derived-mode-p 'prog-mode)
-                                (my/copilot-eligible-p)
-                                (get-buffer-window buf 'visible))
+                                (my/copilot-eligible-p))
                        (while-no-input (copilot-mode 1)))))))))
   :config
   (map! :map copilot-completion-map
