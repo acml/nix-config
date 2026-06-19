@@ -63,8 +63,6 @@
       user-mail-address "ozgezer@gmail.com"
       doom-theme        (if my/gui-init-p 'ef-eagle 'ef-dark)
       auth-source-cache-expiry nil ; default is 7200 (2h)
-      auto-revert-avoid-polling t  ; refresh buffers when files change on disk
-      auto-revert-check-vc-info nil; large compiled tags / treesit files: skip the “file changed on disk” poll
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
       delete-by-moving-to-trash t  ; Delete files to trash
       scroll-margin                         3
@@ -132,10 +130,13 @@
                   (when images
                     (setq fancy-splash-image (seq-random-elt images))))))))
 
-(add-hook! 'doom-first-input-hook
-  (defun my/setup-global-modes-h ()
-    (run-with-idle-timer 1 nil (lambda () (global-subword-mode 1)))
-    (run-with-idle-timer 3 nil (lambda () (repeat-mode         1)))))
+(add-hook 'doom-first-input-hook
+          (defun my/setup-global-modes-h ()
+            (run-with-idle-timer
+             1 nil
+             (lambda ()
+               (global-subword-mode 1)
+               (run-with-idle-timer 2 nil #'repeat-mode)))))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 (defun my/load-custom-h () (load custom-file 'noerror 'nomessage))
@@ -177,16 +178,21 @@
 (after! recentf
   (setq recentf-auto-cleanup 'never
         recentf-max-saved-items 80)
-  (dolist (re (list (concat "\\`" (regexp-quote (file-name-as-directory
-                                                 (expand-file-name doom-local-dir))))
-                    "\\`/[^/|:]+:"   ; remote (tramp) paths
-                    "/tmp/" "\\.gz\\'" "\\.zst\\'" "\\.elc\\'" "\\.eln\\'"
-                    "/log/build-[0-9TZ:+-]+\\.log\\'"))
-    (add-to-list 'recentf-exclude re)))
+  (let ((local-dir (file-name-as-directory (expand-file-name doom-local-dir))))
+    (push (concat "\\(?:"
+                  "\\`" (regexp-quote local-dir)
+                  "\\|\\`/[^/|:]+:"
+                  "\\|/tmp/"
+                  "\\|\\.\\(?:gz\\|zst\\|elc\\|eln\\)\\'"
+                  "\\|/log/build-[0-9TZ:+-]+\\.log\\'"
+                  "\\)")
+          recentf-exclude)))
 
 ;; auto-revert: only watch local files; saves a thread per remote buffer:
 (after! autorevert
-  (setq auto-revert-remote-files nil
+  (setq auto-revert-avoid-polling t  ; refresh buffers when files change on disk
+        auto-revert-check-vc-info nil; large compiled tags / treesit files: skip the “file changed on disk” poll
+        auto-revert-remote-files nil
         auto-revert-stop-on-user-input t))
 
 (after! savehist
@@ -667,11 +673,12 @@ the sequences will be lost."
   ;; Only tail huge, recently-modified logs; not arbitrary `.log` artifacts.
   (when (and buffer-file-name
              (not (file-remote-p buffer-file-name))
-             (> (buffer-size) (* 1 1024 1024))
-             (< (float-time (time-since (file-attribute-modification-time
-                                         (file-attributes buffer-file-name))))
-                3600))
-    (auto-revert-tail-mode 1)))
+             (> (buffer-size) (* 1 1024 1024)))
+    (let* ((attrs (file-attributes buffer-file-name))
+           (mtime (and attrs (file-attribute-modification-time attrs))))
+      (when (and mtime
+                 (< (float-time (time-since mtime)) 3600))
+        (auto-revert-tail-mode 1)))))
 (add-to-list 'auto-mode-alist '("\\.log\\'" . acml/log-mode))
 
 (defvar my/magit-section-visibility-indicators nil
@@ -830,25 +837,31 @@ the sequences will be lost."
         org-latex-pdf-process '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f")
         org-startup-folded 'show2levels
         org-startup-with-inline-images nil)
-  (defvar my/--org-images-timer nil)
+
+  (defvar-local my/--org-images-scanned nil)
+
   (defun my/--org-images-scan ()
-    (setq my/--org-images-timer nil)
-    (dolist (buf (buffer-list))
-      (when (buffer-live-p buf)
-        (with-current-buffer buf
-          (when (derived-mode-p 'org-mode)
-            (save-restriction
-              (widen)
-              (save-excursion
-                (goto-char (point-min))
-                (when (re-search-forward
-                       "\\[\\[\\(?:file:\\)?[^]]+\\.\\(?:png\\|jpe?g\\|svg\\|gif\\|webp\\)"
-                       (min (point-max) (+ (point-min) 8192)) t)
-                  (org-display-inline-images)))))))))
+    (when (and (derived-mode-p 'org-mode)
+               (not my/--org-images-scanned)
+               (not (file-remote-p default-directory)))
+      (setq my/--org-images-scanned t)
+      (save-restriction
+        (widen)
+        (save-excursion
+          (goto-char (point-min))
+          (when (re-search-forward
+                 "\\[\\[\\(?:file:\\)?[^]]+\\.\\(?:png\\|jpe?g\\|svg\\|gif\\|webp\\)"
+                 (min (point-max) (+ (point-min) 8192)) t)
+            (org-display-inline-images))))))
+
   (defun my/org-images-h ()
-    (unless my/--org-images-timer
-      (setq my/--org-images-timer
-            (run-with-idle-timer 0.3 nil #'my/--org-images-scan))))
+    (let ((buf (current-buffer)))
+      (run-with-idle-timer
+       0.3 nil
+       (lambda ()
+         (when (buffer-live-p buf)
+           (with-current-buffer buf (my/--org-images-scan)))))))
+
   (add-hook 'org-mode-hook #'my/org-images-h)
   (add-to-list 'org-modules 'org-habit))
 
@@ -1287,11 +1300,12 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
         "C-<tab>" #'copilot-accept-completion-by-word
         "C-n"     #'copilot-next-completion
         "C-p"     #'copilot-previous-completion)
-  (dolist (entry '((nix-ts-mode 2)(emacs-lisp-mode 2) (lisp-interaction-mode 2)
-                   (text-mode 2) (org-mode 2) (markdown-mode 2)
-                   (gfm-mode 2) (default 2)))
-    (add-to-list 'copilot-indentation-alist entry))
-  (setq copilot-max-char 1000000))
+  (setq copilot-indentation-alist
+        (append '((nix-ts-mode 2) (emacs-lisp-mode 2) (lisp-interaction-mode 2)
+                  (text-mode 2) (org-mode 2) (markdown-mode 2)
+                  (gfm-mode 2) (default 2))
+                copilot-indentation-alist)
+        copilot-max-char 1000000))
 
 (use-package! gt
   :defer t
@@ -1397,8 +1411,11 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
               (xterm-mouse-mode 1))))
 
 ;; TUI prettification
+(defvar my/--tui-glyphs-done nil)
+
 (defun my/tui-glyph-setup (&optional frame)
-  (unless (display-graphic-p frame)
+  (unless (or my/--tui-glyphs-done (display-graphic-p frame))
+    (setq my/--tui-glyphs-done t)
     (when (version<= "31" emacs-version)
       (standard-display-unicode-special-glyphs))
     (set-display-table-slot standard-display-table 5 ?│)

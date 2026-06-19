@@ -89,9 +89,6 @@ Recomputed only when workspace list or active workspace changes.")
   ;; dirvish re-creates its window; re-sync visibility there too.
   (add-hook! 'dirvish-setup-hook #'lkn-tab-bar--sync-visibility)
 
-  (defvar lkn-tab-bar--tooltip-cache nil
-    "Cons (STATE . STRING) mirroring `lkn-tab-bar--render-cache'.")
-
   (defun my/tab-bar-tooltip-tips (&rest _)
     (and tab-bar-mode (bound-and-true-p persp-mode)
          (when-let* ((ws (lkn-tab-bar--workspaces)))

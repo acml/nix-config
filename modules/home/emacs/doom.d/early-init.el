@@ -132,7 +132,7 @@
               (lambda ()
                 (set-default-toplevel-value
                  'file-name-handler-alist
-                 (delete-dups (append old-value file-name-handler-alist))))
+                 (append old-value file-name-handler-alist)))
               101)))                            ; after Doom's own hooks
 
 (setq vc-handled-backends nil)
