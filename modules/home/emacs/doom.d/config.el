@@ -35,12 +35,18 @@
   (or my/daemon-p (display-graphic-p)))
 
 (when my/daemon-p
+  ;; Eagerly load both themes once so they live in `custom-known-themes`.
+  (dolist (th '(ef-eagle ef-dark))
+    (unless (memq th custom-known-themes)
+      (load-theme th t t)))                 ; third t = NO-ENABLE
   (add-hook 'server-after-make-frame-hook
             (defun my/theme-per-frame ()
               (let ((want (if (display-graphic-p) 'ef-eagle 'ef-dark)))
                 (unless (eq doom-theme want)
+                  (mapc #'disable-theme custom-enabled-themes)
+                  (enable-theme want)
                   (setq doom-theme want)
-                  (load-theme want t))))))
+                  (run-hooks 'doom-load-theme-hook))))))
 
 (defconst my/font-size
   (cond (my/macos-p     13.0)
@@ -50,9 +56,15 @@
 (defvar my/nerd-glyphs-p nil
   "Whether Nerd-font glyphs are displayable in any active frame.")
 
+(defvar my/--nerd-glyph-cache (make-hash-table :test 'eq))
+
 (defun my/--update-nerd-glyphs-p (&optional frame)
-  (with-selected-frame (or frame (selected-frame))
-    (setq my/nerd-glyphs-p (char-displayable-p ?))))
+  (let* ((f (or frame (selected-frame)))
+         (k (frame-parameter f 'display)))
+    (setq my/nerd-glyphs-p
+          (or (gethash k my/--nerd-glyph-cache)
+              (puthash k (with-selected-frame f (char-displayable-p ?))
+                       my/--nerd-glyph-cache)))))
 
 (if my/daemon-p
     (add-hook 'server-after-make-frame-hook #'my/--update-nerd-glyphs-p)
@@ -145,8 +157,10 @@
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 ;; Defer to after-init so customizations don't slow module loading.
 (add-hook 'doom-after-init-hook
-          (lambda () (load custom-file 'noerror 'nomessage))
-          90)
+          (lambda ()
+            (run-with-idle-timer 1 nil
+                                 (lambda () (load custom-file 'noerror 'nomessage))))
+          99)
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
@@ -183,7 +197,7 @@
 ;; to hide autosave file from recent files
 (after! recentf
   (setq recentf-auto-cleanup    'never
-        recentf-max-saved-items 200)
+        recentf-max-saved-items 80)
   (add-to-list 'recentf-exclude
                (concat "\\`"
                        (regexp-quote
@@ -222,9 +236,9 @@
             :n (format "w%d" n)     fn))))
 
 (after! gcmh
-  (setq gcmh-high-cons-threshold (* 32 1024 1024)
+  (setq gcmh-high-cons-threshold (* 64 1024 1024)
         gcmh-idle-delay             'auto
-        gcmh-auto-idle-delay-factor 10))
+        gcmh-auto-idle-delay-factor 15))
 
 (map! ;; [remap just-one-space]  #'cycle-spacing
  [remap upcase-word]     #'upcase-dwim
@@ -330,28 +344,29 @@
   "\\`[Rr][Ee][Aa][Dd][Mm][Ee]\\(?:\\.\\(?:org\\|md\\|markdown\\|txt\\|rst\\|adoc\\)\\)?\\'"
   "Regexp matching README candidate filenames.")
 
-(defconst my/readme-fast-candidates
-  '("README.org" "README.md" "README")
-  "Most common README filenames — checked via stat() first.")
+(defvar-local my/dar--timer nil)
+
+(defun my/--readme-here-p ()
+  (let ((case-fold-search t))
+    (directory-files default-directory nil my/readme-regexp t 1)))
 
 (defun my/dired-auto-readme-maybe ()
-  "Enable `dired-auto-readme-mode' on idle if a *local* README exists."
+  "Enable `dired-auto-readme-mode' on idle if a local README exists."
   (unless (or (file-remote-p default-directory)
               (and (fboundp 'dirvish-side-session-visible-p)
                    (eq (dirvish-side-session-visible-p) (selected-window))))
+    (when (timerp my/dar--timer) (cancel-timer my/dar--timer))
     (let ((buf (current-buffer)))
-      (run-with-idle-timer
-       0.2 nil
-       (lambda ()
-         (when (and (buffer-live-p buf)
-                    (with-current-buffer buf (derived-mode-p 'dired-mode)))
-           (with-current-buffer buf
-             (when (or (cl-some (lambda (n) (file-exists-p (expand-file-name n)))
-                                my/readme-fast-candidates)
-                       (let ((case-fold-search t))
-                         (directory-files default-directory nil
-                                          my/readme-regexp t 1)))
-               (dired-auto-readme-mode 1)))))))))
+      (setq my/dar--timer
+            (run-with-idle-timer
+             0.2 nil
+             (lambda ()
+               (when (buffer-live-p buf)
+                 (with-current-buffer buf
+                   (when (and (derived-mode-p 'dired-mode)
+                              (get-buffer-window buf 'visible) ; check here
+                              (my/--readme-here-p))
+                     (dired-auto-readme-mode 1))))))))))
 
 (use-package! page-break-lines
   :hook (dired-auto-readme-mode . page-break-lines-mode))
@@ -392,6 +407,7 @@
   (setq dirvish-side-display-alist
         '((side . right) (slot . -1))))
 
+
 (use-package! dwim-shell-command
   :bind (([remap shell-command]               . dwim-shell-command)
          :map dired-mode-map
@@ -399,8 +415,9 @@
          ([remap dired-do-shell-command]       . dwim-shell-command)
          ([remap dired-smart-shell-command]    . dwim-shell-command))
   :config
-  ;; Heavy: ~hundreds of preset commands; pull them in on idle.
-  (run-with-idle-timer 30 nil (lambda () (require 'dwim-shell-commands))))
+  (add-transient-hook! 'dwim-shell-command
+    (require 'dwim-shell-commands)))
+
 
 (after! eglot
   ;; jsonrpc--log-event is called on every LSP message; with the events buffer
@@ -1350,16 +1367,10 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                           collect toadd)))
                     (string-join (reverse rcrumbs) separator))))))
 
-;; mouse mode must be initialised for each new terminal
-;; see http://stackoverflow.com/a/6798279/27782
-(defun initialize-mouse-mode (&optional frame)
-  (unless (or (display-graphic-p frame) xterm-mouse-mode)
-    (xterm-mouse-mode 1)))
-
 (add-hook 'doom-first-input-hook
           (defun my/xterm-mouse-h ()
-            (unless (display-graphic-p) (xterm-mouse-mode 1))))
-(add-hook 'after-make-frame-functions #'initialize-mouse-mode)
+            (unless (or (display-graphic-p) xterm-mouse-mode)
+              (xterm-mouse-mode 1))))
 
 ;; TUI prettification
 (defun my/tui-glyph-setup (&optional frame)
@@ -1384,11 +1395,14 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 (when (>= emacs-major-version 28)
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
-(add-hook 'doom-first-file-hook
+(add-hook 'doom-after-init-hook
           (defun my/load-host-config-h ()
-            ;; Load a file with the same name as the computer’s name. Just keep on going if
-            ;; the requisite file isn't there.
-            (load! my/host nil t)
-            ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
-            (load! my/system-type-name nil t))
-          95)
+            (run-with-idle-timer
+             0.2 nil
+             (lambda ()
+               ;; Load a file with the same name as the computer’s name. Just keep on going if
+               ;; the requisite file isn't there.
+               (load! my/host nil t)
+               ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
+               (load! my/system-type-name nil t))))
+          99)
