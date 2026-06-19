@@ -199,7 +199,12 @@ clicked."
                   (my--mode-line-buffer-identifier)))
                (t (my--mode-line-buffer-identifier))))))
 
-  (setq frame-title-format '(:eval (my--frame-title-format)))
+  (defun my--frame-title-update (&rest _)
+    (setq frame-title-format (my--frame-title-format)))
+
+  (add-hook 'window-buffer-change-functions #'my--frame-title-update)
+  (add-hook 'buffer-list-update-hook        #'my--frame-title-update)
+  (my--frame-title-update)                       ; initial
   (lkn-tab-bar--sync-visibility))
 
 

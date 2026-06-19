@@ -35,13 +35,11 @@
   (or my/daemon-p (display-graphic-p)))
 
 (when my/daemon-p
-  ;; Eagerly load both themes once so they live in `custom-known-themes`.
-  (dolist (th '(ef-eagle ef-dark))
-    (unless (memq th custom-known-themes)
-      (load-theme th t t)))                 ; third t = NO-ENABLE
   (add-hook 'server-after-make-frame-hook
             (defun my/theme-per-frame ()
               (let ((want (if (display-graphic-p) 'ef-eagle 'ef-dark)))
+                (unless (memq want custom-known-themes)
+                  (load-theme want t t))            ; load lazily, don't enable
                 (unless (eq doom-theme want)
                   (mapc #'disable-theme custom-enabled-themes)
                   (enable-theme want)
@@ -64,29 +62,9 @@
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
-(setq user-full-name "Ahmet Cemal Özgezer"
+(setq user-full-name    "Ahmet Cemal Özgezer"
       user-mail-address "ozgezer@gmail.com"
-
-      ;; There are two ways to load a theme. Both assume the theme is installed and
-      ;; available. You can either set `doom-theme' or manually load a theme with the
-      ;; `load-theme' function. This is the default:
-      doom-theme (if my/gui-init-p 'ef-eagle 'ef-dark)
-      ;; modus-operandi modus-vivendi doom-one doom-gruvbox doom-tomorrow-night
-
-      ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
-      ;; are the three important ones:
-      ;;
-      ;; + `doom-font'
-      ;; + `doom-variable-pitch-font'
-      ;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
-      ;;   presentations or streaming.
-      ;;
-      ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
-      ;; font string. You generally only need these two:
-      doom-font (font-spec :family "Iosevka Comfy" :size my/font-size)
-      doom-big-font (font-spec :family "Iosevka Comfy" :size (if my/macos-p 26.0 20.0))
-      doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size my/font-size)
-      doom-serif-font (font-spec :family "BlexMono Nerd Font" :size my/font-size :weight 'light)
+      doom-theme        (if my/gui-init-p 'ef-eagle 'ef-dark)
       auth-source-cache-expiry nil ; default is 7200 (2h)
       auto-revert-avoid-polling t  ; refresh buffers when files change on disk
       auto-revert-check-vc-info nil; large compiled tags / treesit files: skip the “file changed on disk” poll
@@ -95,10 +73,6 @@
       auto-revert-stop-on-user-input  t
       auto-revert-use-notify t     ; use inotify instead of polling
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
-      auto-revert-buffer-list-filter (lambda (buf)
-                                       (let ((file (buffer-local-value 'buffer-file-name buf)))
-                                         (and (or (not file) (not (file-remote-p file)))
-                                              (< (buffer-size buf) (* 8 1024 1024)))))
       delete-by-moving-to-trash t  ; Delete files to trash
       scroll-margin                         3
       scroll-preserve-screen-position       t
@@ -120,11 +94,35 @@
             (setq vc-handled-backends '(Git))))
 
 (after! vc-hooks
+  (require 'tramp-loaddefs nil t)               ; just for the regexp
+  (setq vc-ignore-dir-regexp
+        (format "%s\\|%s" vc-ignore-dir-regexp
+                (or (bound-and-true-p tramp-file-name-regexp) "\\`/[^/|:]+:")))
   (define-advice vc-refresh-state (:around (fn) my/skip-heavy)
+    "Skip VC refresh for remote or huge buffers."
     (when (and buffer-file-name
                (not (file-remote-p buffer-file-name))
-               (< (buffer-size) 1000000))
+               (< (buffer-size) (* 4 1024 1024)))     ; 4 MB
       (funcall fn))))
+
+(when my/gui-init-p
+  ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
+  ;; are the three important ones:
+  ;;
+  ;; + `doom-font'
+  ;; + `doom-variable-pitch-font'
+  ;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
+  ;;   presentations or streaming.
+  ;;
+  ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
+  ;; font string. You generally only need these two:
+  (setq doom-font              (font-spec :family "Iosevka Comfy" :size my/font-size)
+        doom-big-font          (font-spec :family "Iosevka Comfy"
+                                          :size (if my/macos-p 26.0 20.0))
+        doom-variable-pitch-font (font-spec :family "Overpass Nerd Font"
+                                            :size my/font-size)
+        doom-serif-font        (font-spec :family "BlexMono Nerd Font"
+                                          :size my/font-size :weight 'light)))
 
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 
@@ -132,19 +130,15 @@
   (file-name-concat doom-user-dir "splash")
   "Directory containing splash-image candidates.")
 
-(defvar my/splash-images nil
-  "Cached splash-image candidates; computed lazily on first use.")
-
 (when my/gui-init-p
   (add-hook 'doom-after-init-hook
             (defun my/set-random-splash-image-h ()
               (remove-hook 'doom-after-init-hook #'my/set-random-splash-image-h)
-              (when-let* (((file-directory-p my/splash-image-dir))
-                          (images (or my/splash-images
-                                      (setq my/splash-images
-                                            (directory-files
-                                             my/splash-image-dir t "^[^.]" t)))))
-                (setq fancy-splash-image (seq-random-elt images))))))
+              (when (file-directory-p my/splash-image-dir)
+                (let ((images (directory-files
+                               my/splash-image-dir t "^[^.].+\\.\\(?:png\\|svg\\|jpe?g\\)\\'" t)))
+                  (when images
+                    (setq fancy-splash-image (seq-random-elt images))))))))
 
 (add-hook! 'doom-first-input-hook
   (defun my/setup-global-modes-h ()
@@ -152,9 +146,8 @@
     (run-with-idle-timer 3 nil #'repeat-mode)))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
-(add-hook 'doom-after-init-hook
-          (lambda () (load custom-file 'noerror 'nomessage))
-          99)
+(defun my/load-custom-h () (load custom-file 'noerror 'nomessage))
+(add-hook 'doom-after-init-hook #'my/load-custom-h 99)
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
@@ -199,8 +192,7 @@
                          (expand-file-name doom-local-dir))))))
 
 (after! savehist
-  (setq history-length              200
-        savehist-autosave-interval  300)     ; default 5 s — way too eager
+  (setq history-length 200)
   (dolist (v '(kill-ring search-ring regexp-search-ring))
     (add-to-list 'savehist-additional-variables v)))
 
@@ -231,7 +223,6 @@
 
 (after! gcmh
   (setq gcmh-high-cons-threshold (* 64 1024 1024)
-        gcmh-idle-delay             'auto
         gcmh-auto-idle-delay-factor 15))
 
 (map! ;; [remap just-one-space]  #'cycle-spacing
@@ -329,9 +320,7 @@
   (setq tramp-verbose 1                              ; default 3
         tramp-use-scp-direct-remote-copying t        ; faster copies
         remote-file-name-inhibit-locks t             ; avoid stat() of .#lock
-        remote-file-name-inhibit-cache 60)           ; reuse for a minute
-  (setq vc-ignore-dir-regexp
-        (format "%s\\|%s" vc-ignore-dir-regexp tramp-file-name-regexp)))
+        remote-file-name-inhibit-cache 60))          ; reuse for a minute
 
 (use-package! dired-auto-readme
   :commands dired-auto-readme-mode
@@ -726,24 +715,23 @@ the sequences will be lost."
             (:help-echo "Local changes not in upstream")))
           ("Path" 0 magit-repolist-column-path nil))))
 
+(defun my/magit-todos-bootstrap ()
+  (require 'magit-todos)
+  (magit-todos-mode 1)
+  (when-let ((buf (magit-get-mode-buffer 'magit-status-mode)))
+    (with-current-buffer buf (magit-refresh))))
+
+(defun my/magit-todos-once-h ()
+  (remove-hook 'magit-status-mode-hook #'my/magit-todos-once-h)
+  (run-with-idle-timer 0.5 nil #'my/magit-todos-bootstrap))
+
 (use-package! magit-todos
   :defer t
-  :init
-  (add-hook 'magit-status-mode-hook
-            (defun my/magit-todos-once-h ()
-              (remove-hook 'magit-status-mode-hook #'my/magit-todos-once-h)
-              (run-with-idle-timer
-               0.5 nil          ; was 0; give the status buffer time to paint first
-               (lambda ()
-                 (require 'magit-todos)
-                 (magit-todos-mode 1)
-                 (when-let ((buf (magit-get-mode-buffer 'magit-status-mode)))
-                   (with-current-buffer buf (magit-refresh)))))))
-  :config
-  (setq magit-todos-max-items 20
-        magit-todos-depth     3
-        magit-todos-update    t
-        magit-todos-scanner   #'magit-todos--scan-with-rg))
+  :init  (add-hook 'magit-status-mode-hook #'my/magit-todos-once-h)
+  :config (setq magit-todos-max-items 20
+                magit-todos-depth     3
+                magit-todos-update    t
+                magit-todos-scanner   #'magit-todos--scan-with-rg))
 
 (map! :leader
       (:prefix ("p" . "project")
@@ -752,6 +740,7 @@ the sequences will be lost."
 (after! git-commit
   (setq git-commit-summary-max-length 68))
 
+(defvar my/--mixed-pitch-loaded nil)
 (add-hook! '(org-mode-hook LaTeX-mode-hook markdown-mode-hook
              gfm-mode-hook Info-mode-hook)
   (defun my/mixed-pitch-on ()
@@ -759,10 +748,12 @@ the sequences will be lost."
       (run-with-idle-timer
        0.4 nil
        (lambda ()
-         (when (buffer-live-p buf)
-           (with-current-buffer buf
+       (when (buffer-live-p buf)
+         (with-current-buffer buf
+           (unless my/--mixed-pitch-loaded
              (require 'mixed-pitch)
-             (mixed-pitch-mode 1))))))))
+             (setq my/--mixed-pitch-loaded t))
+           (mixed-pitch-mode 1))))))))
 
 (add-hook! markdown-mode
   (add-hook! before-save :local #'markdown-toc-refresh-toc))
@@ -829,28 +820,30 @@ the sequences will be lost."
                  (lambda ()
                    (when (buffer-live-p buf)
                      (with-current-buffer buf
-                       (when (save-excursion
-                               (goto-char (point-min))
-                               (re-search-forward
-                                "\\[\\[\\(?:file:\\)?[^]]+\\.\\(?:png\\|jpe?g\\|svg\\|gif\\|webp\\)"
-                                (min (point-max) (+ (point-min) (* 256 1024)))
-                                t))
-                         (org-display-inline-images)))))))))
+                       ;; Cheap: only scan the first 8 KB; that's where most #+ATTR / [[file:…]] live.
+                       (save-restriction
+                         (widen)
+                         (save-excursion
+                           (goto-char (point-min))
+                           (when (re-search-forward
+                                  "\\[\\[\\(?:file:\\)?[^]]+\\.\\(?:png\\|jpe?g\\|svg\\|gif\\|webp\\)"
+                                  (min (point-max) (+ (point-min) 8192)) t)
+                             (org-display-inline-images)))))))))))
   (add-to-list 'org-modules 'org-habit))
 
 (unless my/gui-init-p
   (add-hook 'org-mode-hook
             (lambda () (setq-local xterm-set-window-title nil))))
 
-(after! persp-mode
-  ;; Load on idle; frame-title-format and tab-bar setup are not on the
-  ;; critical path to first paint.
-  (run-with-idle-timer 0.1 nil (lambda () (load! "persp-config"))))
+(defun my/load-persp-config () (load! "persp-config"))
 
-(setq +workspaces-switch-project-function (lambda (project-directory)
-                                            (dired project-directory)
-                                            ;; (my/ghostel-toggle t)
-                                            ))
+(after! persp-mode
+  (run-with-idle-timer 0.1 nil #'my/load-persp-config))
+
+(defun my/workspaces-switch-project (project-directory)
+  (dired project-directory))
+
+(setq +workspaces-switch-project-function #'my/workspaces-switch-project)
 
 (map! :when (modulep! :ui workspaces)
       :map doom-leader-workspace-map
@@ -1396,20 +1389,18 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 
 (when (fboundp 'pixel-scroll-precision-mode)
   (add-hook 'doom-first-input-hook
-            (lambda () (when (display-graphic-p)
-                    (pixel-scroll-precision-mode 1)))))
+            (defun my/pixel-scroll-init-h ()
+              (when (display-graphic-p)
+                (pixel-scroll-precision-mode 1)))))
 
 (when (>= emacs-major-version 28)
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
-(add-hook 'doom-after-init-hook
-          (defun my/load-host-config-h ()
-            (run-with-idle-timer
-             0.2 nil
-             (lambda ()
-               ;; Load a file with the same name as the computer’s name. Just keep on going if
-               ;; the requisite file isn't there.
-               (load! my/host nil t)
-               ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
-               (load! my/system-type-name nil t))))
-          99)
+(defun my/load-host-config-h ()
+  ;; Load a file with the same name as the computer’s name. Just keep on going if
+  ;; the requisite file isn't there.
+  (load! my/host nil t)
+  ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
+  (load! my/system-type-name nil t))
+
+(add-hook 'doom-after-init-hook #'my/load-host-config-h 99)

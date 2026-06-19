@@ -1,9 +1,10 @@
 ;;; early-init.el -*- lexical-binding: t; -*-
 
-;; Add near the top of early-init.el
-(setq package-enable-at-startup nil)
-;; Skip `package-quickstart' computation entirely; Doom doesn't use it.
-(setq package-quickstart nil)
+(setq package-enable-at-startup nil
+      ;; Skip `package-quickstart' computation entirely; Doom doesn't use it.
+      package-quickstart nil
+      ;; Don't even bother probing for the quickstart cache.
+      package-quickstart-file nil)
 
 (setq auto-mode-case-fold nil)
 
@@ -45,17 +46,16 @@
       x-gtk-resize-child-frames 'resize-mode)   ; only meaningful under GTK
 
 ;; Prefer fresher bytecode over stale .elc during active development.
-(setq load-prefer-newer noninteractive)
+(setq load-prefer-newer noninteractive
+      ;; Skip loading any *.el if a fresher *.elc exists; avoids per-load stat() pairs.
+      load-suffixes '(".elc" ".el")
+      load-file-rep-suffixes '(""))
 
 ;; ── LSP / subprocess throughput ───────────────────────────────────────────────
 ;; Read subprocess output immediately instead of waiting for the next scheduling
 ;; cycle.  Noticeably faster eglot/LSP response, especially on large JSON chunks.
 (setq process-adaptive-read-buffering nil
       read-process-output-max (* 4 1024 1024)) ; 4 MB — eglot/LSP sends large JSON chunks
-
-;; Process I/O: you set read-process-output-max; also bump the pipe size on Linux.
-(when (eq system-type 'gnu/linux)
-  (setq process-adaptive-read-buffering nil))
 
 ;; ── Bidirectional text scanning ───────────────────────────────────────────────
 ;; Emacs re-scans every displayed line for RTL characters by default.
@@ -106,8 +106,11 @@
 
 ;; Don't warn about missing native-comp source — accelerates first GUI frame
 ;; on systems where some .eln-cache entries lack matching .el files.
-(setq native-comp-warning-on-missing-source nil)
-(setq native-comp-async-report-warnings-errors 'silent)
+(setq native-comp-warning-on-missing-source nil
+      native-comp-async-report-warnings-errors 'silent)
+
+(when (and (fboundp 'native-comp-available-p) (native-comp-available-p))
+  (setq native-comp-async-jobs-number (max 1 (1- (num-processors)))))
 
 ;; Modern terminals: report selection, extended modifiers, mouse, etc.
 (setq xterm-extra-capabilities '(getSelection setSelection modifyOtherKeys))
@@ -137,10 +140,11 @@
 
 (setq vc-handled-backends nil)
 
-(when (and (fboundp 'native-comp-available-p) (native-comp-available-p))
-  (setq native-comp-async-jobs-number (max 1 (1- (num-processors)))))
-
 (setq inhibit-x-resources t) ; Avoid X resources lookup (saves one stat() and one X roundtrip
 
 ;; Skip image type probing for formats you don't use.
 (setq image-types '(svg png gif jpeg))
+
+;; Cheap on Emacs ≥30: skip the symbol-table dump probe during init.
+(when (boundp 'comp-eln-load-path-hook)
+  (setq comp-eln-load-path-hook nil))
