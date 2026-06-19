@@ -120,9 +120,10 @@ Returns a list of directory paths suitable for `magit-repository-directories`."
          (or (when-let* ((project-root (projectile-project-root))
                         (main-folder  (DINA5CG52813LW--get-project-main-folder project-root))
                         (xml-file     (DINA5CG52813LW--get-project-config-path project-root))
-                        (key          (list project-root
-                                            (file-attribute-modification-time
-                                             (file-attributes xml-file)))))
+                        (key          (cons project-root
+                                            (float-time
+                                             (file-attribute-modification-time
+                                              (file-attributes xml-file))))))
                (or (gethash key DINA5CG52813LW--magit-repo-cache)
                    (puthash key
                             (DINA5CG52813LW--collect-magit-repositories
@@ -130,6 +131,7 @@ Returns a list of directory paths suitable for `magit-repository-directories`."
                             DINA5CG52813LW--magit-repo-cache)))
              magit-repository-directories)))
     (apply fn args)))
+
 ;;; Projectile Integration
 
 (defun DINA5CG52813LW--project-has-files-p (required-files excluded-files &optional dir)
@@ -225,11 +227,15 @@ This prevents jka-compr from attempting LZMA decompression on those files."
   :config
   (setq gptel--known-backends
         (cl-remove "ChatGPT" gptel--known-backends :key #'car :test #'equal)
-        gptel-model   'claude-opus-4.7)
+        gptel-model 'claude-opus-4.7)
   (add-transient-hook! 'gptel-menu
     (setq gptel-backend (gptel-make-gh-copilot "Copilot")))
-  (when (fboundp 'macher-install)
-    (run-with-idle-timer 1 nil #'macher-install)))
+  (when (and (fboundp 'macher-install)
+             (not (bound-and-true-p macher--installed)))
+    (run-with-idle-timer 1 nil
+                         (lambda ()
+                           (macher-install)
+                           (setq macher--installed t)))))
 
 (after! dirvish
   (setq dirvish-quick-access-entries

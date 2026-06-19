@@ -68,7 +68,7 @@
 
 (if my/daemon-p
     (add-hook 'server-after-make-frame-hook #'my/--update-nerd-glyphs-p)
-  (my/--update-nerd-glyphs-p))
+  (add-hook 'doom-after-init-hook #'my/--update-nerd-glyphs-p))
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
@@ -103,6 +103,11 @@
       auto-revert-stop-on-user-input  t
       auto-revert-use-notify t     ; use inotify instead of polling
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
+      auto-revert-buffer-list-filter (lambda (buf)
+                                       (with-current-buffer buf
+                                         (and (or (not buffer-file-name)
+                                                  (not (file-remote-p buffer-file-name)))
+                                              (< (buffer-size) (* 8 1024 1024)))))
       delete-by-moving-to-trash t  ; Delete files to trash
       scroll-margin                         3
       scroll-preserve-screen-position       t
@@ -140,26 +145,30 @@
   "Cached splash-image candidates; computed lazily on first use.")
 
 (when my/gui-init-p
-  (add-hook! 'doom-after-init-hook
-    (defun my/set-random-splash-image ()
-      (when-let* (((file-directory-p my/splash-image-dir))
-                  (images (or my/splash-images
-                              (setq my/splash-images
-                                    (directory-files
-                                     my/splash-image-dir t "^[^.]" t)))))
-        (setq fancy-splash-image (seq-random-elt images))))))
+  (add-hook 'doom-after-init-hook
+            (defun my/set-random-splash-image-h ()
+              (remove-hook 'doom-after-init-hook #'my/set-random-splash-image-h)
+              (when-let* (((file-directory-p my/splash-image-dir))
+                          (images (or my/splash-images
+                                      (setq my/splash-images
+                                            (directory-files
+                                             my/splash-image-dir t "^[^.]" t)))))
+                (setq fancy-splash-image (seq-random-elt images))))))
 
 (add-hook! 'doom-first-input-hook
   (defun my/setup-global-modes-h ()
-    (run-with-idle-timer 3 nil (lambda () (global-subword-mode 1)))
-    (run-with-idle-timer 5 nil (lambda () (repeat-mode 1)))))
+    (run-with-idle-timer
+     3 nil
+     (lambda ()
+       (global-subword-mode 1)
+       (run-with-idle-timer 2 nil #'repeat-mode)))))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 ;; Defer to after-init so customizations don't slow module loading.
 (add-hook 'doom-after-init-hook
-          (lambda ()
-            (run-with-idle-timer 1 nil
-                                 (lambda () (load custom-file 'noerror 'nomessage))))
+          (defun my/load-custom-file-h ()
+            (run-with-idle-timer
+             1 nil (lambda () (load custom-file 'noerror 'nomessage))))
           99)
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
@@ -346,9 +355,19 @@
 
 (defvar-local my/dar--timer nil)
 
+(defvar my/--readme-cache (make-hash-table :test 'equal)
+  "Per-directory cache: dir -> (mtime . has-readme-p).")
+
 (defun my/--readme-here-p ()
-  (let ((case-fold-search t))
-    (directory-files default-directory nil my/readme-regexp t 1)))
+  (let* ((dir   default-directory)
+         (mtime (file-attribute-modification-time (file-attributes dir)))
+         (hit   (gethash dir my/--readme-cache)))
+    (if (and hit (equal (car hit) mtime))
+        (cdr hit)
+      (let* ((case-fold-search t)
+             (found (and (directory-files dir nil my/readme-regexp t 1) t)))
+        (puthash dir (cons mtime found) my/--readme-cache)
+        found))))
 
 (defun my/dired-auto-readme-maybe ()
   "Enable `dired-auto-readme-mode' on idle if a local README exists."
@@ -364,9 +383,13 @@
                (when (buffer-live-p buf)
                  (with-current-buffer buf
                    (when (and (derived-mode-p 'dired-mode)
-                              (get-buffer-window buf 'visible) ; check here
+                              (get-buffer-window buf 'visible)
                               (my/--readme-here-p))
-                     (dired-auto-readme-mode 1))))))))))
+                     (dired-auto-readme-mode 1))))))))
+    (add-hook 'kill-buffer-hook
+              (lambda () (when (timerp my/dar--timer)
+                      (cancel-timer my/dar--timer)))
+              nil t)))
 
 (use-package! page-break-lines
   :hook (dired-auto-readme-mode . page-break-lines-mode))
@@ -401,7 +424,7 @@
         dirvish-subtree-prefix "  "
         dirvish-subtree-state-style 'nerd)
   ;; (dirvish-peek-mode)
-  (add-hook 'doom-first-input-hook #'dirvish-side-follow-mode))
+  (dirvish-side-follow-mode +1))
 
 (after! dirvish-side
   (setq dirvish-side-display-alist
@@ -646,22 +669,24 @@ the sequences will be lost."
     (acml/ansi-color)
     (setq-local acml/log-mode--colorized-to (point-max)))
    (t
-    (message "acml/log-mode: incremental ANSI colorization (%d bytes)" (buffer-size))
     (acml/log-mode--colorize-chunk (current-buffer))))
   (add-hook 'after-revert-hook #'acml/ansi-color-tail nil t)
   (add-hook 'kill-buffer-hook
-            (lambda ()
-              (when (timerp acml/log-mode--colorize-timer)
-                (cancel-timer acml/log-mode--colorize-timer)))
+            (lambda () (when (timerp acml/log-mode--colorize-timer)
+                    (cancel-timer acml/log-mode--colorize-timer)))
             nil t)
+  ;; Only tail huge, recently-modified logs; not arbitrary `.log` artifacts.
   (when (and buffer-file-name
-             (not (file-remote-p buffer-file-name)))
+             (not (file-remote-p buffer-file-name))
+             (> (buffer-size) (* 1 1024 1024))
+             (< (float-time (time-since (file-attribute-modification-time
+                                         (file-attributes buffer-file-name))))
+                3600))
     (auto-revert-tail-mode 1)))
 (add-to-list 'auto-mode-alist '("\\.log\\'" . acml/log-mode))
 
-(defvar my/magit-section-visibility-indicators
-  `((magit-fringe-bitmap> . magit-fringe-bitmapv)
-    (,(if my/nerd-glyphs-p "" "...") . t)))
+(defvar my/magit-section-visibility-indicators nil
+  "Computed lazily inside `after! magit'.")
 
 (after! magit
   (setq magit-save-repository-buffers nil
@@ -672,7 +697,9 @@ the sequences will be lost."
         magit-revision-insert-related-refs nil
         magit-diff-refine-hunk            nil
         magit-log-section-commit-count    10
-        magit-status-show-hashes-in-headers nil)
+        magit-status-show-hashes-in-headers nil
+        my/magit-section-visibility-indicators `((magit-fringe-bitmap> . magit-fringe-bitmapv)
+                                                 (,(if my/nerd-glyphs-p "" "...") . t)))
   (magit-add-section-hook 'magit-status-sections-hook
                           'magit-insert-worktrees
                           'magit-insert-status-headers t)
@@ -717,7 +744,7 @@ the sequences will be lost."
             (defun my/magit-todos-once-h ()
               (remove-hook 'magit-status-mode-hook #'my/magit-todos-once-h)
               (run-with-idle-timer
-               0 nil
+               0.5 nil          ; was 0; give the status buffer time to paint first
                (lambda ()
                  (require 'magit-todos)
                  (magit-todos-mode 1)
@@ -799,10 +826,6 @@ the sequences will be lost."
 (setq org-directory (expand-file-name "~/Documents/org/")
       org-agenda-files (list org-directory (expand-file-name "~/Documents/worg/")))
 
-(setq org-modules-load-list '(org-habit))
-(add-hook 'org-load-hook
-          (lambda () (add-to-list 'org-modules 'org-habit)))
-
 (after! org
   (setq org-ellipsis (if (and my/gui-init-p my/nerd-glyphs-p) " " nil)
         org-hide-emphasis-markers t
@@ -823,7 +846,8 @@ the sequences will be lost."
                                 "\\[\\[\\(?:file:\\)?[^]]+\\.\\(?:png\\|jpe?g\\|svg\\|gif\\|webp\\)"
                                 (min (point-max) (+ (point-min) (* 256 1024)))
                                 t))
-                         (org-display-inline-images))))))))))
+                         (org-display-inline-images)))))))))
+  (add-to-list 'org-modules 'org-habit))
 
 (unless my/gui-init-p
   (add-hook 'org-mode-hook
@@ -1244,17 +1268,11 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
          (< (buffer-size) 200000)))
   (defun my/copilot-maybe ()
     (when (my/copilot-eligible-p) (copilot-mode 1)))
-  (add-hook 'doom-first-file-hook
+  (add-hook 'doom-first-input-hook
             (defun my/copilot-bootstrap-h ()
               (run-with-idle-timer
-               1.5 nil
-               (lambda ()
-                 (add-hook 'prog-mode-hook #'my/copilot-maybe)
-                 (dolist (win (window-list nil 'no-mini))
-                   (with-current-buffer (window-buffer win)
-                     (when (and (derived-mode-p 'prog-mode)
-                                (my/copilot-eligible-p))
-                       (while-no-input (copilot-mode 1)))))))))
+               2 nil
+               (lambda () (add-hook 'prog-mode-hook #'my/copilot-maybe)))))
   :config
   (map! :map copilot-completion-map
         "<tab>"   #'copilot-accept-completion

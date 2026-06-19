@@ -29,8 +29,8 @@ Recomputed only when workspace list or active workspace changes.")
            (current (+workspace-current-name))
            (cache   lkn-tab-bar--render-cache))
       (when (< 1 (length names))
-        (if (and (eq current (cadr cache))
-                 (equal names (car cache)))
+        (if (and (equal current (cadr cache))
+                 (equal names   (car  cache)))
             (cddr cache)
           (let ((tabs (lkn-tab-bar--compute-workspaces names current)))
             (setq lkn-tab-bar--render-cache (cons names (cons current tabs)))
@@ -64,12 +64,7 @@ Recomputed only when workspace list or active workspace changes.")
           `(,(propertize persp 'edge-x 0 'invisible t)))))))
 
   (defun lkn-tab-bar--workspaces-or-nil ()
-    "Return workspace tab strings when multiple workspaces exist, nil otherwise.
-Must be side-effect-free: this runs inside a display :eval form."
-    ;; tab-bar-mode is managed by lkn-tab-bar--sync-visibility: it is non-nil
-    ;; iff there are 2+ workspaces.  This O(1) variable check avoids calling
-    ;; +workspace-list-names (and allocating a list) on every single mode-line
-    ;; update when only one workspace is open — by far the common case.
+    "Return workspace tab strings when multiple workspaces exist, nil otherwise."
     (when (and tab-bar-mode (bound-and-true-p persp-mode))
       (lkn-tab-bar--workspaces)))
 
@@ -204,7 +199,8 @@ clicked."
                   (my--mode-line-buffer-identifier)))
                (t (my--mode-line-buffer-identifier))))))
 
-  (setq frame-title-format '(:eval (my--frame-title-format))))
+  (setq frame-title-format '(:eval (my--frame-title-format)))
+  (lkn-tab-bar--sync-visibility))
 
 
 (provide 'persp-config)

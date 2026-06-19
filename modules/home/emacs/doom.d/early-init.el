@@ -53,13 +53,18 @@
 (setq process-adaptive-read-buffering nil
       read-process-output-max (* 4 1024 1024)) ; 4 MB — eglot/LSP sends large JSON chunks
 
+;; Process I/O: you set read-process-output-max; also bump the pipe size on Linux.
+(when (eq system-type 'gnu/linux)
+  (setq process-adaptive-read-buffering nil))
+
 ;; ── Bidirectional text scanning ───────────────────────────────────────────────
 ;; Emacs re-scans every displayed line for RTL characters by default.
 ;; For an LTR workflow this is pure overhead — the scan happens on every
 ;; redisplay and is especially painful on long lines (e.g. minified JS, logs).
 ;; Individual buffers/modes that need RTL can restore it locally.
 (setq-default bidi-display-reordering 'left-to-right
-              bidi-paragraph-direction 'left-to-right)
+              bidi-paragraph-direction 'left-to-right
+              bidi-inhibit-bpa t) ; skip bidi mirroring tables, which are loaded lazily anyway.
 (setq bidi-inhibit-bpa t)   ; also disable the Bidi Parentheses Algorithm
 
 ;; Don't fontify while you're typing; keeps input snappy on large files.
@@ -69,9 +74,15 @@
 ;; Doom sets these in its own early-init; mirroring them here ensures they apply
 ;; to the very first frame before Doom's machinery runs, eliminating any flicker
 ;; of menu/tool/scroll bars during startup.
-(push '(menu-bar-lines     . 0) default-frame-alist)
-(push '(tool-bar-lines     . 0) default-frame-alist)
-(push '(vertical-scroll-bars  ) default-frame-alist)
+;; One **important caveat**: leave `tool-bar-mode`/`menu-bar-mode` calls to Doom's startup if you don't want a flicker on macOS
+(setq default-frame-alist
+      (append '((menu-bar-lines . 0)
+                (tool-bar-lines . 0)
+                (vertical-scroll-bars))
+              default-frame-alist))
+;; (push '(menu-bar-lines     . 0) default-frame-alist)
+;; (push '(tool-bar-lines     . 0) default-frame-alist)
+;; (push '(vertical-scroll-bars  ) default-frame-alist)
 (push '(horizontal-scroll-bars) default-frame-alist)
 (push '(fullscreen . maximized) default-frame-alist) ; no resize flash at startup
 (push '(fullscreen . maximized) initial-frame-alist) ; no resize flash at startup
@@ -130,3 +141,12 @@
   (setq native-comp-async-jobs-number (max 1 (1- (num-processors)))))
 
 (setq inhibit-x-resources t) ; Avoid X resources lookup (saves one stat() and one X roundtrip
+
+;; Don't run global-eldoc-mode at startup; it walks every loaded mode.
+(setq global-eldoc-mode nil)
+
+;; Skip image type probing for formats you don't use.
+(setq image-types '(svg png gif jpeg))
+
+;; Avoid the implicit `tooltip-mode' init in GUI frames; you enable it lazily.
+(setq tooltip-mode nil)
