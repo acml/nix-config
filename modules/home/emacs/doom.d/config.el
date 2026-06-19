@@ -132,11 +132,12 @@
 
 (add-hook 'doom-first-input-hook
           (defun my/setup-global-modes-h ()
+            (remove-hook 'doom-first-input-hook #'my/setup-global-modes-h)
             (run-with-idle-timer
-             1 nil
+             1.5 nil
              (lambda ()
                (global-subword-mode 1)
-               (run-with-idle-timer 2 nil #'repeat-mode)))))
+               (repeat-mode 1)))))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 (defun my/load-custom-h () (load custom-file 'noerror 'nomessage))
@@ -692,8 +693,7 @@ the sequences will be lost."
         magit-inhibit-save-previous-winconf t
         transient-values '((magit-rebase "--autostash" "--autosquash")
                            (magit-pull   "--autostash" "--rebase"))
-        magit-refresh-verbose              nil
-        magit-revision-insert-related-refs nil
+        magit-refresh-verbose             nil
         magit-diff-refine-hunk            nil
         magit-log-section-commit-count    10
         magit-status-show-hashes-in-headers nil
@@ -1150,65 +1150,68 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                  (display-buffer-in-side-window)
                  (side . right))))
 
-(defconst my/gptel-openrouter-models
-  '(nvidia/nemotron-nano-9b-v2:free
-    openrouter/sonoma-dusk-alpha
-    openrouter/sonoma-sky-alpha
-    deepseek/deepseek-chat-v3.1:free
-    openai/gpt-oss-120b:free
-    openai/gpt-oss-20b:free
-    z-ai/glm-4.5-air:free
-    qwen/qwen3-coder:free
-    moonshotai/kimi-k2:free
-    lphin-mistral-24b-venice-edition:free
-    google/gemma-3n-e2b-it:free
-    tencent/hunyuan-a13b-instruct:free
-    tngtech/deepseek-r1t2-chimera:free
-    mistralai/mistral-small-3.2-24b-instruct:free
-    moonshotai/kimi-dev-72b:free
-    deepseek/deepseek-r1-0528-qwen3-8b:free
-    deepseek/deepseek-r1-0528:free
-    mistralai/devstral-small-2505:free
-    google/gemma-3n-e4b-it:free
-    meta-llama/llama-3.3-8b-instruct:free
-    qwen/qwen3-4b:free
-    qwen/qwen3-30b-a3b:free
-    qwen/qwen3-8b:free
-    qwen/qwen3-14b:free
-    qwen/qwen3-235b-a22b:free
-    tngtech/deepseek-r1t-chimera:free
-    microsoft/mai-ds-r1:free
-    shisa-ai/shisa-v2-llama3.3-70b:free
-    arliai/qwq-32b-arliai-rpr-v1:free
-    agentica-org/deepcoder-14b-preview:free
-    moonshotai/kimi-vl-a3b-thinking:free
-    meta-llama/llama-4-maverick:free
-    meta-llama/llama-4-scout:free
-    qwen/qwen2.5-vl-32b-instruct:free
-    deepseek/deepseek-chat-v3-0324:free
-    mistralai/mistral-small-3.1-24b-instruct:free
-    google/gemma-3-4b-it:free
-    google/gemma-3-12b-it:free
-    rekaai/reka-flash-3:free
-    google/gemma-3-27b-it:free
-    qwen/qwq-32b:free
-    nousresearch/deephermes-3-llama-3-8b-preview:free
-    cognitivecomputations/dolphin3.0-r1-mistral-24b:free
-    cognitivecomputations/dolphin3.0-mistral-24b:free
-    qwen/qwen2.5-vl-72b-instruct:free
-    mistralai/mistral-small-24b-instruct-2501:free
-    deepseek/deepseek-r1-distill-llama-70b:free
-    deepseek/deepseek-r1:free
-    google/gemini-2.0-flash-exp:free
-    meta-llama/llama-3.3-70b-instruct:free
-    qwen/qwen-2.5-coder-32b-instruct:free
-    meta-llama/llama-3.2-3b-instruct:free
-    qwen/qwen-2.5-72b-instruct:free
-    meta-llama/llama-3.1-405b-instruct:free
-    mistralai/mistral-nemo:free
-    google/gemma-2-9b-it:free
-    mistralai/mistral-7b-instruct:free)
-  "OpenRouter free models, declared once at top level.")
+(defvar my/gptel-openrouter-models nil
+  "OpenRouter free models; populated only on non-work hosts.")
+
+(unless my/work-host-p
+  (setq my/gptel-openrouter-models
+        '(nvidia/nemotron-nano-9b-v2:free
+          openrouter/sonoma-dusk-alpha
+          openrouter/sonoma-sky-alpha
+          deepseek/deepseek-chat-v3.1:free
+          openai/gpt-oss-120b:free
+          openai/gpt-oss-20b:free
+          z-ai/glm-4.5-air:free
+          qwen/qwen3-coder:free
+          moonshotai/kimi-k2:free
+          lphin-mistral-24b-venice-edition:free
+          google/gemma-3n-e2b-it:free
+          tencent/hunyuan-a13b-instruct:free
+          tngtech/deepseek-r1t2-chimera:free
+          mistralai/mistral-small-3.2-24b-instruct:free
+          moonshotai/kimi-dev-72b:free
+          deepseek/deepseek-r1-0528-qwen3-8b:free
+          deepseek/deepseek-r1-0528:free
+          mistralai/devstral-small-2505:free
+          google/gemma-3n-e4b-it:free
+          meta-llama/llama-3.3-8b-instruct:free
+          qwen/qwen3-4b:free
+          qwen/qwen3-30b-a3b:free
+          qwen/qwen3-8b:free
+          qwen/qwen3-14b:free
+          qwen/qwen3-235b-a22b:free
+          tngtech/deepseek-r1t-chimera:free
+          microsoft/mai-ds-r1:free
+          shisa-ai/shisa-v2-llama3.3-70b:free
+          arliai/qwq-32b-arliai-rpr-v1:free
+          agentica-org/deepcoder-14b-preview:free
+          moonshotai/kimi-vl-a3b-thinking:free
+          meta-llama/llama-4-maverick:free
+          meta-llama/llama-4-scout:free
+          qwen/qwen2.5-vl-32b-instruct:free
+          deepseek/deepseek-chat-v3-0324:free
+          mistralai/mistral-small-3.1-24b-instruct:free
+          google/gemma-3-4b-it:free
+          google/gemma-3-12b-it:free
+          rekaai/reka-flash-3:free
+          google/gemma-3-27b-it:free
+          qwen/qwq-32b:free
+          nousresearch/deephermes-3-llama-3-8b-preview:free
+          cognitivecomputations/dolphin3.0-r1-mistral-24b:free
+          cognitivecomputations/dolphin3.0-mistral-24b:free
+          qwen/qwen2.5-vl-72b-instruct:free
+          mistralai/mistral-small-24b-instruct-2501:free
+          deepseek/deepseek-r1-distill-llama-70b:free
+          deepseek/deepseek-r1:free
+          google/gemini-2.0-flash-exp:free
+          meta-llama/llama-3.3-70b-instruct:free
+          qwen/qwen-2.5-coder-32b-instruct:free
+          meta-llama/llama-3.2-3b-instruct:free
+          qwen/qwen-2.5-72b-instruct:free
+          meta-llama/llama-3.1-405b-instruct:free
+          mistralai/mistral-nemo:free
+          google/gemma-2-9b-it:free
+          mistralai/mistral-7b-instruct:free)))
 
 (defun my/gptel-register-openrouter ()
   (unless (assoc "OpenRouter" gptel--known-backends)
