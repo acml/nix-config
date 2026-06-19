@@ -102,8 +102,8 @@ Must be side-effect-free: this runs inside a display :eval form."
     (and tab-bar-mode (bound-and-true-p persp-mode)
          (when-let* ((ws (lkn-tab-bar--workspaces)))
            (tooltip-show
-          (string-trim (substring-no-properties (mapconcat #'identity ws "")))
-          (not tooltip-mode))
+            (string-trim (substring-no-properties (mapconcat #'identity ws "")))
+            (not tooltip-mode))
            t)))
   (advice-add 'tooltip-help-tips :before-until #'my/tab-bar-tooltip-tips)
 
@@ -182,9 +182,10 @@ clicked."
 
   (defvar-local my--frame-title-cache nil)
 
-  (defun my--frame-title-invalidate (&optional _win &rest _)
-    "Clear the per-buffer frame-title cache."
-    (setq my--frame-title-cache nil))
+  (defun my--frame-title-invalidate (&optional win &rest _)
+    "Clear the per-buffer frame-title cache for the selected window."
+    (when (or (null win) (eq win (selected-window)))
+      (setq my--frame-title-cache nil)))
 
   (add-hook 'window-buffer-change-functions #'my--frame-title-invalidate)
 

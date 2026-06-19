@@ -28,16 +28,24 @@
            (file-exists-p "/proc/sys/fs/binfmt_misc/WSLInterop")))
   "Cached WSL detection.")
 
+(defconst my/daemon-p (daemonp))
 (defconst my/gui-init-p
-  ;; A daemon almost always serves a GUI client; treat it as graphical.
-  ;; The few users who only ever use `emacsclient -t' can override.
-  (or (display-graphic-p) (daemonp))
-  "Non-nil if the very first frame is, or will be, graphical.")
+  (or my/daemon-p (display-graphic-p)))
+
+(when my/daemon-p
+  (add-hook 'server-after-make-frame-hook
+            (defun my/theme-per-frame ()
+              (let ((want (if (display-graphic-p) 'ef-eagle 'ef-dark)))
+                (unless (eq doom-theme want)
+                  (setq doom-theme want)
+                  (load-theme want t))))))
 
 (defconst my/font-size
   (cond ((featurep :system 'macos) 13.0)
         (my/work-host-p            10.8)
         (t                         12.0)))
+
+(defconst my/nerd-glyphs-p (char-displayable-p ?))
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
@@ -73,9 +81,6 @@
       auto-revert-use-notify t     ; use inotify instead of polling
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
       delete-by-moving-to-trash t  ; Delete files to trash
-      display-line-numbers-type    'relative
-      display-line-numbers-grow-only t
-      display-line-numbers-width-start t
       scroll-margin                         3
       scroll-preserve-screen-position       t
       truncate-string-ellipsis "…" ; Unicode ellispis are nicer than "...", and also save /precious/ space
@@ -86,10 +91,14 @@
       x-stretch-cursor t           ; Stretch cursor to the glyph width
       xref-history-storage 'xref-window-local-history)
 
+(setq-default display-line-numbers-type     'relative
+              display-line-numbers-grow-only t
+              display-line-numbers-width-start t)
+
+(setq vc-follow-symlinks t)
 (add-hook 'doom-first-file-hook
           (defun my/enable-vc-h ()
-            (setq vc-handled-backends '(Git)
-                  vc-follow-symlinks  t)))
+            (setq vc-handled-backends '(Git))))
 
 (after! vc-hooks
   (define-advice vc-refresh-state (:around (fn) my/skip-heavy)
@@ -166,11 +175,11 @@
 (after! recentf
   (setq recentf-auto-cleanup    'never
         recentf-max-saved-items 200)
-  (defvar my/recentf-doom-local-dir
-    (file-name-as-directory (expand-file-name doom-local-dir)))
-  (defun my/recentf-exclude-doom-local-p (file)
-    (string-prefix-p my/recentf-doom-local-dir file))
-  (add-to-list 'recentf-exclude #'my/recentf-exclude-doom-local-p))
+  (add-to-list 'recentf-exclude
+               (concat "\\`"
+                       (regexp-quote
+                        (file-name-as-directory
+                         (expand-file-name doom-local-dir))))))
 
 (after! savehist
   (setq history-length              200
@@ -310,15 +319,22 @@
   "Most common README filenames — checked via stat() first.")
 
 (defun my/dired-auto-readme-maybe ()
-  "Enable `dired-auto-readme-mode' if a README exists here."
+  "Enable `dired-auto-readme-mode' on idle if a README exists."
   (unless (and (fboundp 'dirvish-side-session-visible-p)
                (eq (dirvish-side-session-visible-p) (selected-window)))
-    (when (or (cl-some (lambda (n)
-                         (file-exists-p (expand-file-name n)))
-                       my/readme-fast-candidates)
-              (let ((case-fold-search t))
-                (directory-files default-directory nil my/readme-regexp t 1)))
-      (dired-auto-readme-mode 1))))
+    (let ((buf (current-buffer)))
+      (run-with-idle-timer
+       0.4 nil
+       (lambda ()
+         (when (and (buffer-live-p buf)
+                    (with-current-buffer buf (derived-mode-p 'dired-mode)))
+           (with-current-buffer buf
+             (when (or (cl-some (lambda (n) (file-exists-p (expand-file-name n)))
+                                my/readme-fast-candidates)
+                       (let ((case-fold-search t))
+                         (directory-files default-directory nil
+                                          my/readme-regexp t 1)))
+               (dired-auto-readme-mode 1)))))))))
 
 (use-package! page-break-lines
   :hook (dired-auto-readme-mode . page-break-lines-mode))
@@ -449,8 +465,13 @@
         :v "V" #'expreg-contract))
 
 (use-package! highlight-parentheses
-  :hook (prog-mode . highlight-parentheses-mode)
-  :init (setq highlight-parentheses-delay 0.2)
+  :hook (prog-mode . my/highlight-parens-maybe)
+  :init
+  (setq highlight-parentheses-delay 0.2)
+  (defun my/highlight-parens-maybe ()
+    (when (and (< (buffer-size) (* 256 1024))
+               (not (file-remote-p default-directory)))
+      (highlight-parentheses-mode 1)))
   :config (set-face-attribute 'hl-paren-face nil :weight 'ultra-bold))
 
 (after! indent-bars
@@ -604,14 +625,9 @@ the sequences will be lost."
     (auto-revert-tail-mode 1)))
 (add-to-list 'auto-mode-alist '("\\.log\\'" . acml/log-mode))
 
-(defvar my/magit-fold-indicator nil)
-
-(defun my/magit-fold-indicator ()
-  (or my/magit-fold-indicator
-      (setq my/magit-fold-indicator
-            (if (char-displayable-p ?) "" "..."))))
-
-(defvar my/magit-section-visibility-indicators nil)
+(defvar my/magit-section-visibility-indicators
+  `((magit-fringe-bitmap> . magit-fringe-bitmapv)
+    (,(if my/nerd-glyphs-p "" "...") . t)))
 
 (after! magit
   (setq magit-save-repository-buffers nil
@@ -620,8 +636,8 @@ the sequences will be lost."
                            (magit-pull   "--autostash" "--rebase"))
         magit-refresh-verbose              nil
         magit-revision-insert-related-refs nil
-        magit-diff-refine-hunk            nil      ; was implicit 'all
-        magit-log-section-commit-count    10       ; default 10 already, but make explicit
+        magit-diff-refine-hunk            nil
+        magit-log-section-commit-count    10
         magit-status-show-hashes-in-headers nil)
   (magit-add-section-hook 'magit-status-sections-hook
                           'magit-insert-worktrees
@@ -632,10 +648,6 @@ the sequences will be lost."
                           nil)
   (add-hook 'magit-mode-hook
             (defun my/magit-mode-setup-h ()
-              (unless my/magit-section-visibility-indicators
-                (setq my/magit-section-visibility-indicators
-                      `((magit-fringe-bitmap> . magit-fringe-bitmapv)
-                        (,(my/magit-fold-indicator) . t))))
               (setq-local left-fringe-width 16
                           magit-section-visibility-indicators
                           my/magit-section-visibility-indicators)))
@@ -758,7 +770,7 @@ the sequences will be lost."
           (lambda () (add-to-list 'org-modules 'org-habit)))
 
 (after! org
-  (setq org-ellipsis (if (and my/gui-init-p (char-displayable-p ?)) " " nil)
+  (setq org-ellipsis (if (and my/gui-init-p my/nerd-glyphs-p) " " nil)
         org-hide-emphasis-markers t
         org-latex-pdf-process '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f")
         org-startup-folded 'show2levels
@@ -770,13 +782,14 @@ the sequences will be lost."
                  0.3 nil
                  (lambda ()
                    (when (buffer-live-p buf)
-                     (with-current-buffer buf
-                       (when (save-excursion
-                               (goto-char (point-min))
-                               (re-search-forward
-                                "\\[\\[\\(?:file:\\)?[^]]+\\.\\(?:png\\|jpe?g\\|svg\\|gif\\|webp\\)"
-                                nil t))
-                         (org-display-inline-images))))))))))
+                   (with-current-buffer buf
+                     (when (save-excursion
+                             (goto-char (point-min))
+                             (re-search-forward
+                              "\\[\\[\\(?:file:\\)?[^]]+\\.\\(?:png\\|jpe?g\\|svg\\|gif\\|webp\\)"
+                              (min (point-max) (+ (point-min) (* 256 1024)))
+                              t))
+                       (org-display-inline-images))))))))))
 
 (unless my/gui-init-p
   (add-hook 'org-mode-hook
@@ -1261,9 +1274,15 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
         (overlay-put ov 'line-highlight-overlay-marker t)))))
 (map! "<f12>" #'highlight-or-dehighlight-line)
 
+(defun my/breadcrumb-maybe ()
+  (when (and (not (file-remote-p default-directory))
+             (< (buffer-size) (* 512 1024)))
+    (breadcrumb-local-mode 1)))
+
 (use-package! breadcrumb
   :defer t
   :when (modulep! :tools lsp +eglot)
+  :hook (prog-mode . my/breadcrumb-maybe)
   :config
   ;; Don't show the project/file name in the header, show only an icon
   (after! nerd-icons
@@ -1361,10 +1380,10 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 (when (>= emacs-major-version 28)
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
-(add-hook 'doom-after-init-hook
+(add-hook 'doom-first-buffer-hook
           (defun my/load-host-config-h ()
             (run-with-idle-timer
-             1 nil
+             2 nil
              (lambda ()
                ;; Load a file with the same name as the computer’s name. Just keep on going if
                ;; the requisite file isn't there.
