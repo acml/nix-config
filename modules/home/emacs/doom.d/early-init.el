@@ -142,11 +142,5 @@
 
 (setq inhibit-x-resources t) ; Avoid X resources lookup (saves one stat() and one X roundtrip
 
-;; Don't run global-eldoc-mode at startup; it walks every loaded mode.
-(setq global-eldoc-mode nil)
-
 ;; Skip image type probing for formats you don't use.
 (setq image-types '(svg png gif jpeg))
-
-;; Avoid the implicit `tooltip-mode' init in GUI frames; you enable it lazily.
-(setq tooltip-mode nil)

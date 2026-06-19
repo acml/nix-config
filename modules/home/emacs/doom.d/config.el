@@ -53,22 +53,14 @@
         (my/work-host-p 10.8)
         (t              12.0)))
 
-(defvar my/nerd-glyphs-p nil
-  "Whether Nerd-font glyphs are displayable in any active frame.")
+(defun my/nerd-glyphs-p ()
+  (let* ((f (selected-frame))
+         (k (frame-parameter f 'display)))
+    (or (gethash k my/--nerd-glyph-cache)
+        (puthash k (with-selected-frame f (char-displayable-p ?))
+                 my/--nerd-glyph-cache))))
 
 (defvar my/--nerd-glyph-cache (make-hash-table :test 'eq))
-
-(defun my/--update-nerd-glyphs-p (&optional frame)
-  (let* ((f (or frame (selected-frame)))
-         (k (frame-parameter f 'display)))
-    (setq my/nerd-glyphs-p
-          (or (gethash k my/--nerd-glyph-cache)
-              (puthash k (with-selected-frame f (char-displayable-p ?))
-                       my/--nerd-glyph-cache)))))
-
-(if my/daemon-p
-    (add-hook 'server-after-make-frame-hook #'my/--update-nerd-glyphs-p)
-  (add-hook 'doom-after-init-hook #'my/--update-nerd-glyphs-p))
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
@@ -104,10 +96,9 @@
       auto-revert-use-notify t     ; use inotify instead of polling
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
       auto-revert-buffer-list-filter (lambda (buf)
-                                       (with-current-buffer buf
-                                         (and (or (not buffer-file-name)
-                                                  (not (file-remote-p buffer-file-name)))
-                                              (< (buffer-size) (* 8 1024 1024)))))
+                                       (let ((file (buffer-local-value 'buffer-file-name buf)))
+                                         (and (or (not file) (not (file-remote-p file)))
+                                              (< (buffer-size buf) (* 8 1024 1024)))))
       delete-by-moving-to-trash t  ; Delete files to trash
       scroll-margin                         3
       scroll-preserve-screen-position       t
@@ -157,18 +148,12 @@
 
 (add-hook! 'doom-first-input-hook
   (defun my/setup-global-modes-h ()
-    (run-with-idle-timer
-     3 nil
-     (lambda ()
-       (global-subword-mode 1)
-       (run-with-idle-timer 2 nil #'repeat-mode)))))
+    (run-with-idle-timer 1 nil #'global-subword-mode)
+    (run-with-idle-timer 3 nil #'repeat-mode)))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
-;; Defer to after-init so customizations don't slow module loading.
 (add-hook 'doom-after-init-hook
-          (defun my/load-custom-file-h ()
-            (run-with-idle-timer
-             1 nil (lambda () (load custom-file 'noerror 'nomessage))))
+          (lambda () (load custom-file 'noerror 'nomessage))
           99)
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
@@ -265,34 +250,38 @@
 (defvar wl-copy-process nil
   "Live wl-copy process, or nil when the clipboard is empty.")
 
+(defun my/wayland-clipboard-setup ()
+  "Set up Wayland clipboard interop using `wl-copy'/`wl-paste'."
+  (when-let* ((wl-copy-exe  (executable-find "wl-copy"))
+              (wl-paste-exe (executable-find "wl-paste")))
+    (defun wl-copy (text)
+      (when (process-live-p wl-copy-process)
+        (kill-process wl-copy-process))
+      (setq wl-copy-process
+            (make-process :name "wl-copy" :buffer nil
+                          :command `(,wl-copy-exe "-f" "-n")
+                          :connection-type 'pipe
+                          :coding 'utf-8-unix :noquery t))
+      (process-send-string wl-copy-process text)
+      (process-send-eof    wl-copy-process))
+    (defun wl-paste ()
+      (unless (and wl-copy-process (process-live-p wl-copy-process))
+        (with-temp-buffer
+          (when (zerop (call-process wl-paste-exe nil t nil "-n"))
+            (let ((s (string-trim-right (buffer-string) "[\r\n]+")))
+              (unless (string-empty-p s) s))))))
+    (add-hook 'kill-emacs-hook
+              (lambda ()
+                (when (process-live-p wl-copy-process)
+                  (kill-process wl-copy-process)
+                  (setq wl-copy-process nil))))
+    (setq interprogram-cut-function   #'wl-copy
+          interprogram-paste-function #'wl-paste)))
+
 (when my/wayland-p
   (add-hook 'doom-first-input-hook
-            (defun my/wayland-clipboard-setup ()
-              (when-let* ((wl-copy-exe  (executable-find "wl-copy"))
-                          (wl-paste-exe (executable-find "wl-paste")))
-                (defun wl-copy (text)
-                  (when (process-live-p wl-copy-process)
-                    (kill-process wl-copy-process))
-                  (setq wl-copy-process
-                        (make-process :name "wl-copy" :buffer nil
-                                      :command `(,wl-copy-exe "-f" "-n")
-                                      :connection-type 'pipe
-                                      :coding 'utf-8-unix :noquery t))
-                  (process-send-string wl-copy-process text)
-                  (process-send-eof    wl-copy-process))
-                (defun wl-paste ()
-                  (unless (and wl-copy-process (process-live-p wl-copy-process))
-                    (with-temp-buffer
-                      (when (zerop (call-process wl-paste-exe nil t nil "-n"))
-                        (let ((s (string-trim-right (buffer-string) "[\r\n]+")))
-                          (unless (string-empty-p s) s))))))
-                (add-hook 'kill-emacs-hook
-                          (lambda ()
-                            (when (process-live-p wl-copy-process)
-                              (kill-process wl-copy-process)
-                              (setq wl-copy-process nil))))
-                (setq interprogram-cut-function   #'wl-copy
-                      interprogram-paste-function #'wl-paste)))))
+            (lambda () (run-with-idle-timer 1 nil #'my/wayland-clipboard-setup))))
+
 
 (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t)
                     ("^\\*\\(?:Wo\\)?Man " :size 82 :side right :select t :quit t)))
@@ -394,10 +383,9 @@
 (use-package! page-break-lines
   :hook (dired-auto-readme-mode . page-break-lines-mode))
 
-(defadvice! acml/dirvish-subtree-toggle (fn &rest args)
-  :around #'dirvish-subtree-toggle (save-excursion (apply fn args)))
-
 (after! dirvish
+  (defadvice! acml/dirvish-subtree-toggle (fn &rest args)
+    :around #'dirvish-subtree-toggle (save-excursion (apply fn args)))
   (setq dirvish-attributes (append
                             ;; The order of these attributes is insignificant, they are always
                             ;; displayed in the same position.
@@ -516,10 +504,11 @@
 
 ;; expand-region, tree-sitter edition
 (use-package! expreg
-  :after-call doom-first-input-hook
-  :config
-  (map! :v "v" #'expreg-expand
-        :v "V" #'expreg-contract))
+  :defer t
+  :init
+  (after! evil
+    (define-key evil-visual-state-map (kbd "v") #'expreg-expand)
+    (define-key evil-visual-state-map (kbd "V") #'expreg-contract)))
 
 (use-package! highlight-parentheses
   :hook (prog-mode . my/highlight-parens-maybe)
@@ -699,7 +688,7 @@ the sequences will be lost."
         magit-log-section-commit-count    10
         magit-status-show-hashes-in-headers nil
         my/magit-section-visibility-indicators `((magit-fringe-bitmap> . magit-fringe-bitmapv)
-                                                 (,(if my/nerd-glyphs-p "" "...") . t)))
+                                                 (,(if (my/nerd-glyphs-p) "" "...") . t)))
   (magit-add-section-hook 'magit-status-sections-hook
                           'magit-insert-worktrees
                           'magit-insert-status-headers t)

@@ -227,15 +227,10 @@ This prevents jka-compr from attempting LZMA decompression on those files."
   :config
   (setq gptel--known-backends
         (cl-remove "ChatGPT" gptel--known-backends :key #'car :test #'equal)
-        gptel-model 'claude-opus-4.7)
+        gptel-model   'claude-opus-4.7
+        gptel-backend (gptel-make-gh-copilot "Copilot"))
   (add-transient-hook! 'gptel-menu
-    (setq gptel-backend (gptel-make-gh-copilot "Copilot")))
-  (when (and (fboundp 'macher-install)
-             (not (bound-and-true-p macher--installed)))
-    (run-with-idle-timer 1 nil
-                         (lambda ()
-                           (macher-install)
-                           (setq macher--installed t)))))
+    (when (fboundp 'macher-install) (macher-install))))
 
 (after! dirvish
   (setq dirvish-quick-access-entries
