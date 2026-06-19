@@ -51,14 +51,11 @@
         (my/work-host-p 10.8)
         (t              12.0)))
 
+(defvar my/--nerd-glyphs 'unset)
 (defun my/nerd-glyphs-p ()
-  (let* ((f (selected-frame))
-         (k (frame-parameter f 'display)))
-    (or (gethash k my/--nerd-glyph-cache)
-        (puthash k (with-selected-frame f (char-displayable-p ?))
-                 my/--nerd-glyph-cache))))
-
-(defvar my/--nerd-glyph-cache (make-hash-table :test 'eq))
+  (if (eq my/--nerd-glyphs 'unset)
+      (setq my/--nerd-glyphs (char-displayable-p ?))
+    my/--nerd-glyphs))
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
@@ -178,14 +175,19 @@
 
 ;; to hide autosave file from recent files
 (after! recentf
-  (setq recentf-auto-cleanup    'never
+  (setq recentf-auto-cleanup 'never
         recentf-max-saved-items 80)
   (dolist (re (list (concat "\\`" (regexp-quote (file-name-as-directory
                                                  (expand-file-name doom-local-dir))))
-                    "/tmp/"
-                    "\\.gz\\'" "\\.zst\\'" "\\.elc\\'" "\\.eln\\'"
+                    "\\`/[^/|:]+:"   ; remote (tramp) paths
+                    "/tmp/" "\\.gz\\'" "\\.zst\\'" "\\.elc\\'" "\\.eln\\'"
                     "/log/build-[0-9TZ:+-]+\\.log\\'"))
     (add-to-list 'recentf-exclude re)))
+
+;; auto-revert: only watch local files; saves a thread per remote buffer:
+(after! autorevert
+  (setq auto-revert-remote-files nil
+        auto-revert-stop-on-user-input t))
 
 (after! savehist
   (setq history-length 200)
@@ -318,8 +320,7 @@
         remote-file-name-inhibit-locks               t
         remote-file-name-inhibit-cache               60
         tramp-completion-reread-directory-timeout    nil
-        tramp-default-method                         "ssh"
-        vc-ignore-dir-regexp                         vc-ignore-dir-regexp))
+        tramp-default-method                         "ssh"))
 
 (use-package! dired-auto-readme
   :commands dired-auto-readme-mode
@@ -335,13 +336,20 @@
 (defvar my/--readme-cache (make-hash-table :test 'equal)
   "Per-directory cache: dir -> (mtime . has-readme-p).")
 
+(defconst my/readme-candidates
+  '("README.org" "README.md" "README" "README.txt" "Readme.md" "readme.md"
+    "README.markdown" "README.rst" "README.adoc"))
+
 (defun my/--readme-here-p ()
   (let* ((dir   default-directory)
          (mtime (file-attribute-modification-time (file-attributes dir)))
          (hit   (gethash dir my/--readme-cache)))
     (if (and hit (equal (car hit) mtime))
         (cdr hit)
-      (let ((found (and (directory-files dir nil my/readme-regexp t 1) t)))
+      (let ((found (catch 'hit
+                     (dolist (n my/readme-candidates)
+                       (when (file-exists-p (expand-file-name n dir))
+                         (throw 'hit t))))))
         (puthash dir (cons mtime found) my/--readme-cache)
         found))))
 
@@ -436,9 +444,11 @@
     (set-eglot-client! 'nix-mode    nil-lsp)
     (set-eglot-client! 'nix-ts-mode nil-lsp)))
 
+;; Doom already loads `eldoc`; this one extra line saves a redisplay path:
 (after! eldoc
   (setq eldoc-idle-delay 0.4
-        eldoc-echo-area-use-multiline-p nil))
+        eldoc-echo-area-use-multiline-p nil
+        eldoc-echo-area-display-truncation-message nil))
 
 (after! embark
   (setq prefix-help-command #'embark-prefix-help-command))
@@ -820,23 +830,26 @@ the sequences will be lost."
         org-latex-pdf-process '("tectonic -X compile --outdir=%o -Z shell-escape -Z continue-on-errors %f")
         org-startup-folded 'show2levels
         org-startup-with-inline-images nil)
-  (add-hook 'org-mode-hook
-            (defun my/org-images-h ()
-              (let ((buf (current-buffer)))
-                (run-with-idle-timer
-                 0.3 nil
-                 (lambda ()
-                   (when (buffer-live-p buf)
-                     (with-current-buffer buf
-                       ;; Cheap: only scan the first 8 KB; that's where most #+ATTR / [[file:…]] live.
-                       (save-restriction
-                         (widen)
-                         (save-excursion
-                           (goto-char (point-min))
-                           (when (re-search-forward
-                                  "\\[\\[\\(?:file:\\)?[^]]+\\.\\(?:png\\|jpe?g\\|svg\\|gif\\|webp\\)"
-                                  (min (point-max) (+ (point-min) 8192)) t)
-                             (org-display-inline-images)))))))))))
+  (defvar my/--org-images-timer nil)
+  (defun my/--org-images-scan ()
+    (setq my/--org-images-timer nil)
+    (dolist (buf (buffer-list))
+      (when (buffer-live-p buf)
+        (with-current-buffer buf
+          (when (derived-mode-p 'org-mode)
+            (save-restriction
+              (widen)
+              (save-excursion
+                (goto-char (point-min))
+                (when (re-search-forward
+                       "\\[\\[\\(?:file:\\)?[^]]+\\.\\(?:png\\|jpe?g\\|svg\\|gif\\|webp\\)"
+                       (min (point-max) (+ (point-min) 8192)) t)
+                  (org-display-inline-images)))))))))
+  (defun my/org-images-h ()
+    (unless my/--org-images-timer
+      (setq my/--org-images-timer
+            (run-with-idle-timer 0.3 nil #'my/--org-images-scan))))
+  (add-hook 'org-mode-hook #'my/org-images-h)
   (add-to-list 'org-modules 'org-habit))
 
 (unless my/gui-init-p
@@ -947,12 +960,13 @@ the sequences will be lost."
 
 (use-package! turkish :commands (turkish-mode))
 
+(defun my/ghostel-hide-modeline-h ()
+  (when (fboundp 'hide-mode-line-mode) (hide-mode-line-mode 1)))
+
 (use-package! ghostel
   :defer t
   :commands (ghostel ghostel-project)
-  :hook (ghostel-mode . (lambda ()
-                          (when (fboundp 'hide-mode-line-mode)
-                            (hide-mode-line-mode 1))))
+  :hook (ghostel-mode . my/ghostel-hide-modeline-h)
   :init
   (set-popup-rule! "^\\*doom:ghostel-popup:" :size 0.25 :vslot -4 :select t :quit nil :ttl 0)
   (set-evil-initial-state! 'ghostel-mode 'emacs))
@@ -1264,10 +1278,7 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   (add-hook 'doom-first-input-hook
             (defun my/copilot-bootstrap-h ()
               (add-hook 'prog-mode-hook #'my/copilot-maybe)
-              (dolist (buf (buffer-list))               ; for `emacs file.el`
-                (with-current-buffer buf
-                  (when (derived-mode-p 'prog-mode)
-                    (my/copilot-maybe))))))
+              (when (derived-mode-p 'prog-mode) (my/copilot-maybe))))
   :config
   (map! :map copilot-completion-map
         "<tab>"   #'copilot-accept-completion

@@ -191,8 +191,10 @@ DIR defaults to current project root."
 
 ;;; File Type Associations
 
-(dolist (ext DINA5CG52813LW-makefile-extensions)
-  (add-to-list 'auto-mode-alist (cons ext 'makefile-gmake-mode)))
+(setq auto-mode-alist
+      (nconc (mapcar (lambda (ext) (cons ext 'makefile-gmake-mode))
+                     DINA5CG52813LW-makefile-extensions)
+             auto-mode-alist))
 
 ;;; Compression Handling
 
@@ -223,10 +225,9 @@ This prevents jka-compr from attempting LZMA decompression on those files."
 (use-package! gptel
   :defer t
   :config
-  (setq gptel--known-backends
-        (cl-remove "ChatGPT" gptel--known-backends :key #'car :test #'equal)
-        gptel-model   'claude-opus-4.7
+  (setq gptel-model   'claude-opus-4.7
         gptel-backend (gptel-make-gh-copilot "Copilot"))
+  (setf (alist-get "ChatGPT" gptel--known-backends nil 'remove #'equal) nil)
   (add-transient-hook! 'gptel-menu
     (when (fboundp 'macher-install) (macher-install))))
 

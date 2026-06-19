@@ -42,14 +42,11 @@
 ;; Resize by pixel rather than by character — set here so it takes effect
 ;; before any font or frame geometry calculation runs.
 (setq frame-resize-pixelwise t
-      window-resize-pixelwise t
-      x-gtk-resize-child-frames 'resize-mode)   ; only meaningful under GTK
+      window-resize-pixelwise t)
+(when (eq window-system 'x) (setq x-gtk-resize-child-frames 'resize-mode))
 
 ;; Prefer fresher bytecode over stale .elc during active development.
-(setq load-prefer-newer noninteractive
-      ;; Skip loading any *.el if a fresher *.elc exists; avoids per-load stat() pairs.
-      load-suffixes '(".elc" ".el")
-      load-file-rep-suffixes '(""))
+(setq load-prefer-newer noninteractive)
 
 ;; ── LSP / subprocess throughput ───────────────────────────────────────────────
 ;; Read subprocess output immediately instead of waiting for the next scheduling
