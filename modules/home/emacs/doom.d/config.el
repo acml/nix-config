@@ -68,10 +68,6 @@
       auth-source-cache-expiry nil ; default is 7200 (2h)
       auto-revert-avoid-polling t  ; refresh buffers when files change on disk
       auto-revert-check-vc-info nil; large compiled tags / treesit files: skip the “file changed on disk” poll
-      auto-revert-interval            5   ; only matters when notify is unavailable
-      auto-revert-remote-files nil ; so TRAMP buffers don’t silently spawn checks
-      auto-revert-stop-on-user-input  t
-      auto-revert-use-notify t     ; use inotify instead of polling
       auto-save-default t          ; Nobody likes to loose work, I certainly don't
       delete-by-moving-to-trash t  ; Delete files to trash
       scroll-margin                         3
@@ -94,15 +90,14 @@
             (setq vc-handled-backends '(Git))))
 
 (after! vc-hooks
-  (require 'tramp-loaddefs nil t)               ; just for the regexp
+  ;; Match TRAMP-style paths without pulling in tramp-loaddefs at startup.
   (setq vc-ignore-dir-regexp
-        (format "%s\\|%s" vc-ignore-dir-regexp
-                (or (bound-and-true-p tramp-file-name-regexp) "\\`/[^/|:]+:")))
+        (concat vc-ignore-dir-regexp "\\|\\`/[^/|:]+:"))
   (define-advice vc-refresh-state (:around (fn) my/skip-heavy)
     "Skip VC refresh for remote or huge buffers."
     (when (and buffer-file-name
                (not (file-remote-p buffer-file-name))
-               (< (buffer-size) (* 4 1024 1024)))     ; 4 MB
+               (< (buffer-size) (* 4 1024 1024)))
       (funcall fn))))
 
 (when my/gui-init-p
@@ -422,7 +417,7 @@
 (after! eglot
   ;; jsonrpc--log-event is called on every LSP message; with the events buffer
   ;; already disabled (size 0) there is nothing useful left for it to do.
-  (fset 'jsonrpc--log-event #'ignore)
+  (advice-add 'jsonrpc--log-event :override #'ignore)
 
   (setq eglot-events-buffer-size 0
         eglot-autoshutdown      t
@@ -667,7 +662,10 @@ the sequences will be lost."
   "Computed lazily inside `after! magit'.")
 
 (after! magit
-  (setq magit-save-repository-buffers nil
+  (setq magit-revision-show-gravatars nil
+        magit-diff-paint-whitespace   'status   ; whitespace paint only in status
+        magit-bury-buffer-function    #'magit-restore-window-configuration
+        magit-save-repository-buffers nil
         magit-inhibit-save-previous-winconf t
         transient-values '((magit-rebase "--autostash" "--autosquash")
                            (magit-pull   "--autostash" "--rebase"))
@@ -740,7 +738,6 @@ the sequences will be lost."
 (after! git-commit
   (setq git-commit-summary-max-length 68))
 
-(defvar my/--mixed-pitch-loaded nil)
 (add-hook! '(org-mode-hook LaTeX-mode-hook markdown-mode-hook
              gfm-mode-hook Info-mode-hook)
   (defun my/mixed-pitch-on ()
@@ -748,12 +745,9 @@ the sequences will be lost."
       (run-with-idle-timer
        0.4 nil
        (lambda ()
-       (when (buffer-live-p buf)
-         (with-current-buffer buf
-           (unless my/--mixed-pitch-loaded
-             (require 'mixed-pitch)
-             (setq my/--mixed-pitch-loaded t))
-           (mixed-pitch-mode 1))))))))
+         (when (buffer-live-p buf)
+           (with-current-buffer buf
+             (mixed-pitch-mode 1))))))))
 
 (add-hook! markdown-mode
   (add-hook! before-save :local #'markdown-toc-refresh-toc))
@@ -796,10 +790,9 @@ the sequences will be lost."
 
 (after! org-roam
   (setq org-roam-db-update-on-save nil)
-  (add-hook 'org-roam-find-file-hook
-            (lambda ()
-              (add-hook 'after-save-hook
-                        #'my/org-roam-schedule-db-sync nil :local))))
+  (defun my/org-roam-enable-save-hook ()
+    (add-hook 'after-save-hook #'my/org-roam-schedule-db-sync nil :local))
+  (add-hook 'org-roam-find-file-hook #'my/org-roam-enable-save-hook))
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -1254,7 +1247,12 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
             (defun my/copilot-bootstrap-h ()
               (run-with-idle-timer
                2 nil
-               (lambda () (add-hook 'prog-mode-hook #'my/copilot-maybe)))))
+               (lambda ()
+               (add-hook 'prog-mode-hook #'my/copilot-maybe)
+               (dolist (buf (buffer-list))
+                 (with-current-buffer buf
+                   (when (derived-mode-p 'prog-mode)
+                     (my/copilot-maybe))))))))
   :config
   (map! :map copilot-completion-map
         "<tab>"   #'copilot-accept-completion

@@ -80,8 +80,9 @@ Recomputed only when workspace list or active workspace changes.")
             ((and (not multiple-workspaces) tab-bar-mode)  (tab-bar-mode -1)))))
 
   ;; persp-mode runs these with run-hook-with-args so add-hook works fine.
-  (add-hook 'persp-activated-functions #'lkn-tab-bar--sync-visibility)
-  (add-hook 'persp-created-functions   #'lkn-tab-bar--sync-visibility)
+  (add-hook 'window-buffer-change-functions      #'my--frame-title-update)
+  (add-hook 'window-selection-change-functions   #'my--frame-title-update)
+  (add-hook 'after-set-visited-file-name-hook    #'my--frame-title-invalidate)
   ;; For kill we advise *after* so the count is already decremented.
   (advice-add 'persp-kill :after #'lkn-tab-bar--sync-visibility)
 
@@ -180,8 +181,6 @@ clicked."
     (when (or (null win) (eq win (selected-window)))
       (setq my--frame-title-cache nil)))
 
-  (add-hook 'window-buffer-change-functions #'my--frame-title-invalidate)
-
   (defun my--frame-title-format ()
     (or my--frame-title-cache
         (setq my--frame-title-cache
@@ -202,8 +201,6 @@ clicked."
   (defun my--frame-title-update (&rest _)
     (setq frame-title-format (my--frame-title-format)))
 
-  (add-hook 'window-buffer-change-functions #'my--frame-title-update)
-  (add-hook 'buffer-list-update-hook        #'my--frame-title-update)
   (my--frame-title-update)                       ; initial
   (lkn-tab-bar--sync-visibility))
 
