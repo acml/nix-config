@@ -20,21 +20,22 @@
 ;;; Code:
 
 (after! persp-mode
-  (defvar lkn-tab-bar--render-cache (cons nil nil)
-    "Cons of (STATE . TABS); STATE = (workspace-names . current-name).
-Recomputed only when workspace list or active workspace changes.")
+  (defvar lkn-tab-bar--render-cache nil
+    "Rendered workspace strings, or nil to recompute.")
+
+  (defun lkn-tab-bar--invalidate (&rest _) (setq lkn-tab-bar--render-cache nil))
+
+  (dolist (h '(persp-renamed-functions persp-created-functions
+               persp-activated-functions persp-before-kill-functions))
+    (add-hook h #'lkn-tab-bar--invalidate))
 
   (defun lkn-tab-bar--workspaces ()
-    (let* ((names   (+workspace-list-names))
-           (current (+workspace-current-name))
-           (cache   lkn-tab-bar--render-cache))
-      (when (< 1 (length names))
-        (if (and (equal current (cadr cache))
-                 (equal names   (car  cache)))
-            (cddr cache)
-          (let ((tabs (lkn-tab-bar--compute-workspaces names current)))
-            (setq lkn-tab-bar--render-cache (cons names (cons current tabs)))
-            tabs)))))
+    (or lkn-tab-bar--render-cache
+        (let* ((names   (+workspace-list-names))
+               (current (+workspace-current-name)))
+          (setq lkn-tab-bar--render-cache
+                (and (< 1 (length names))
+                     (lkn-tab-bar--compute-workspaces names current))))))
 
   (defun lkn-tab-bar--compute-workspaces (persps persp)
     "Render workspace tab strings for PERSPS with PERSP as the active workspace."

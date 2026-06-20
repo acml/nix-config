@@ -64,6 +64,8 @@ Cached by file modification time."
                           (value (string-trim (match-string 2))))
                       (unless (string-empty-p key)
                         (push (cons (intern key) value) parsed))))
+                  (my/cache-cap! DINA5CG52813LW--ini-cache       128)
+                  (my/cache-cap! DINA5CG52813LW--magit-repo-cache 32)
                   (puthash cache-key parsed DINA5CG52813LW--ini-cache)
                   parsed))
             (error
@@ -198,15 +200,16 @@ DIR defaults to current project root."
 
 ;;; Compression Handling
 
-;; Advise `jka-compr-get-compression-info' rather than `insert-file-contents'.
-;; The former is called only when jka-compr's file-name handler fires (*.lzma);
-;; the latter is called for every file Emacs reads, making advice there costly.
+;; jka-compr advice: the cheap `member` becomes O(1) and avoids `file-name-nondirectory'
+(defconst DINA5CG52813LW-lzma-excluded-set
+  (let ((h (make-hash-table :test 'equal)))
+    (dolist (f DINA5CG52813LW-lzma-excluded-files) (puthash f t h))
+    h))
+
 (defadvice! DINA5CG52813LW--jka-compr-skip-excluded (fn filename)
-  "Return nil for FILENAME if it is in `DINA5CG52813LW-lzma-excluded-files'.
-This prevents jka-compr from attempting LZMA decompression on those files."
   :around #'jka-compr-get-compression-info
-  (unless (member (file-name-nondirectory filename)
-                  DINA5CG52813LW-lzma-excluded-files)
+  (unless (gethash (file-name-nondirectory filename)
+                   DINA5CG52813LW-lzma-excluded-set)
     (funcall fn filename)))
 
 ;;; Search Integration

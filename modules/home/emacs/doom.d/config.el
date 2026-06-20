@@ -57,6 +57,11 @@
       (setq my/--nerd-glyphs (char-displayable-p ?))
     my/--nerd-glyphs))
 
+(defsubst my/cache-cap! (table max)
+  "Wipe TABLE if it has grown beyond MAX entries (cheap LRU substitute)."
+  (when (> (hash-table-count table) max)
+    (clrhash table)))
+
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name    "Ahmet Cemal Özgezer"
@@ -136,8 +141,10 @@
             (run-with-idle-timer
              1.5 nil
              (lambda ()
-               (global-subword-mode 1)
-               (repeat-mode 1)))))
+               (repeat-mode 1)
+               ;; subword only in editing modes — skips dired/magit/vterm/etc.
+               (dolist (h '(prog-mode-hook text-mode-hook conf-mode-hook))
+                 (add-hook h #'subword-mode))))))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 (defun my/load-custom-h () (load custom-file 'noerror 'nomessage))
@@ -184,6 +191,10 @@
                   "\\`" (regexp-quote local-dir)
                   "\\|\\`/[^/|:]+:"
                   "\\|/tmp/"
+                  "\\|/nix/store/"
+                  "\\|/\\.direnv/"
+                  "\\|/result\\(?:-[a-z]+\\)?/"
+                  "\\|/node_modules/"
                   "\\|\\.\\(?:gz\\|zst\\|elc\\|eln\\)\\'"
                   "\\|/log/build-[0-9TZ:+-]+\\.log\\'"
                   "\\)")
@@ -357,6 +368,7 @@
                      (dolist (n my/readme-candidates)
                        (when (file-exists-p (expand-file-name n dir))
                          (throw 'hit t))))))
+        (my/cache-cap! my/--readme-cache 256)
         (puthash dir (cons mtime found) my/--readme-cache)
         found))))
 
@@ -444,7 +456,8 @@
         eglot-autoshutdown      t
         eglot-sync-connect      nil
         eglot-report-progress   nil
-        eglot-extend-to-xref    t)
+        eglot-extend-to-xref    t
+        jsonrpc-default-request-timeout 30)
 
   (let ((nil-lsp '("nil" "--stdio" :initializationOptions
                    (:nil (:nix (:flake (:autoArchive t)))))))
@@ -888,7 +901,7 @@ the sequences will be lost."
   (setq proced-enable-color-flag t
         proced-tree-flag t
         proced-auto-update-flag 'visible
-        proced-auto-update-interval 1
+        proced-auto-update-interval 2
         proced-descend t))
 
 (use-package! projectile
@@ -1441,10 +1454,11 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
 (defun my/load-host-config-h ()
+  (let ((file-name-handler-alist nil))   ; bypass tramp/jka-compr handlers
   ;; Load a file with the same name as the computer’s name. Just keep on going if
   ;; the requisite file isn't there.
-  (load! my/host nil t)
+    (load! my/host nil t)
   ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
-  (load! my/system-type-name nil t))
+    (load! my/system-type-name nil t)))
 
 (add-hook 'doom-after-init-hook #'my/load-host-config-h 99)
