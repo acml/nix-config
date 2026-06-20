@@ -145,7 +145,3 @@
 
 ;; Skip image type probing for formats you don't use.
 (setq image-types '(svg png gif jpeg))
-
-;; Cheap on Emacs ≥30: skip the symbol-table dump probe during init.
-(when (boundp 'comp-eln-load-path-hook)
-  (setq comp-eln-load-path-hook nil))

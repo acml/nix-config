@@ -47,30 +47,30 @@
 (defun DINA5CG52813LW--parse-ini-file (file-path)
   "Parse INI file at FILE-PATH and return an alist of key-value pairs.
 Cached by file modification time."
-  (when (and file-path (file-readable-p file-path))
-    (let* ((mtime     (file-attribute-modification-time
-                       (file-attributes file-path)))
-           (cache-key (cons file-path mtime)))
-      (or (gethash cache-key DINA5CG52813LW--ini-cache)
-          (condition-case err
-              (with-temp-buffer
-                (insert-file-contents file-path)
-                (let (parsed)
-                  (goto-char (point-min))
-                  (while (re-search-forward
-                          "^\\s-*\\([^#;\n=]+\\)\\s-*=\\s-*\\([^\n]*\\)\\s-*$"
-                          nil t)
-                    (let ((key   (string-trim (match-string 1)))
-                          (value (string-trim (match-string 2))))
-                      (unless (string-empty-p key)
-                        (push (cons (intern key) value) parsed))))
-                  (my/cache-cap! DINA5CG52813LW--ini-cache       128)
-                  (puthash cache-key parsed DINA5CG52813LW--ini-cache)
-                  parsed))
-            (error
-             (message "Error parsing INI file %s: %s"
-                      file-path (error-message-string err))
-             nil))))))
+  (when-let* ((file-path file-path)
+              (attrs     (file-attributes file-path))
+              (mtime     (file-attribute-modification-time attrs))
+              (cache-key (cons file-path mtime)))
+    (or (gethash cache-key DINA5CG52813LW--ini-cache)
+        (condition-case err
+            (with-temp-buffer
+              (insert-file-contents file-path)
+              (let (parsed)
+                (goto-char (point-min))
+                (while (re-search-forward
+                        "^\\s-*\\([^#;\n=]+\\)\\s-*=\\s-*\\([^\n]*\\)\\s-*$"
+                        nil t)
+                  (let ((key   (string-trim (match-string 1)))
+                        (value (string-trim (match-string 2))))
+                    (unless (string-empty-p key)
+                      (push (cons (intern key) value) parsed))))
+                (my/cache-cap! DINA5CG52813LW--ini-cache 128)
+                (puthash cache-key parsed DINA5CG52813LW--ini-cache)
+                parsed))
+          (error
+           (message "Error parsing INI file %s: %s"
+                    file-path (error-message-string err))
+           nil)))))
 
 (defun DINA5CG52813LW--get-project-main-folder (project-root)
   "Get the main folder path from project configuration in PROJECT-ROOT.

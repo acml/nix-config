@@ -197,9 +197,13 @@ clicked."
   (defvar my--frame-title-last-buffer nil)
 
   (defun my--frame-title-update (&optional window &rest _)
-    (let* ((win (or window (selected-window)))
-           (buf (window-buffer win)))
-      (unless (eq buf my--frame-title-last-buffer)
+    (let* ((win  (or window (selected-window)))
+           (buf  (window-buffer win))
+           (name (buffer-name buf)))
+      (unless (or (eq buf my--frame-title-last-buffer)
+                  (minibufferp buf)
+                  (and (> (length name) 0)
+                       (eq ?\s (aref name 0))))   ; internal/hidden buffer
         (setq my--frame-title-last-buffer buf)
         (with-current-buffer buf
           (setq frame-title-format (my--frame-title-format))))))

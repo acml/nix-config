@@ -74,7 +74,6 @@
       user-mail-address "ozgezer@gmail.com"
       doom-theme        (if my/gui-init-p 'ef-eagle 'ef-dark)
       auth-source-cache-expiry nil ; default is 7200 (2h)
-      auto-save-default t          ; Nobody likes to loose work, I certainly don't
       delete-by-moving-to-trash t  ; Delete files to trash
       scroll-margin                         3
       scroll-preserve-screen-position       t
@@ -95,18 +94,19 @@
           (defun my/enable-vc-h ()
             (setq vc-handled-backends '(Git))))
 
+(define-advice vc-refresh-state (:around (fn) my/skip-heavy)
+  "Skip VC refresh for remote, archive, transient or huge buffers."
+  (when (and buffer-file-name
+             (file-name-absolute-p buffer-file-name)
+             (not (file-remote-p buffer-file-name))
+             (not (string-match-p "\\`/\\(?:tmp\\|nix/store\\)/" buffer-file-name))
+             (not (string-suffix-p ".gpg" buffer-file-name))
+             (< (buffer-size) (* 4 1024 1024)))
+    (funcall fn)))
+
 (after! vc-hooks
   (setq vc-ignore-dir-regexp
-        (concat vc-ignore-dir-regexp "\\|\\`/[^/|:]+:"))
-  (define-advice vc-refresh-state (:around (fn) my/skip-heavy)
-    "Skip VC refresh for remote, archive, transient or huge buffers."
-    (when (and buffer-file-name
-               (file-name-absolute-p buffer-file-name)
-               (not (file-remote-p buffer-file-name))
-               (not (string-match-p "\\`/\\(?:tmp\\|nix/store\\)/" buffer-file-name))
-               (not (string-suffix-p ".gpg" buffer-file-name))
-               (< (buffer-size) (* 4 1024 1024)))
-      (funcall fn))))
+        (concat vc-ignore-dir-regexp "\\|\\`/[^/|:]+:")))
 
 (when my/gui-init-p
   ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
@@ -149,7 +149,6 @@
                                         t)))))
                   (setq fancy-splash-image (seq-random-elt images)))))))
 
-
 (add-hook 'doom-first-input-hook
           (defun my/setup-global-modes-h ()
             (remove-hook 'doom-first-input-hook #'my/setup-global-modes-h)
@@ -159,12 +158,12 @@
                (repeat-mode 1)
                (dolist (h '(prog-mode-hook text-mode-hook conf-mode-hook))
                  (add-hook h #'subword-mode))
-               (dolist (b (buffer-list))
-                 (when (buffer-live-p b)
-                   (let ((m (buffer-local-value 'major-mode b)))
-                     (when (provided-mode-derived-p
-                            m 'prog-mode 'text-mode 'conf-mode)
-                       (with-current-buffer b (subword-mode 1))))))))))
+               (walk-windows
+                (lambda (w)
+                  (with-current-buffer (window-buffer w)
+                    (when (derived-mode-p 'prog-mode 'text-mode 'conf-mode)
+                      (subword-mode 1))))
+                nil t)))))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 (defun my/load-custom-h () (load custom-file 'noerror 'nomessage))
@@ -311,8 +310,11 @@
             (lambda () (run-with-idle-timer 1 nil #'my/wayland-clipboard-setup))))
 
 
-(set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t)
-                    ("^\\*\\(?:Wo\\)?Man " :size 82 :side right :select t :quit t)))
+(after! info
+  (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t))))
+
+(after! man
+  (set-popup-rules! '(("^\\*\\(?:Wo\\)?Man " :size 82 :side right :select t :quit t))))
 
 (after! avy
   (setq avy-all-windows 'all-frames
@@ -715,10 +717,9 @@ the sequences will be lost."
   (when (and buffer-file-name
              (not (file-remote-p buffer-file-name))
              (> (buffer-size) (* 1 1024 1024)))
-    (let* ((attrs (file-attributes buffer-file-name))
-           (mtime (and attrs (file-attribute-modification-time attrs))))
-      (when (and mtime
-                 (< (float-time (time-since mtime)) 3600))
+    (let ((mtime (file-attribute-modification-time
+                  (file-attributes buffer-file-name))))
+      (when (and mtime (< (float-time (time-since mtime)) 3600))
         (auto-revert-tail-mode 1)))))
 (add-to-list 'auto-mode-alist '("\\.log\\'" . acml/log-mode))
 
@@ -1448,7 +1449,8 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                                         c)
                           sum (+ (length toadd) seplen) into used
                           collect toadd)))
-                    (string-join (reverse rcrumbs) separator))))))
+                    (string-join (reverse rcrumbs) separator)))))
+  (add-hook 'doom-load-theme-hook #'my/breadcrumb--invalidate-icon-cache))
 
 (add-hook 'doom-first-input-hook
           (defun my/xterm-mouse-h ()
@@ -1473,18 +1475,21 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
     (add-hook 'server-after-make-frame-hook #'my/tui-glyph-setup)
   (my/tui-glyph-setup))
 
-(when (fboundp 'pixel-scroll-precision-mode)
-  (add-hook 'doom-first-input-hook
-            (defun my/pixel-scroll-init-h ()
-              (when (display-graphic-p)
-                (pixel-scroll-precision-mode 1)))))
+(add-hook 'doom-first-input-hook
+          (defun my/input-setup-h ()
+            (remove-hook 'doom-first-input-hook #'my/input-setup-h)
+            (if (display-graphic-p)
+                (when (fboundp 'pixel-scroll-precision-mode)
+                  (pixel-scroll-precision-mode 1))
+              (unless xterm-mouse-mode (xterm-mouse-mode 1)))))
 
 (when (>= emacs-major-version 28)
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
 (defun my/load-host-config-h ()
   (let ((file-name-handler-alist nil)
-        (gc-cons-threshold most-positive-fixnum))
+        (gc-cons-threshold most-positive-fixnum)
+        (inhibit-message t))
     ;; Load a file with the same name as the computer’s name. Just keep on going if
     ;; the requisite file isn't there.
     (load! my/host             nil t)
