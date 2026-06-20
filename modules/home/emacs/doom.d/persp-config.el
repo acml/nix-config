@@ -82,7 +82,6 @@
 
   ;; persp-mode runs these with run-hook-with-args so add-hook works fine.
   (add-hook 'window-buffer-change-functions      #'my--frame-title-update)
-  (add-hook 'window-selection-change-functions   #'my--frame-title-update)
   (add-hook 'after-set-visited-file-name-hook    #'my--frame-title-invalidate)
   ;; For kill we advise *after* so the count is already decremented.
   (advice-add 'persp-kill :after #'lkn-tab-bar--sync-visibility)
@@ -196,8 +195,9 @@ clicked."
                   (my--mode-line-buffer-identifier)))
                (t (my--mode-line-buffer-identifier))))))
 
-  (defun my--frame-title-update (&rest _)
-    (setq frame-title-format (my--frame-title-format)))
+  (defun my--frame-title-update (&optional window &rest _)
+    (with-current-buffer (window-buffer (or window (selected-window)))
+      (setq frame-title-format (my--frame-title-format))))
 
   (my--frame-title-update)                       ; initial
   (lkn-tab-bar--sync-visibility))

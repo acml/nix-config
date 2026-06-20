@@ -65,7 +65,6 @@ Cached by file modification time."
                       (unless (string-empty-p key)
                         (push (cons (intern key) value) parsed))))
                   (my/cache-cap! DINA5CG52813LW--ini-cache       128)
-                  (my/cache-cap! DINA5CG52813LW--magit-repo-cache 32)
                   (puthash cache-key parsed DINA5CG52813LW--ini-cache)
                   parsed))
             (error
@@ -120,17 +119,19 @@ Returns a list of directory paths suitable for `magit-repository-directories`."
   :around #'magit-repolist-setup
   (let ((magit-repository-directories
          (or (when-let* ((project-root (projectile-project-root))
-                        (main-folder  (DINA5CG52813LW--get-project-main-folder project-root))
-                        (xml-file     (DINA5CG52813LW--get-project-config-path project-root))
-                        (key          (cons project-root
-                                            (float-time
-                                             (file-attribute-modification-time
+                         (main-folder  (DINA5CG52813LW--get-project-main-folder project-root))
+                         (xml-file     (DINA5CG52813LW--get-project-config-path project-root))
+                         (key          (cons project-root
+                                             (float-time
+                                              (file-attribute-modification-time
                                               (file-attributes xml-file))))))
                (or (gethash key DINA5CG52813LW--magit-repo-cache)
-                   (puthash key
-                            (DINA5CG52813LW--collect-magit-repositories
-                             project-root main-folder xml-file)
-                            DINA5CG52813LW--magit-repo-cache)))
+                   (progn
+                     (my/cache-cap! DINA5CG52813LW--magit-repo-cache 32)
+                     (puthash key
+                              (DINA5CG52813LW--collect-magit-repositories
+                               project-root main-folder xml-file)
+                              DINA5CG52813LW--magit-repo-cache))))
              magit-repository-directories)))
     (apply fn args)))
 
