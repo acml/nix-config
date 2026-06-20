@@ -151,9 +151,13 @@
              1.5 nil
              (lambda ()
                (repeat-mode 1)
-               ;; subword only in editing modes — skips dired/magit/vterm/etc.
                (dolist (h '(prog-mode-hook text-mode-hook conf-mode-hook))
-                 (add-hook h #'subword-mode))))))
+                 (add-hook h #'subword-mode))
+               ;; Catch buffers already open at startup.
+               (dolist (b (buffer-list))
+                 (with-current-buffer b
+                   (when (derived-mode-p 'prog-mode 'text-mode 'conf-mode)
+                     (subword-mode 1))))))))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 (defun my/load-custom-h () (load custom-file 'noerror 'nomessage))
@@ -357,10 +361,6 @@
   :config (setq dired-auto-readme-separator "\n")
   :hook (dired-mode . my/dired-auto-readme-maybe))
 
-(defconst my/readme-regexp
-  "\\`[Rr][Ee][Aa][Dd][Mm][Ee]\\(?:\\.\\(?:org\\|md\\|markdown\\|txt\\|rst\\|adoc\\)\\)?\\'"
-  "Regexp matching README candidate filenames.")
-
 (defvar-local my/dar--timer nil)
 
 (defvar my/--readme-cache (make-hash-table :test 'equal)
@@ -384,12 +384,19 @@
         (puthash dir (cons mtime found) my/--readme-cache)
         found))))
 
+
+(defun my/dar--cancel-timer ()
+  "Cancel pending dired-auto-readme idle timer (buffer-local)."
+  (when (timerp my/dar--timer)
+    (cancel-timer my/dar--timer)
+    (setq my/dar--timer nil)))
+
 (defun my/dired-auto-readme-maybe ()
   "Enable `dired-auto-readme-mode' on idle if a local README exists."
   (unless (or (file-remote-p default-directory)
               (and (fboundp 'dirvish-side-session-visible-p)
                    (eq (dirvish-side-session-visible-p) (selected-window))))
-    (when (timerp my/dar--timer) (cancel-timer my/dar--timer))
+    (my/dar--cancel-timer)
     (let ((buf (current-buffer)))
       (setq my/dar--timer
             (run-with-idle-timer
@@ -401,10 +408,7 @@
                               (get-buffer-window buf 'visible)
                               (my/--readme-here-p))
                      (dired-auto-readme-mode 1))))))))
-    (add-hook 'kill-buffer-hook
-              (lambda () (when (timerp my/dar--timer)
-                      (cancel-timer my/dar--timer)))
-              nil t)))
+    (add-hook 'kill-buffer-hook #'my/dar--cancel-timer nil t)))
 
 (use-package! page-break-lines
   :hook (dired-auto-readme-mode . page-break-lines-mode))
@@ -663,7 +667,10 @@ the sequences will be lost."
         (let* ((start  (or acml/log-mode--colorized-to (point-min)))
                (target (min (+ start acml/log-colorize-chunk-size) (point-max)))
                (end    (save-excursion (goto-char target) (line-end-position)))
-               (ansi-color-context-region nil))
+               (ansi-color-context-region nil)
+               (inhibit-modification-hooks t)   ; <- big win
+               (inhibit-point-motion-hooks t)
+               (buffer-undo-list t))            ; no undo for cosmetics
           (when (< start end)
             (ansi-color-apply-on-region start end t)
             (setq acml/log-mode--colorized-to end))
@@ -849,7 +856,8 @@ the sequences will be lost."
            (with-current-buffer buf (my/--org-images-scan)))))))
 
   (add-hook 'org-mode-hook #'my/org-images-h)
-  (add-to-list 'org-modules 'org-habit))
+  (add-to-list 'org-modules 'org-habit)
+  (org-load-modules-maybe t))
 
 (unless my/gui-init-p
   (add-hook 'org-mode-hook
@@ -997,8 +1005,11 @@ the sequences will be lost."
         '("o" "psd" "aux" "ptc" "fdb_latexmk" "fls" "synctex.gz" "toc"
           "glg" "glo" "gls" "glsdefs" "ist" "acn" "acr" "alg" "mw" "pdfa.xmpi"))
 
-  (treemacs-follow-mode)
-  (treemacs-filewatch-mode))
+  (run-with-idle-timer
+   1 nil
+   (lambda ()
+     (treemacs-follow-mode)
+     (treemacs-filewatch-mode))))
 
 (use-package! turkish :commands (turkish-mode))
 
@@ -1318,20 +1329,23 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
          buffer-file-name
          (not (file-remote-p buffer-file-name))
          (< (buffer-size) 200000)))
-  (defun my/copilot-maybe ()
-    (when (my/copilot-eligible-p) (copilot-mode 1)))
+  (defun my/copilot-arm-on-edit ()
+    "Activate copilot the first time the buffer is modified."
+    (when (and (derived-mode-p 'prog-mode) (my/copilot-eligible-p))
+      (add-hook 'first-change-hook
+                (lambda () (copilot-mode 1))
+                nil t)))
   (add-hook 'doom-first-input-hook
             (defun my/copilot-bootstrap-h ()
-              (add-hook 'prog-mode-hook #'my/copilot-maybe)
-              (when (derived-mode-p 'prog-mode) (my/copilot-maybe))))
+              (add-hook 'prog-mode-hook #'my/copilot-arm-on-edit)))
   :config
   (map! :map copilot-completion-map
-        "<tab>"   #'copilot-accept-completion
-        "TAB"     #'copilot-accept-completion
-        "C-TAB"   #'copilot-accept-completion-by-word
+        "<tab>" #'copilot-accept-completion
+        "TAB"   #'copilot-accept-completion
+        "C-TAB" #'copilot-accept-completion-by-word
         "C-<tab>" #'copilot-accept-completion-by-word
-        "C-n"     #'copilot-next-completion
-        "C-p"     #'copilot-previous-completion)
+        "C-n" #'copilot-next-completion
+        "C-p" #'copilot-previous-completion)
   (setq copilot-indentation-alist
         (append '((nix-ts-mode 2) (emacs-lisp-mode 2) (lisp-interaction-mode 2)
                   (text-mode 2) (org-mode 2) (markdown-mode 2)
@@ -1470,11 +1484,15 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
 (defun my/load-host-config-h ()
-  (let ((file-name-handler-alist nil))   ; bypass tramp/jka-compr handlers
-  ;; Load a file with the same name as the computer’s name. Just keep on going if
-  ;; the requisite file isn't there.
-    (load! my/host nil t)
-  ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
+  (let ((file-name-handler-alist nil)
+        (gc-cons-threshold most-positive-fixnum))
+    ;; Load a file with the same name as the computer’s name. Just keep on going if
+    ;; the requisite file isn't there.
+    (load! my/host             nil t)
+    ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
     (load! my/system-type-name nil t)))
 
-(add-hook 'doom-after-init-hook #'my/load-host-config-h 99)
+(add-hook 'doom-first-input-hook
+          (defun my/defer-host-config-h ()
+            (remove-hook 'doom-first-input-hook #'my/defer-host-config-h)
+            (run-with-idle-timer 0.3 nil #'my/load-host-config-h)))

@@ -194,9 +194,15 @@ clicked."
                                (file-relative-name buffer-file-name root)))))
                (t (my--mode-line-buffer-identifier))))))
 
+  (defvar my--frame-title-last-buffer nil)
+
   (defun my--frame-title-update (&optional window &rest _)
-    (with-current-buffer (window-buffer (or window (selected-window)))
-      (setq frame-title-format (my--frame-title-format))))
+    (let* ((win (or window (selected-window)))
+           (buf (window-buffer win)))
+      (unless (eq buf my--frame-title-last-buffer)
+        (setq my--frame-title-last-buffer buf)
+        (with-current-buffer buf
+          (setq frame-title-format (my--frame-title-format))))))
 
   (my--frame-title-update)                       ; initial
   (lkn-tab-bar--sync-visibility))
