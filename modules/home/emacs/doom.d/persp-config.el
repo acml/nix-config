@@ -182,17 +182,16 @@ clicked."
     (or my--frame-title-cache
         (setq my--frame-title-cache
               (cond
-               ((and buffer-file-name (file-remote-p buffer-file-name))
+               ((null buffer-file-name)
+                (my--mode-line-buffer-identifier))
+               ((file-remote-p buffer-file-name)
                 (let ((v (tramp-dissect-file-name buffer-file-name)))
                   (concat (tramp-file-name-host v) " — "
                           (abbreviate-file-name (tramp-file-name-localname v)))))
-               ((featurep 'projectile)
-                (if-let* ((root (projectile-project-root)))
-                    (concat (projectile-project-name) " — "
-                            (if buffer-file-name
-                                (file-relative-name buffer-file-name root)
-                              (buffer-name)))
-                  (my--mode-line-buffer-identifier)))
+               ((and (featurep 'projectile)
+                     (when-let* ((root (projectile-project-root)))
+                       (concat (projectile-project-name) " — "
+                               (file-relative-name buffer-file-name root)))))
                (t (my--mode-line-buffer-identifier))))))
 
   (defun my--frame-title-update (&optional window &rest _)

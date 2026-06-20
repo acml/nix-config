@@ -90,13 +90,15 @@
             (setq vc-handled-backends '(Git))))
 
 (after! vc-hooks
-  ;; Match TRAMP-style paths without pulling in tramp-loaddefs at startup.
   (setq vc-ignore-dir-regexp
         (concat vc-ignore-dir-regexp "\\|\\`/[^/|:]+:"))
   (define-advice vc-refresh-state (:around (fn) my/skip-heavy)
-    "Skip VC refresh for remote or huge buffers."
+    "Skip VC refresh for remote, archive, transient or huge buffers."
     (when (and buffer-file-name
+               (file-name-absolute-p buffer-file-name)
                (not (file-remote-p buffer-file-name))
+               (not (string-match-p "\\`/\\(?:tmp\\|nix/store\\)/" buffer-file-name))
+               (not (string-suffix-p ".gpg" buffer-file-name))
                (< (buffer-size) (* 4 1024 1024)))
       (funcall fn))))
 
@@ -125,15 +127,22 @@
   (file-name-concat doom-user-dir "splash")
   "Directory containing splash-image candidates.")
 
+(defvar my/--splash-images-cache nil)
+
 (when my/gui-init-p
   (add-hook 'doom-after-init-hook
             (defun my/set-random-splash-image-h ()
               (remove-hook 'doom-after-init-hook #'my/set-random-splash-image-h)
               (when (file-directory-p my/splash-image-dir)
-                (let ((images (directory-files
-                               my/splash-image-dir t "^[^.].+\\.\\(?:png\\|svg\\|jpe?g\\)\\'" t)))
-                  (when images
-                    (setq fancy-splash-image (seq-random-elt images))))))))
+                (when-let* ((images
+                             (or my/--splash-images-cache
+                                 (setq my/--splash-images-cache
+                                       (directory-files
+                                        my/splash-image-dir t
+                                        "^[^.].+\\.\\(?:png\\|svg\\|jpe?g\\)\\'"
+                                        t)))))
+                  (setq fancy-splash-image (seq-random-elt images)))))))
+
 
 (add-hook 'doom-first-input-hook
           (defun my/setup-global-modes-h ()
@@ -238,8 +247,9 @@
             :n (format "w%d" n)     fn))))
 
 (after! gcmh
-  (setq gcmh-high-cons-threshold (* 64 1024 1024)
-        gcmh-auto-idle-delay-factor 15))
+  (setq gcmh-high-cons-threshold      (* 128 1024 1024)
+        gcmh-idle-delay               5
+        gcmh-auto-idle-delay-factor   20))
 
 (map! ;; [remap just-one-space]  #'cycle-spacing
  [remap upcase-word]     #'upcase-dwim
@@ -311,8 +321,11 @@
          (c-mode-common . google-make-newline-indent)))
 
 (after! compile
-  (setq compilation-scroll-output 'first-error
-        next-error-message-highlight t))
+  (setq compilation-scroll-output            'first-error
+        next-error-message-highlight         t
+        compilation-always-kill              t      ; don't ask to kill prior compile
+        compilation-ask-about-save           nil    ; auto-save dirty buffers
+        compilation-max-output-line-length   nil))
 
 (use-package! daemons
   :commands (daemons daemons-disable daemons-enable daemons-reload daemons-restart daemons-start daemons-status daemons-stop)
@@ -334,11 +347,10 @@
 
 (after! tramp
   (setq tramp-verbose                                1
-        tramp-use-scp-direct-remote-copying          t
         remote-file-name-inhibit-locks               t
         remote-file-name-inhibit-cache               60
-        tramp-completion-reread-directory-timeout    nil
-        tramp-default-method                         "ssh"))
+        tramp-default-method                         "ssh"
+        tramp-completion-use-cache                   t))
 
 (use-package! dired-auto-readme
   :commands dired-auto-readme-mode
@@ -801,48 +813,9 @@ the sequences will be lost."
         deft-default-extension "org"
         deft-directory (or (bound-and-true-p org-roam-directory) org-directory)))
 
-(use-package! org-block-capf
-  :defer t
-  :init
-  (add-hook 'org-mode-hook
-            (defun my/org-block-capf-maybe ()
-              (let ((buf (current-buffer)))
-                (run-with-idle-timer
-                 0.5 nil
-                 (lambda ()
-                   (when (buffer-live-p buf)
-                     (with-current-buffer buf
-                       (org-block-capf-add-to-completion-at-point-functions)))))))))
-
-(use-package! org-glossary
-  :commands (org-glossary-mode org-glossary-insert-term-definition)
-  :init
-  (map! :map org-mode-map
-        :localleader
-        :desc "Glossary mode" "G" #'org-glossary-mode))
-
-(defvar-local my/org-roam--sync-timer nil
-  "Timer handle for the debounced DB sync.")
-
-(defun my/org-roam-schedule-db-sync ()
-  "Cancel any pending sync; schedule a fresh one 2 s from now."
-  (when (timerp my/org-roam--sync-timer)
-    (cancel-timer my/org-roam--sync-timer))
-  (let ((file (buffer-file-name)))
-    (setq my/org-roam--sync-timer
-          (run-with-idle-timer
-           2 nil (lambda () (org-roam-db-update-file file))))))
-
-(after! org-roam
-  (setq org-roam-db-update-on-save nil)
-  (defun my/org-roam-enable-save-hook ()
-    (add-hook 'after-save-hook #'my/org-roam-schedule-db-sync nil :local))
-  (add-hook 'org-roam-find-file-hook #'my/org-roam-enable-save-hook))
-
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory (expand-file-name "~/Documents/org/")
-      org-agenda-files (list org-directory (expand-file-name "~/Documents/worg/")))
+(setq org-directory (expand-file-name "~/Documents/org/"))
 
 (after! org
   (setq org-ellipsis (if (and my/gui-init-p (my/nerd-glyphs-p)) " " nil)
@@ -881,6 +854,49 @@ the sequences will be lost."
 (unless my/gui-init-p
   (add-hook 'org-mode-hook
             (lambda () (setq-local xterm-set-window-title nil))))
+
+(after! org-agenda
+  (setq org-agenda-files
+        (list org-directory
+              (expand-file-name "~/Documents/worg/"))))
+
+(use-package! org-block-capf
+  :defer t
+  :init
+  (add-hook 'org-mode-hook
+            (defun my/org-block-capf-maybe ()
+              (let ((buf (current-buffer)))
+                (run-with-idle-timer
+                 0.5 nil
+                 (lambda ()
+                   (when (buffer-live-p buf)
+                     (with-current-buffer buf
+                       (org-block-capf-add-to-completion-at-point-functions)))))))))
+
+(use-package! org-glossary
+  :commands (org-glossary-mode org-glossary-insert-term-definition)
+  :init
+  (map! :map org-mode-map
+        :localleader
+        :desc "Glossary mode" "G" #'org-glossary-mode))
+
+(defvar-local my/org-roam--sync-timer nil
+  "Timer handle for the debounced DB sync.")
+
+(defun my/org-roam-schedule-db-sync ()
+  "Cancel any pending sync; schedule a fresh one 2 s from now."
+  (when (timerp my/org-roam--sync-timer)
+    (cancel-timer my/org-roam--sync-timer))
+  (let ((file (buffer-file-name)))
+    (setq my/org-roam--sync-timer
+          (run-with-idle-timer
+           2 nil (lambda () (org-roam-db-update-file file))))))
+
+(after! org-roam
+  (setq org-roam-db-update-on-save nil)
+  (defun my/org-roam-enable-save-hook ()
+    (add-hook 'after-save-hook #'my/org-roam-schedule-db-sync nil :local))
+  (add-hook 'org-roam-find-file-hook #'my/org-roam-enable-save-hook))
 
 (defun my/load-persp-config () (load! "persp-config"))
 
