@@ -57,6 +57,12 @@
       (setq my/--nerd-glyphs (char-displayable-p ?))
     my/--nerd-glyphs))
 
+(defun my/--prime-nerd-glyphs (&optional _frame) (my/nerd-glyphs-p))
+
+(if my/daemon-p
+    (add-hook 'server-after-make-frame-hook #'my/--prime-nerd-glyphs)
+  (add-hook 'doom-after-init-hook #'my/--prime-nerd-glyphs 99))
+
 (defsubst my/cache-cap! (table max)
   "Wipe TABLE if it has grown beyond MAX entries (cheap LRU substitute)."
   (when (> (hash-table-count table) max)
@@ -153,11 +159,12 @@
                (repeat-mode 1)
                (dolist (h '(prog-mode-hook text-mode-hook conf-mode-hook))
                  (add-hook h #'subword-mode))
-               ;; Catch buffers already open at startup.
                (dolist (b (buffer-list))
-                 (with-current-buffer b
-                   (when (derived-mode-p 'prog-mode 'text-mode 'conf-mode)
-                     (subword-mode 1))))))))
+                 (when (buffer-live-p b)
+                   (let ((m (buffer-local-value 'major-mode b)))
+                     (when (provided-mode-derived-p
+                            m 'prog-mode 'text-mode 'conf-mode)
+                       (with-current-buffer b (subword-mode 1))))))))))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 (defun my/load-custom-h () (load custom-file 'noerror 'nomessage))
@@ -366,9 +373,12 @@
 (defvar my/--readme-cache (make-hash-table :test 'equal)
   "Per-directory cache: dir -> (mtime . has-readme-p).")
 
-(defconst my/readme-candidates
-  '("README.org" "README.md" "README" "README.txt" "Readme.md" "readme.md"
-    "README.markdown" "README.rst" "README.adoc"))
+(defconst my/readme-candidates-re
+  (concat "\\`" (regexp-opt
+                 '("README.org" "README.md" "README" "README.txt"
+                   "Readme.md" "readme.md" "README.markdown"
+                   "README.rst" "README.adoc"))
+          "\\'"))
 
 (defun my/--readme-here-p ()
   (let* ((dir   default-directory)
@@ -376,14 +386,12 @@
          (hit   (gethash dir my/--readme-cache)))
     (if (and hit (equal (car hit) mtime))
         (cdr hit)
-      (let ((found (catch 'hit
-                     (dolist (n my/readme-candidates)
-                       (when (file-exists-p (expand-file-name n dir))
-                         (throw 'hit t))))))
+      (let ((found (and (ignore-errors
+                          (directory-files dir nil my/readme-candidates-re t 1))
+                        t)))
         (my/cache-cap! my/--readme-cache 256)
         (puthash dir (cons mtime found) my/--readme-cache)
         found))))
-
 
 (defun my/dar--cancel-timer ()
   "Cancel pending dired-auto-readme idle timer (buffer-local)."
@@ -718,17 +726,9 @@ the sequences will be lost."
   "Computed lazily inside `after! magit'.")
 
 (after! magit
-  (setq magit-revision-show-gravatars nil
-        magit-diff-paint-whitespace   'status   ; whitespace paint only in status
-        magit-bury-buffer-function    #'magit-restore-window-configuration
-        magit-save-repository-buffers nil
-        magit-inhibit-save-previous-winconf t
-        transient-values '((magit-rebase "--autostash" "--autosquash")
+  (setq transient-values '((magit-rebase "--autostash" "--autosquash")
                            (magit-pull   "--autostash" "--rebase"))
-        magit-refresh-verbose             nil
-        magit-diff-refine-hunk            nil
-        magit-log-section-commit-count    10
-        magit-status-show-hashes-in-headers nil
+        magit-process-popup-time 3
         my/magit-section-visibility-indicators `((magit-fringe-bitmap> . magit-fringe-bitmapv)
                                                  (,(if (my/nerd-glyphs-p) "" "...") . t)))
   (add-transient-hook! 'magit-status-mode-hook
@@ -856,8 +856,7 @@ the sequences will be lost."
            (with-current-buffer buf (my/--org-images-scan)))))))
 
   (add-hook 'org-mode-hook #'my/org-images-h)
-  (add-to-list 'org-modules 'org-habit)
-  (org-load-modules-maybe t))
+  (add-to-list 'org-modules 'org-habit))
 
 (unless my/gui-init-p
   (add-hook 'org-mode-hook
@@ -866,7 +865,8 @@ the sequences will be lost."
 (after! org-agenda
   (setq org-agenda-files
         (list org-directory
-              (expand-file-name "~/Documents/worg/"))))
+              (expand-file-name "~/Documents/worg/")))
+  (org-load-modules-maybe t))
 
 (use-package! org-block-capf
   :defer t
@@ -928,25 +928,24 @@ the sequences will be lost."
         proced-auto-update-interval 2
         proced-descend t))
 
-(use-package! projectile
-  :commands (projectile-register-project-type)
-  :init
-  (setq ;; projectile-switch-project-action 'projectile-dired
-   projectile-project-root-functions '(projectile-root-local
-                                       projectile-root-marked
-                                       projectile-root-top-down
-                                       projectile-root-bottom-up
-                                       projectile-root-top-down-recurring)
-   projectile-enable-caching t
-   projectile-enable-cmake-presets t
-   projectile-project-search-path '(("~/.nix-config/" . 0)
-                                    ("~/Projects" . 3)
-                                    ("~/Work" . 2)))
-  :config
-  (projectile-register-project-type 'acml/exercism-lua '(".exercism" ".busted" "HELP.md" "README.md")
-                                    :project-file '("?*.lua")
-                                    :test "busted -v"
-                                    :test-suffix "_spec"))
+(setq ;; projectile-switch-project-action 'projectile-dired
+ projectile-project-root-functions '(projectile-root-local
+                                     projectile-root-marked
+                                     projectile-root-top-down
+                                     projectile-root-bottom-up
+                                     projectile-root-top-down-recurring)
+ projectile-enable-caching t
+ projectile-enable-cmake-presets t
+ projectile-project-search-path '(("~/.nix-config/" . 0)
+                                  ("~/Projects" . 3)
+                                  ("~/Work" . 2)))
+
+(after! projectile
+  (projectile-register-project-type
+   'acml/exercism-lua '(".exercism" ".busted" "HELP.md" "README.md")
+   :project-file '("?*.lua")
+   :test "busted -v"
+   :test-suffix "_spec"))
 
 (use-package! rainbow-mode
   :hook

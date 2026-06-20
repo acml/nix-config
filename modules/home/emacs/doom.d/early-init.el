@@ -2,9 +2,7 @@
 
 (setq package-enable-at-startup nil
       ;; Skip `package-quickstart' computation entirely; Doom doesn't use it.
-      package-quickstart nil
-      ;; Don't even bother probing for the quickstart cache.
-      package-quickstart-file nil)
+      package-quickstart nil)
 
 (setq auto-mode-case-fold nil)
 
@@ -61,8 +59,7 @@
 ;; Individual buffers/modes that need RTL can restore it locally.
 (setq-default bidi-display-reordering 'left-to-right
               bidi-paragraph-direction 'left-to-right
-              bidi-inhibit-bpa t) ; skip bidi mirroring tables, which are loaded lazily anyway.
-(setq bidi-inhibit-bpa t)   ; also disable the Bidi Parentheses Algorithm
+              bidi-inhibit-bpa t) ; also disable the Bidi Parentheses Algorithm
 
 ;; Don't fontify while you're typing; keeps input snappy on large files.
 (setq redisplay-skip-fontification-on-input t)
