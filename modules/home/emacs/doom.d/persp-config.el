@@ -25,8 +25,10 @@
 
   (defun lkn-tab-bar--invalidate (&rest _) (setq lkn-tab-bar--render-cache nil))
 
-  (dolist (h '(persp-renamed-functions persp-created-functions
-               persp-activated-functions persp-before-kill-functions))
+  (dolist (h '(persp-renamed-functions
+               persp-created-functions
+               persp-activated-functions
+               persp-before-kill-functions))
     (add-hook h #'lkn-tab-bar--invalidate))
 
   (defun lkn-tab-bar--workspaces ()
@@ -149,15 +151,16 @@ clicked."
   ;; Construct the buffer identifier for a buffer backed by a file. This is done
   ;; by combining: dirname/ + filename, each propertized separately.
   (defun my--mode-line-file-identifier (path &optional max-width)
-    (let* ((path (if (file-remote-p buffer-file-name)
-                     (tramp-file-name-localname (tramp-dissect-file-name buffer-file-name))
+    (let* ((path (if (file-remote-p path)
+                     (tramp-file-name-localname (tramp-dissect-file-name path))
                    path))
            (dirname (file-name-as-directory
                      (abbreviate-file-name (or (file-name-directory path) "./"))))
-           (filename (file-name-nondirectory path))          ; was f-filename
+           (filename (file-name-nondirectory path))
            (propertized-filename
             (propertize filename 'face 'mode-line-buffer-id)))
-      (if (> (+ (length dirname) (length filename) 2) max-width)
+      (if (and max-width
+               (> (+ (length dirname) (length filename) 2) max-width))
           propertized-filename
         (concat
          (unless (string= dirname "./")
@@ -196,17 +199,21 @@ clicked."
 
   (defvar my--frame-title-last-buffer nil)
 
-  (defun my--frame-title-update (&optional window &rest _)
-    (let* ((win  (or window (selected-window)))
-           (buf  (window-buffer win))
-           (name (buffer-name buf)))
-      (unless (or (eq buf my--frame-title-last-buffer)
-                  (minibufferp buf)
-                  (and (> (length name) 0)
-                       (eq ?\s (aref name 0))))   ; internal/hidden buffer
-        (setq my--frame-title-last-buffer buf)
-        (with-current-buffer buf
-          (setq frame-title-format (my--frame-title-format))))))
+  (defun my--frame-title-update (&optional window-or-frame &rest _)
+    (condition-case err
+        (let* ((win (cond ((windowp window-or-frame) window-or-frame)
+                          ((framep  window-or-frame) (frame-selected-window window-or-frame))
+                          (t (selected-window))))
+               (buf  (and (window-live-p win) (window-buffer win)))
+               (name (and buf (buffer-name buf))))
+          (when (and buf name
+                     (not (eq buf my--frame-title-last-buffer))
+                     (not (minibufferp buf))
+                     (not (eq ?\s (aref name 0))))
+            (setq my--frame-title-last-buffer buf)
+            (with-current-buffer buf
+              (setq frame-title-format (my--frame-title-format)))))
+      (error (message "my--frame-title-update: %S" err))))
 
   (my--frame-title-update)                       ; initial
   (lkn-tab-bar--sync-visibility))

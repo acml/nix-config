@@ -823,7 +823,9 @@ the sequences will be lost."
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory (expand-file-name "~/Documents/org/"))
+(setq org-directory (expand-file-name "~/Documents/org/")
+      org-agenda-files (list org-directory
+                             (expand-file-name "~/Documents/worg/")))
 
 (after! org
   (setq org-ellipsis (if (and my/gui-init-p (my/nerd-glyphs-p)) " " nil)
@@ -864,9 +866,6 @@ the sequences will be lost."
             (lambda () (setq-local xterm-set-window-title nil))))
 
 (after! org-agenda
-  (setq org-agenda-files
-        (list org-directory
-              (expand-file-name "~/Documents/worg/")))
   (org-load-modules-maybe t))
 
 (use-package! org-block-capf
