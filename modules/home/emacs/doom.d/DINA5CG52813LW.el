@@ -193,7 +193,7 @@ DIR defaults to current project root."
                                     :configure "git dt checkout -f"))
 
 ;;; File Type Associations
-
+(add-to-list 'auto-mode-alist '("\\.fct\\'" . c-mode))
 (setq auto-mode-alist
       (nconc (mapcar (lambda (ext) (cons ext 'makefile-gmake-mode))
                      DINA5CG52813LW-makefile-extensions)

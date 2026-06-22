@@ -274,10 +274,10 @@ in
           xsel
         ];
 
-      extraPlugins = with pkgs.vimPlugins; [
-        # go-nvim
-        # nvim-biscuits
-      ];
+      # extraPlugins = with pkgs.vimPlugins; [
+      #   go-nvim
+      #   nvim-biscuits
+      # ];
 
       globals.mapleader = " ";
 
