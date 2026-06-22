@@ -219,6 +219,33 @@
                   "\\)")
           recentf-exclude)))
 
+(use-package! saveplace
+  ;; persistent point location in buffers
+  :hook (doom-first-file . save-place-mode)
+  :custom (save-place-file (file-name-concat doom-profile-cache-dir "saveplace"))
+  :config
+  (defadvice! doom--recenter-on-load-saveplace-a (&rest _)
+    "Recenter on cursor when loading a saved place."
+    :after-while #'save-place-find-file-hook
+    (if buffer-file-name (ignore-errors (recenter))))
+
+  (defadvice! doom--inhibit-saveplace-in-long-files-a (fn &rest args)
+    :around #'save-place-to-alist
+    (unless (bound-and-true-p so-long-minor-mode)
+      (apply fn args)))
+
+  (defadvice! doom--inhibit-saveplace-if-point-not-at-bol-a (&rest _)
+    "If something else has moved point, don't try to move it again."
+    :before-while #'save-place-find-file-hook
+    (bobp))
+
+  (defadvice! doom--dont-prettify-saveplace-cache-a (fn)
+    "`save-place-alist-to-file' uses `pp' to prettify the contents of its cache.
+`pp' can be expensive for longer lists, and there's no reason to prettify cache
+files, so this replace calls to `pp' with the much faster `prin1'."
+    :around #'save-place-alist-to-file
+    (letf! ((#'pp #'prin1)) (funcall fn))))
+
 ;; auto-revert: only watch local files; saves a thread per remote buffer:
 (after! autorevert
   (setq auto-revert-avoid-polling t  ; refresh buffers when files change on disk
@@ -308,7 +335,6 @@
 (when my/wayland-p
   (add-hook 'doom-first-input-hook
             (lambda () (run-with-idle-timer 1 nil #'my/wayland-clipboard-setup))))
-
 
 (after! info
   (set-popup-rules! '(("^\\*info\\*" :size 82 :side right :select t :quit t))))
@@ -461,7 +487,6 @@
   (setq dirvish-side-display-alist
         '((side . right) (slot . -1))))
 
-
 (use-package! dwim-shell-command
   :bind (([remap shell-command]               . dwim-shell-command)
          :map dired-mode-map
@@ -471,7 +496,6 @@
   :config
   (add-transient-hook! 'dwim-shell-command
     (require 'dwim-shell-commands)))
-
 
 (after! eglot
   ;; jsonrpc--log-event is called on every LSP message; with the events buffer
