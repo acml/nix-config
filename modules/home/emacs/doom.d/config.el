@@ -861,10 +861,6 @@ the sequences will be lost."
   (add-hook 'org-mode-hook #'my/org-images-h)
   (add-to-list 'org-modules 'org-habit))
 
-(unless my/gui-init-p
-  (add-hook 'org-mode-hook
-            (lambda () (setq-local xterm-set-window-title nil))))
-
 (after! org-agenda
   (org-load-modules-maybe t))
 
