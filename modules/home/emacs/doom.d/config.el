@@ -15,8 +15,9 @@
   "Cached host name.")
 
 (defconst my/work-host-p
-  (string-equal-ignore-case my/host "DINA5CG52813LW")
-  "Non-nil on the DINA5CG52813LW work machine.")
+  (or (string-equal-ignore-case my/host "DINA5CG52813LW")
+      (string-equal-ignore-case my/host "DINDRc4aBxuYR6T"))
+  "Non-nil on the work machines.")
 
 (defconst my/system-type-name
   (car (last (split-string (symbol-name system-type) "/")))
@@ -735,7 +736,7 @@ the sequences will be lost."
   (add-hook 'after-revert-hook #'acml/ansi-color-tail nil t)
   (add-hook 'kill-buffer-hook
             (lambda () (when (timerp acml/log-mode--colorize-timer)
-                    (cancel-timer acml/log-mode--colorize-timer)))
+                         (cancel-timer acml/log-mode--colorize-timer)))
             nil t)
   ;; Only tail huge, recently-modified logs; not arbitrary `.log` artifacts.
   (when (and buffer-file-name
@@ -1505,17 +1506,15 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
 (when (>= emacs-major-version 28)
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
-(defun my/load-host-config-h ()
-  (let ((file-name-handler-alist nil)
-        (gc-cons-threshold most-positive-fixnum)
-        (inhibit-message t))
-    ;; Load a file with the same name as the computer’s name. Just keep on going if
-    ;; the requisite file isn't there.
-    (load! my/host             nil t)
-    ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
-    (load! my/system-type-name nil t)))
-
-(add-hook 'doom-first-input-hook
-          (defun my/defer-host-config-h ()
-            (remove-hook 'doom-first-input-hook #'my/defer-host-config-h)
-            (run-with-idle-timer 0.3 nil #'my/load-host-config-h)))
+(add-hook 'doom-after-init-hook
+          (defun my/load-host-config-h ()
+            (let ((file-name-handler-alist nil)
+                  (gc-cons-threshold most-positive-fixnum)
+                  (inhibit-message t))
+              ;; Load a file with the same name as the computer’s name. Just keep on going if
+              ;; the requisite file isn't there.
+              (load! my/host             nil t)
+              (when my/work-host-p
+                (load! "work" nil t))
+              ;; Load a file with the name of the OS type ("gnu/linux" → "linux")
+              (load! my/system-type-name nil t))))

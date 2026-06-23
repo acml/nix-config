@@ -46,6 +46,7 @@ in
     homeConfigurations = {
       darkstar = mkHome "darkstar" "x86_64-linux";
       DINA5CG52813LW = mkHome "DINA5CG52813LW" "x86_64-linux";
+      DINDRc4aBxuYR6T = mkHome "DINDRc4aBxuYR6T" "x86_64-linux";
       goethe = mkHome "goethe" "x86_64-linux";
       hilbert = mkHome "hilbert" "x86_64-linux";
       popper = mkHome "popper" "aarch64-linux";

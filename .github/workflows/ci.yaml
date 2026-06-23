@@ -69,6 +69,10 @@ jobs:
           hostPlatform: x86_64-linux
           name: DINA5CG52813LW
           runsOn: ubuntu-24.04
+        - attr: homeConfigurations.DINDRc4aBxuYR6T.activationPackage
+          hostPlatform: x86_64-linux
+          name: DINDRc4aBxuYR6T
+          runsOn: ubuntu-24.04
         - attr: homeConfigurations.darkstar.activationPackage
           hostPlatform: x86_64-linux
           name: darkstar
