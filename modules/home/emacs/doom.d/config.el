@@ -1180,7 +1180,6 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
   (defun acml-set-keyboard ()
     (interactive)
     (start-process "" nil "setxkbmap" "us" "-variant" "colemak"))
-  (map! "<f9>" #'acml-set-keyboard)
   (add-hook 'doom-after-init-hook
             (lambda ()
               (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe"))
@@ -1189,9 +1188,9 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                         browse-url-generic-args     '("/c" "start")
                         browse-url-browser-function 'browse-url-generic
                         search-web-default-browser  'browse-url-generic)))
-              ;; Defer the actual xkb invocation off the critical path.
               (when my/gui-init-p
-                (run-with-idle-timer 2 nil #'acml-set-keyboard)))))
+                (map! "<f9>" #'acml-set-keyboard)
+                (acml-set-keyboard)))))
 
 (map! "<f5>"   #'projectile-run-project
       "<f6>"   #'previous-error
