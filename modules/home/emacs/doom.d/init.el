@@ -57,7 +57,10 @@
        (evil +everywhere)  ; come to the dark side, we have cookies
        file-templates      ; auto-snippets for empty files
        fold                ; (nigh) universal code folding
-       (:if my/work-host-p format (format +onsave))              ; automated prettiness
+       (:if (or (string-equal-ignore-case (or (getenv "HOSTNAME") (system-name)) "DINA5CG52813LW")
+                (string-equal-ignore-case (or (getenv "HOSTNAME") (system-name)) "DINDRc4aBxuYR6T"))
+           format
+         (format +onsave))              ; automated prettiness
        ;;god               ; run Emacs commands without modifier keys
        ;;lispy             ; vim for lisp, for people who don't like vim
        multiple-cursors    ; editing in many places at once
