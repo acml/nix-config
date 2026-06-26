@@ -1279,53 +1279,53 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
       :stream t :key #'gptel-api-key-from-auth-source
       :models my/gptel-openrouter-models)))
 
-(use-package! gptel
-  :defer t
-  :if (not my/work-host-p)
-  :config
-  (setq gptel-include-reasoning 'ignore
-        gptel-model 'gpt-4.1
-        gptel-backend (gptel-make-gh-copilot "Copilot"))
-  ;; Heavy backends are only registered the first time the menu is opened.
-  (add-transient-hook! 'gptel-menu
-    (gptel-make-gemini "Gemini" :key #'gptel-api-key-from-auth-source :stream t)
-    (gptel-make-kagi   "Kagi"   :key #'gptel-api-key-from-auth-source)
-    (gptel-make-openai "Groq"
-      :host "api.groq.com" :endpoint "/openai/v1/chat/completions"
-      :stream t :key #'gptel-api-key-from-auth-source
-      :models '(llama-3.1-70b-versatile llama-3.1-8b-instant
-                llama3-70b-8192 llama3-8b-8192
-                mixtral-8x7b-32768 gemma-7b-it))
-    (gptel-make-openai "MistralLeChat"
-      :host "api.mistral.ai" :endpoint "/v1/chat/completions"
-      :protocol "https" :key #'gptel-api-key-from-auth-source
-      :models '("mistral-small"))
-    (gptel-make-openai "Github Models"
-      :host "models.inference.ai.azure.com" :endpoint "/chat/completions?api-version=2024-05-01-preview"
-      :stream t :key #'gptel-api-key-from-auth-source
-      :models '(gpt-4o))
-    (gptel-make-openai "NovitaAI"
-      :host "api.novita.ai" :endpoint "/v3/openai"
-      :key #'gptel-api-key-from-auth-source :stream t
-      :models '(;; has many more, check https://novita.ai/llm-api
-                meta-llama/llama-3.2-1b-instruct
-                qwen/qwen3-4b-fp8
-                baidu/ernie-4.5-0.3b
-                google/gemma-3-1b-it
-                baidu/ernie-4.5-0.3b))
-    (gptel-make-openai "AI/ML API"
-      :host "api.aimlapi.com" :endpoint "/v1/chat/completions"
-      :stream t :key #'gptel-api-key-from-auth-source
-      :models '(google/gemma-3n-e4b-it
-                google/gemma-3-12b-it
-                google/gemma-3-4b-it
-                google/gemma-3-1b-it
-                gpt-4o))
-    (my/gptel-register-openrouter)
-    (when (fboundp 'macher-install)
-      (run-with-idle-timer 1 nil #'macher-install)))
-  :hook
-  (gptel-post-stream-hook . gptel-auto-scroll))
+(unless my/work-host-p
+  (use-package! gptel
+    :defer t
+    :config
+    (setq gptel-include-reasoning 'ignore
+          gptel-model 'gpt-4.1
+          gptel-backend (gptel-make-gh-copilot "Copilot"))
+    ;; Heavy backends are only registered the first time the menu is opened.
+    (add-transient-hook! 'gptel-menu
+      (gptel-make-gemini "Gemini" :key #'gptel-api-key-from-auth-source :stream t)
+      (gptel-make-kagi   "Kagi"   :key #'gptel-api-key-from-auth-source)
+      (gptel-make-openai "Groq"
+        :host "api.groq.com" :endpoint "/openai/v1/chat/completions"
+        :stream t :key #'gptel-api-key-from-auth-source
+        :models '(llama-3.1-70b-versatile llama-3.1-8b-instant
+                  llama3-70b-8192 llama3-8b-8192
+                  mixtral-8x7b-32768 gemma-7b-it))
+      (gptel-make-openai "MistralLeChat"
+        :host "api.mistral.ai" :endpoint "/v1/chat/completions"
+        :protocol "https" :key #'gptel-api-key-from-auth-source
+        :models '("mistral-small"))
+      (gptel-make-openai "Github Models"
+        :host "models.inference.ai.azure.com" :endpoint "/chat/completions?api-version=2024-05-01-preview"
+        :stream t :key #'gptel-api-key-from-auth-source
+        :models '(gpt-4o))
+      (gptel-make-openai "NovitaAI"
+        :host "api.novita.ai" :endpoint "/v3/openai"
+        :key #'gptel-api-key-from-auth-source :stream t
+        :models '(;; has many more, check https://novita.ai/llm-api
+                  meta-llama/llama-3.2-1b-instruct
+                  qwen/qwen3-4b-fp8
+                  baidu/ernie-4.5-0.3b
+                  google/gemma-3-1b-it
+                  baidu/ernie-4.5-0.3b))
+      (gptel-make-openai "AI/ML API"
+        :host "api.aimlapi.com" :endpoint "/v1/chat/completions"
+        :stream t :key #'gptel-api-key-from-auth-source
+        :models '(google/gemma-3n-e4b-it
+                  google/gemma-3-12b-it
+                  google/gemma-3-4b-it
+                  google/gemma-3-1b-it
+                  gpt-4o))
+      (my/gptel-register-openrouter)
+      (when (fboundp 'macher-install)
+        (run-with-idle-timer 1 nil #'macher-install)))
+    :hook
+    (gptel-post-stream-hook . gptel-auto-scroll)))
 
 (use-package! gptel-agent
   :defer t
@@ -1370,7 +1370,9 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root."
                   (text-mode 2) (org-mode 2) (markdown-mode 2)
                   (gfm-mode 2) (default 2))
                 copilot-indentation-alist)
-        copilot-max-char 1000000))
+        copilot-max-char 1000000)
+  (if my/work-host-p
+      (setopt copilot-lsp-settings '(:github-enterprise (:uri "https://siemens.ghe.com")))))
 
 (use-package! gt
   :defer t
