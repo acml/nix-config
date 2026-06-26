@@ -62,13 +62,13 @@ let
         let
           zig = pkgs.zig_0_15;
           pname = "ghostel";
-          version = "20260625";
+          version = "20260626";
 
           src = pkgs.fetchFromGitHub {
             owner = "dakra";
             repo = "ghostel";
-            rev = "78e9677cf599f8c073efccd8baae7dfe9bbb1948";
-            hash = "sha256-zm7mvHX4mpu1OThOwlTWQ9dU6ANkW6q7qLfA8VD3o1c=";
+            rev = "b896dddff2a7b8e2217883bd27d452e1902f3011";
+            hash = "sha256-EkavRuJSRiIbUwSlNlumH4LRU56k11XpCIYLXx9k55M=";
           };
 
           module = pkgs.stdenv.mkDerivation (finalAttrs: {
