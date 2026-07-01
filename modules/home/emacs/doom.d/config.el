@@ -1033,80 +1033,84 @@ the sequences will be lost."
 
 (use-package! turkish :commands (turkish-mode))
 
-(defun my/ghostel-hide-modeline-h ()
-  (when (fboundp 'hide-mode-line-mode) (hide-mode-line-mode 1)))
-
 (use-package! ghostel
   :defer t
-  :commands (ghostel ghostel-project)
-  :hook (ghostel-mode . my/ghostel-hide-modeline-h)
-  :init
-  (set-popup-rule! "^\\*doom:ghostel-popup:" :size 0.25 :vslot -4 :select t :quit nil :ttl 0)
-  (set-evil-initial-state! 'ghostel-mode 'emacs))
+  :commands (ghostel ghostel-project))
 
-(use-package! ghostel-compile
-  :after compile
-  :config (ghostel-compile-global-mode 1))
+;; (defun my/ghostel-hide-modeline-h ()
+;;   (when (fboundp 'hide-mode-line-mode) (hide-mode-line-mode 1)))
 
-;; (use-package! evil-ghostel
-;;   :after (ghostel evil)
-;;   :if (featurep 'evil)
-;;   :hook (ghostel-mode . evil-ghostel-mode))
+;; (use-package! ghostel
+;;   :defer t
+;;   :commands (ghostel ghostel-project)
+;;   :hook (ghostel-mode . my/ghostel-hide-modeline-h)
+;;   :init
+;;   (set-popup-rule! "^\\*doom:ghostel-popup:" :size 0.25 :vslot -4 :select t :quit nil :ttl 0)
+;;   (set-evil-initial-state! 'ghostel-mode 'emacs))
 
-(defun my/ghostel-buffer-name ()
-  "Return the ghostel popup buffer name for the current workspace."
-  (format "*doom:ghostel-popup:%s*"
-          (if (bound-and-true-p persp-mode)
-              (safe-persp-name (get-current-persp))
-            "main")))
+;; (use-package! ghostel-compile
+;;   :after compile
+;;   :config (ghostel-compile-global-mode 1))
 
-;; Enable a ghostel popup similar to doom's =vterm= popup.
-(defun my/ghostel-toggle (arg)
-  "Toggle a Ghostel popup window at project root.
-If prefix ARG is non-nil, recreate the Ghostel buffer in the current project's root."
-  (interactive "P")
-  (my/ghostel--configure-project-root-and-display
-   arg
-   (lambda ()
-     (let ((ghostel-buf (my/ghostel-buffer-name))  ; renamed from buffer-name
-           confirm-kill-processes)
-       (when arg
-         (when-let ((win (get-buffer-window ghostel-buf)))
-           (delete-window win))
-         (when-let ((buf (get-buffer ghostel-buf)))
-           (kill-buffer buf)))
-       (if-let* ((win (get-buffer-window ghostel-buf)))
-           (delete-window win)
-         (let ((ghostel-buffer-name ghostel-buf))
-           (ghostel)))
-       (get-buffer ghostel-buf)))))
+;; ;; (use-package! evil-ghostel
+;; ;;   :after (ghostel evil)
+;; ;;   :if (featurep 'evil)
+;; ;;   :hook (ghostel-mode . evil-ghostel-mode))
 
-(defun my/ghostel-here (arg)
-  "Open a Ghostel buffer in the current window at project root.
+;; (defun my/ghostel-buffer-name ()
+;;   "Return the ghostel popup buffer name for the current workspace."
+;;   (format "*doom:ghostel-popup:%s*"
+;;           (if (bound-and-true-p persp-mode)
+;;               (safe-persp-name (get-current-persp))
+;;             "main")))
 
-If prefix ARG is non-nil, cd into `default-directory' instead of project root."
-  (interactive "P")
-  (my/ghostel--configure-project-root-and-display
-   arg
-   (lambda ()
-     (let (display-buffer-alist)
-       (ghostel)))))
+;; ;; Enable a ghostel popup similar to doom's =vterm= popup.
+;; (defun my/ghostel-toggle (arg)
+;;   "Toggle a Ghostel popup window at project root.
+;; If prefix ARG is non-nil, recreate the Ghostel buffer in the current project's root."
+;;   (interactive "P")
+;;   (my/ghostel--configure-project-root-and-display
+;;    arg
+;;    (lambda ()
+;;      (let ((ghostel-buf (my/ghostel-buffer-name))  ; renamed from buffer-name
+;;            confirm-kill-processes)
+;;        (when arg
+;;          (when-let ((win (get-buffer-window ghostel-buf)))
+;;            (delete-window win))
+;;          (when-let ((buf (get-buffer ghostel-buf)))
+;;            (kill-buffer buf)))
+;;        (if-let* ((win (get-buffer-window ghostel-buf)))
+;;            (delete-window win)
+;;          (let ((ghostel-buffer-name ghostel-buf))
+;;            (ghostel)))
+;;        (get-buffer ghostel-buf)))))
 
-(defun my/ghostel--configure-project-root-and-display (arg display-fn)
-  "Set project root context and display Ghostel using DISPLAY-FN.
+;; (defun my/ghostel-here (arg)
+;;   "Open a Ghostel buffer in the current window at project root.
 
-If prefix ARG is non-nil, cd into `default-directory' instead of project root."
-  (let* ((project-root (or (doom-project-root) default-directory))
-         (default-directory
-          (if arg
-              default-directory
-            project-root)))
-    ;; (setenv "PROOT" project-root)
-    (funcall display-fn)))
+;; If prefix ARG is non-nil, cd into `default-directory' instead of project root."
+;;   (interactive "P")
+;;   (my/ghostel--configure-project-root-and-display
+;;    arg
+;;    (lambda ()
+;;      (let (display-buffer-alist)
+;;        (ghostel)))))
 
-(map! :leader
-      :desc "Ghostel popup" "o t" #'my/ghostel-toggle
-      :desc "Ghostel" "o T" #'my/ghostel-here)
+;; (defun my/ghostel--configure-project-root-and-display (arg display-fn)
+;;   "Set project root context and display Ghostel using DISPLAY-FN.
+
+;; If prefix ARG is non-nil, cd into `default-directory' instead of project root."
+;;   (let* ((project-root (or (doom-project-root) default-directory))
+;;          (default-directory
+;;           (if arg
+;;               default-directory
+;;             project-root)))
+;;     ;; (setenv "PROOT" project-root)
+;;     (funcall display-fn)))
+
+;; (map! :leader
+;;       :desc "Ghostel popup" "o t" #'my/ghostel-toggle
+;;       :desc "Ghostel" "o T" #'my/ghostel-here)
 
 (after! vterm
   (setq vterm-max-scrollback 100000))
