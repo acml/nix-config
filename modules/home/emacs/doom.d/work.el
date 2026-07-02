@@ -229,7 +229,9 @@ DIR defaults to current project root."
 (after! gptel
   (setf (alist-get "ChatGPT" gptel--known-backends nil 'remove #'equal) nil)
   (setq gptel-model   'claude-opus-4.8
-        gptel-backend (gptel-make-gh-copilot "Copilot Enterprise" :host "api.enterprise.githubcopilot.com"))
+        gptel-backend (gptel-make-gh-copilot "Copilot"))
+  (gptel-make-gh-copilot "Copilot Business" :host "api.business.githubcopilot.com")
+  (gptel-make-gh-copilot "Copilot Enterprise" :host "api.enterprise.githubcopilot.com")
   (add-transient-hook! 'gptel-menu
     (when (fboundp 'macher-install) (macher-install))))
 
