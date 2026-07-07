@@ -62,13 +62,13 @@ let
         let
           zig = pkgs.zig_0_15;
           pname = "ghostel";
-          version = "20260707";
+          version = "20260706";
 
           src = pkgs.fetchFromGitHub {
             owner = "dakra";
             repo = "ghostel";
-            rev = "109ed0d1c88d36dcd415381148164bafd70ee97b";
-            hash = "sha256-7s2apqogNB+jNQW/1u8uzBolUKItGqQmdT0iqDVrCAY=";
+            rev = "eb806d158df4ff302aee68e91caf257f11d66320";
+            hash = "sha256-Xz3Sy0iR/g5SoEzqJTZo2ymfMPYQ0NvnAOEoXiXhQFE=";
           };
 
           module = pkgs.stdenv.mkDerivation (finalAttrs: {
@@ -79,7 +79,7 @@ let
               fetchAll = true;
               hash = "sha256-lFU0ywNyP1q2NL9MkIfWciH03VAA/Act5dGYAV4V7EY=";
             };
-            nativeBuildInputs = [ zig ];
+            nativeBuildInputs = [ zig ] ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ xcbuild ];
             env.EMACS_INCLUDE_DIR = "${emacs}/include";
             dontSetZigDefaultFlags = true;
             doCheck = true;
@@ -101,11 +101,12 @@ let
           inherit pname version src;
 
           files = ''
-            (:defaults "etc" "ghostel-module${libExt}")
+            (:defaults "etc" "ghostel-module${libExt}" "ghostel-module.version")
           '';
 
           preBuild = ''
-            install ${module}/lib/libghostel-module${libExt} ghostel-module${libExt}
+            install ${module}/ghostel-module${libExt} ghostel-module${libExt}
+            install --mode=444 ${module}/ghostel-module.version ghostel-module.version
           '';
 
           passthru = {
