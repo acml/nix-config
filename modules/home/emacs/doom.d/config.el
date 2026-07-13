@@ -543,7 +543,7 @@ files, so this replace calls to `pp' with the much faster `prin1'."
 
 (use-package! exercism :commands (exercism)
               :init
-              (map! (:leader :desc "Exercism" :n "ox" #'exercism))
+              (map! (:leader :desc "Exercism" :n "o x" #'exercism))
               :config
               (setq exercism-directory "~/Projects/exercism"))
 
@@ -808,8 +808,7 @@ the sequences will be lost."
   :defer t
   :init
   (add-hook 'magit-status-mode-hook #'my/magit-todos-once-h)
-  (map! (:leader
-         :desc "List project todos" "pt" #'magit-todos-list))
+  (map! (:leader :desc "List project todos" "p t" #'magit-todos-list))
   :config (setq magit-todos-max-items 20
                 magit-todos-depth     3
                 magit-todos-update    t
@@ -835,7 +834,7 @@ the sequences will be lost."
 (use-package! obvious
   :commands (obvious-mode)
   :init
-  (map! (:leader :desc "Obvious (Toggle Comments)" :n "to" #'obvious-mode)))
+  (map! (:leader :desc "Obvious (Toggle Comments)" :n "t o" #'obvious-mode)))
 
 (use-package! deft
   :commands (deft)
