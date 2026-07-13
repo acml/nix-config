@@ -806,15 +806,14 @@ the sequences will be lost."
 
 (use-package! magit-todos
   :defer t
-  :init  (add-hook 'magit-status-mode-hook #'my/magit-todos-once-h)
+  :init
+  (add-hook 'magit-status-mode-hook #'my/magit-todos-once-h)
+  (map! (:leader
+         :desc "List project todos" "pt" #'magit-todos-list))
   :config (setq magit-todos-max-items 20
                 magit-todos-depth     3
                 magit-todos-update    t
                 magit-todos-scanner   #'magit-todos--scan-with-rg))
-
-(map! :leader
-      (:prefix ("p" . "project")
-       :desc "List project todos" "t" #'magit-todos-list))
 
 (after! git-commit
   (setq git-commit-summary-max-length 68))
