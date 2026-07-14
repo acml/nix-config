@@ -64,10 +64,6 @@
 ;; Don't fontify while you're typing; keeps input snappy on large files.
 (setq redisplay-skip-fontification-on-input t)
 
-;; Skip costly UI redisplays for invisible frames (daemon mode)
-(setq redisplay-dont-pause           t
-      visible-cursor                 nil)
-
 ;; ── Frame defaults (belt-and-suspenders alongside Doom) ───────────────────────
 ;; Doom sets these in its own early-init; mirroring them here ensures they apply
 ;; to the very first frame before Doom's machinery runs, eliminating any flicker
@@ -109,15 +105,15 @@
 
 (when (and (fboundp 'native-comp-available-p) (native-comp-available-p))
   (setq native-comp-async-jobs-number
-        (max 1 (- (num-processors) 2))                 ; was -1; leave 2 cores free
-        native-comp-speed                  2           ; max optimization
-        native-comp-deferred-compilation   t))
+        (max 1 (- (num-processors) 2))            ; was -1; leave 2 cores free
+        native-comp-speed             2           ; max optimization
+        native-comp-jit-compilation   t))
 
 ;; Modern terminals: report selection, extended modifiers, mouse, etc.
 (setq xterm-extra-capabilities '(getSelection setSelection modifyOtherKeys))
 
 ;; Avoid the implicit `recentf-mode' / `savehist-mode' GC churn during init.
-(setq idle-update-delay 1.0)                    ; default 0.5
+(setq which-func-update-delay 1.0)                    ; default 0.5
 
 ;; Skip site-start.el and default.el (rarely useful for user-managed installs).
 (setq site-run-file nil
