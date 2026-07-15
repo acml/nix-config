@@ -1400,11 +1400,6 @@ the sequences will be lost."
                     (string-join (reverse rcrumbs) separator)))))
   (add-hook 'doom-load-theme-hook #'my/breadcrumb--invalidate-icon-cache))
 
-(add-hook 'doom-first-input-hook
-          (defun my/xterm-mouse-h ()
-            (unless (or (display-graphic-p) xterm-mouse-mode)
-              (xterm-mouse-mode 1))))
-
 ;; TUI prettification
 (defvar my/--tui-glyphs-done nil)
 
@@ -1423,9 +1418,9 @@ the sequences will be lost."
     (add-hook 'server-after-make-frame-hook #'my/tui-glyph-setup)
   (my/tui-glyph-setup))
 
-(add-hook 'doom-first-input-hook
+(add-hook 'doom-after-init-hook
           (defun my/input-setup-h ()
-            (remove-hook 'doom-first-input-hook #'my/input-setup-h)
+            (remove-hook 'doom-after-init-hook #'my/input-setup-h)
             (if (display-graphic-p)
                 (when (fboundp 'pixel-scroll-precision-mode)
                   (pixel-scroll-precision-mode 1))
