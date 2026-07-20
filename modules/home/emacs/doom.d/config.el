@@ -153,18 +153,8 @@
 (add-hook 'doom-first-input-hook
           (defun my/setup-global-modes-h ()
             (remove-hook 'doom-first-input-hook #'my/setup-global-modes-h)
-            (run-with-idle-timer
-             1.5 nil
-             (lambda ()
-               (repeat-mode 1)
-               (dolist (h '(prog-mode-hook text-mode-hook conf-mode-hook))
-                 (add-hook h #'subword-mode))
-               (walk-windows
-                (lambda (w)
-                  (with-current-buffer (window-buffer w)
-                    (when (derived-mode-p 'prog-mode 'text-mode 'conf-mode)
-                      (subword-mode 1))))
-                nil t)))))
+            (repeat-mode 1)
+            (global-subword-mode 1)))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 (defun my/load-custom-h () (load custom-file 'noerror 'nomessage))
