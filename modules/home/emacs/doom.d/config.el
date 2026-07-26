@@ -1021,10 +1021,6 @@ the sequences will be lost."
 
 (use-package! turkish :commands (turkish-mode))
 
-(use-package! ghostel
-  :defer t
-  :commands (ghostel ghostel-project))
-
 (after! vterm
   (setq vterm-max-scrollback 100000))
 

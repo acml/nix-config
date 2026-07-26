@@ -62,6 +62,7 @@
 (package! exercism)
 (package! google-c-style)
 (package! ghostel :built-in 'prefer)
+(package! evil-ghostel :built-in 'prefer)
 ;; (package! evil-ghostel)
 (package! gptel-agent)
 (package! gt)

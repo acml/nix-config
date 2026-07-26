@@ -62,7 +62,7 @@ let
         let
           zig = pkgs.zig_0_15;
           pname = "ghostel";
-          version = "20260713";
+          version = "20260723";
 
           src = pkgs.fetchFromGitHub {
             owner = "dakra";
