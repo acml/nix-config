@@ -140,11 +140,8 @@
     };
     nixvim = {
       url = "github:nix-community/nixvim";
-      # inputs = {
-      #   flake-parts.follows = "flake-parts";
-      #   nixpkgs.follows = "nixpkgs";
-      #   systems.follows = "systems";
-      # };
+      # If you are not running an unstable channel of nixpkgs, select the corresponding branch of Nixvim.
+      # url = "github:nix-community/nixvim/nixos-26.05";     # };
     };
 
     # Development tools

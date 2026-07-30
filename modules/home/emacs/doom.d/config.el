@@ -1033,6 +1033,30 @@ the sequences will be lost."
 (defconst my/terminal-buffer-face '(:family "IosevkaTerm Nerd Font")
   "Cached buffer-face for terminal-style buffers.")
 
+(after! evil-ghostel   ; use the real feature name
+  (defun evil-ghostel--around-redraw (orig-fn term &rest args)
+    "Apply Evil point/visual handling around `ghostel--redraw'.
+ORIG-FN is the advised function.  Skipped in alt-screen (1049)."
+    (if (and evil-ghostel-mode
+             (not (ghostel--mode-enabled term 1049)))
+        (let* ((visual-p (eq evil-state 'visual))
+               (saved-vb (and visual-p (bound-and-true-p evil-visual-beginning)
+                              (marker-position evil-visual-beginning)))
+               (saved-ve (and visual-p (bound-and-true-p evil-visual-end)
+                              (marker-position evil-visual-end))))
+          (apply orig-fn term args)
+          (when (and (memq evil-state '(insert emacs))
+                     (let ((win (get-buffer-window (current-buffer) t)))
+                       (or (null win) (ghostel--window-anchored-p win))))
+            (evil-ghostel--reset-cursor-point))
+          (when visual-p
+            (let ((pmax (point-max)))
+              (when saved-vb
+                (set-marker evil-visual-beginning (min saved-vb pmax)))
+              (when saved-ve
+                (set-marker evil-visual-end (min saved-ve pmax))))))
+      (apply orig-fn term args)))) ; the fixed version
+
 (add-hook! '(vterm-mode-hook ghostel-mode-hook)
   (defun my/setup-terminal-font ()
     (setq-local buffer-face-mode-face my/terminal-buffer-face)

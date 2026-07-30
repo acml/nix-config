@@ -60,15 +60,15 @@ let
     ++ [
       (
         let
-          zig = pkgs.zig_0_15;
+          zig = pkgs.zig_0_16;
           pname = "ghostel";
-          version = "20260723";
+          version = "20260729";
 
           src = pkgs.fetchFromGitHub {
             owner = "dakra";
             repo = "ghostel";
-            rev = "9a4256abd6ee2042475b5ab30b9a73904eb3b28e";
-            hash = "sha256-YsETCB7WN+cGTz49Iap93Tzq2LzKxqwIF3ORf+SPx2Q=";
+            rev = "f87c7ee794c34d4e100b229d49f07b89d0fec840";
+            hash = "sha256-upIcL4wf2zAc3/3QeERF619nSDml2wEZCOl6/XOaT3E=";
           };
 
           module = pkgs.stdenv.mkDerivation (finalAttrs: {
@@ -77,7 +77,7 @@ let
             deps = zig.fetchDeps {
               inherit (finalAttrs) src pname version;
               fetchAll = true;
-              hash = "sha256-yrVgiofdmVjTGJ+PGPGRCc8gb/JcEca1uAzIoPgHHqU=";
+              hash = "sha256-NcNp0FnMy6FfZ63+pwiTRCmJ8FIovJEOhNvxVr1+uSQ=";
             };
             nativeBuildInputs = [ zig ] ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ xcbuild ];
             env.EMACS_INCLUDE_DIR = "${emacs}/include";
