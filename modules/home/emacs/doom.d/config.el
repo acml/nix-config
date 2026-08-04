@@ -493,8 +493,7 @@ files, so this replace calls to `pp' with the much faster `prin1'."
   ;; already disabled (size 0) there is nothing useful left for it to do.
   (advice-add 'jsonrpc--log-event :override #'ignore)
 
-  (setq eglot-events-buffer-size 0
-        eglot-autoshutdown      t
+  (setq eglot-autoshutdown      t
         eglot-sync-connect      nil
         eglot-report-progress   nil
         eglot-extend-to-xref    t
@@ -514,6 +513,8 @@ files, so this replace calls to `pp' with the much faster `prin1'."
 (after! embark
   (setq prefix-help-command #'embark-prefix-help-command))
 
+(setq marginalia-align-offset 2)
+
 (after! vertico-multiform
   (add-to-list 'vertico-multiform-categories '(embark-keybinding grid)))
 
@@ -528,8 +529,7 @@ files, so this replace calls to `pp' with the much faster `prin1'."
      consult-bookmark
      :preview-key '("C-SPC" :debounce 0.2 any))
     (consult-customize consult-line consult-buffer consult-imenu
-                       :preview-key '(:debounce 0.2 any))
-    ))
+                       :preview-key '(:debounce 0.2 any))))
 
 (use-package! exercism :commands (exercism)
               :init
