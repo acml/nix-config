@@ -163,6 +163,7 @@ in
       };
     };
     fwupd.enable = true;
+    oauth2-proxy.email.domains = [ "gmail.com" ];
     oauth2-proxy.nginx.virtualHosts."stash.${config.networking.hostName}.meurer.org" = { };
     smartd.enable = true;
     syncthing.settings.folders.music = {
