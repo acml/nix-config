@@ -76,8 +76,9 @@
       doom-theme        (if my/gui-init-p 'ef-eagle 'ef-dark)
       auth-source-cache-expiry nil ; default is 7200 (2h)
       delete-by-moving-to-trash t  ; Delete files to trash
-      scroll-margin                         3
-      scroll-preserve-screen-position       t
+      save-interprogram-paste-before-kill t
+      scroll-margin                       3
+      scroll-preserve-screen-position     t
       truncate-string-ellipsis "…" ; Unicode ellispis are nicer than "...", and also save /precious/ space
       undo-limit         16000000
       undo-strong-limit  24000000
