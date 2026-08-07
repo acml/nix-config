@@ -51,6 +51,16 @@
               :config
               (global-evil-colemak-basics-mode))
 
+(use-package! highlight-parentheses :disabled
+  :hook (prog-mode . my/highlight-parens-maybe)
+  :init
+  (setq highlight-parentheses-delay 0.2)
+  (defun my/highlight-parens-maybe ()
+    (when (and (< (buffer-size) (* 256 1024))
+               (not (file-remote-p default-directory)))
+      (highlight-parentheses-mode 1)))
+  :config (set-face-attribute 'hl-paren-face nil :weight 'ultra-bold))
+
 (use-package! modus-themes
   :disabled
   :init

@@ -572,16 +572,6 @@ files, so this replace calls to `pp' with the much faster `prin1'."
     (define-key evil-visual-state-map (kbd "v") #'expreg-expand)
     (define-key evil-visual-state-map (kbd "V") #'expreg-contract)))
 
-(use-package! highlight-parentheses
-  :hook (prog-mode . my/highlight-parens-maybe)
-  :init
-  (setq highlight-parentheses-delay 0.2)
-  (defun my/highlight-parens-maybe ()
-    (when (and (< (buffer-size) (* 256 1024))
-               (not (file-remote-p default-directory)))
-      (highlight-parentheses-mode 1)))
-  :config (set-face-attribute 'hl-paren-face nil :weight 'ultra-bold))
-
 (after! indent-bars
   (setq
    indent-bars-treesit-support         t    ; faster + more accurate with ts modes
