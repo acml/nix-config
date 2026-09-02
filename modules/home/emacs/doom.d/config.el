@@ -911,10 +911,10 @@ the sequences will be lost."
 (after! persp-mode
   (run-with-idle-timer 0.1 nil #'my/load-persp-config))
 
-(defun my/workspaces-switch-project (project-directory)
-  (dired project-directory))
+;; (defun my/workspaces-switch-project (project-directory)
+;;   (dired project-directory))
 
-(setq +workspaces-switch-project-function #'my/workspaces-switch-project)
+;; (setq +workspaces-switch-project-function #'my/workspaces-switch-project)
 
 (map! :when (modulep! :ui workspaces)
       :map doom-leader-workspace-map
