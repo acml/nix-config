@@ -809,7 +809,16 @@ the sequences will be lost."
            (with-current-buffer buf
              (mixed-pitch-mode 1))))))))
 
-(add-hook! markdown-mode
+;; (add-hook! markdown-mode
+;;   (add-hook! before-save :local #'markdown-toc-refresh-toc))
+
+(use-package! markdown-ts-mode
+  :ensure nil
+  :mode ("\\.md\\'" "\\.mdx\\'" "\\.markdown\\'")
+  :config
+  (require 'markdown-ts-mode-x))
+
+(add-hook! markdown-ts-mode
   (add-hook! before-save :local #'markdown-toc-refresh-toc))
 
 (use-package! obvious
