@@ -48,5 +48,8 @@ in
     oauth2-proxy.nginx.virtualHosts."transmission.${hostName}.meurer.org" = { };
   };
 
-  systemd.services.transmission.after = [ "zfs-mount.service" ];
+  systemd.services.transmission = {
+    after = [ "zfs-mount.service" ];
+    serviceConfig.BindPaths = [ "/mnt/movies" ];
+  };
 }
