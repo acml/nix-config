@@ -530,7 +530,12 @@ files, so this replace calls to `pp' with the much faster `prin1'."
      consult-bookmark
      :preview-key '("C-SPC" :debounce 0.2 any))
     (consult-customize consult-line consult-buffer consult-imenu
-                       :preview-key '(:debounce 0.2 any))))
+                       :preview-key '(:debounce 0.2 any))
+    (setq consult-async-refresh-delay 0.05
+          consult-async-input-debounce 0.1
+          consult-async-input-throttle 0.15
+          ;; consult-async-min-input 1
+          )))
 
 (use-package! exercism :commands (exercism)
               :init
