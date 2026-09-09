@@ -80,6 +80,7 @@
 (package! page-break-lines)
 (package! rainbow-mode)
 (package! scopeline)
+(package! surveyor :recipe (:host github :repo "mrcnski/surveyor.el"))
 (package! trashed)
 (package! turkish)
 (package! visual-ascii-mode)

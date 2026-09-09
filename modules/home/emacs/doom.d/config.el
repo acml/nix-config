@@ -1335,6 +1335,9 @@ ORIG-FN is the advised function.  Skipped in alt-screen (1049)."
               (evil-define-key '(normal visual insert emacs) gt-buffer-render-local-map
                 "q" #'kill-buffer-and-window))))
 
+(use-package! surveyor
+  :commands (surveyor surveyor-defun surveyor-file))
+
 ;; Source - https://stackoverflow.com/a/14454756
 ;; Posted by PascalVKooten, modified by community. See post 'Timeline' for change history
 ;; Retrieved 2026-02-18, License - CC BY-SA 3.0

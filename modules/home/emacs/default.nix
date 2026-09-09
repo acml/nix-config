@@ -191,6 +191,8 @@ let
       wordnet
       gnuplot # org-plot/gnuplot
       graphviz # org-roam-graph
+      d2 # surveyor
+      mermaid-cli # surveyor
       # :lang latex & :lang org (latex previews)
       tectonic
 
