@@ -29,7 +29,8 @@
                persp-created-functions
                persp-activated-functions
                persp-before-kill-functions))
-    (add-hook h #'lkn-tab-bar--invalidate))
+    (add-hook h #'lkn-tab-bar--invalidate)
+    (add-hook h #'lkn-tab-bar--sync-visibility))
 
   (defun lkn-tab-bar--workspaces ()
     (or lkn-tab-bar--render-cache
