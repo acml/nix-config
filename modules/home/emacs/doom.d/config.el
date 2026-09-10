@@ -359,17 +359,13 @@ files, so this replace calls to `pp' with the much faster `prin1'."
         compilation-max-output-line-length   nil))
 
 (use-package! daemons
-  :commands (daemons daemons-disable daemons-enable daemons-reload daemons-restart daemons-start daemons-status daemons-stop)
   :config
   (require 'evil-collection-daemons)
-  (evil-collection-define-key '(normal visual) 'daemons-mode-map
-    "e" 'daemons-enable-at-point
-    "d" 'daemons-disable-at-point
-    "u" 'daemons-systemd-toggle-user)
-  (evil-collection-define-key '(normal visual) 'daemons-output-mode-map
-    "e" 'daemons-enable-at-point
-    "d" 'daemons-disable-at-point
-    "u" 'daemons-systemd-toggle-user))
+  (dolist (mode-map '(daemons-mode-map daemons-output-mode-map))
+    (evil-collection-define-key '(normal visual) mode-map
+      "e" 'daemons-enable-at-point
+      "d" 'daemons-disable-at-point
+      "u" 'daemons-systemd-toggle-user)))
 
 (after! dired
   (unless (string-match-p "--time-style" dired-listing-switches)
@@ -1038,30 +1034,6 @@ the sequences will be lost."
 (defconst my/terminal-buffer-face '(:family "IosevkaTerm Nerd Font")
   "Cached buffer-face for terminal-style buffers.")
 
-(after! evil-ghostel   ; use the real feature name
-  (defun evil-ghostel--around-redraw (orig-fn term &rest args)
-    "Apply Evil point/visual handling around `ghostel--redraw'.
-ORIG-FN is the advised function.  Skipped in alt-screen (1049)."
-    (if (and evil-ghostel-mode
-             (not (ghostel--mode-enabled term 1049)))
-        (let* ((visual-p (eq evil-state 'visual))
-               (saved-vb (and visual-p (bound-and-true-p evil-visual-beginning)
-                              (marker-position evil-visual-beginning)))
-               (saved-ve (and visual-p (bound-and-true-p evil-visual-end)
-                              (marker-position evil-visual-end))))
-          (apply orig-fn term args)
-          (when (and (memq evil-state '(insert emacs))
-                     (let ((win (get-buffer-window (current-buffer) t)))
-                       (or (null win) (ghostel--window-anchored-p win))))
-            (evil-ghostel--reset-cursor-point))
-          (when visual-p
-            (let ((pmax (point-max)))
-              (when saved-vb
-                (set-marker evil-visual-beginning (min saved-vb pmax)))
-              (when saved-ve
-                (set-marker evil-visual-end (min saved-ve pmax))))))
-      (apply orig-fn term args)))) ; the fixed version
-
 (add-hook! '(vterm-mode-hook ghostel-mode-hook)
   (defun my/setup-terminal-font ()
     (setq-local buffer-face-mode-face my/terminal-buffer-face)
@@ -1336,7 +1308,33 @@ ORIG-FN is the advised function.  Skipped in alt-screen (1049)."
                 "q" #'kill-buffer-and-window))))
 
 (use-package! surveyor
-  :commands (surveyor surveyor-defun surveyor-file))
+  :commands (surveyor surveyor-defun surveyor-file)
+  :init
+  (evil-set-initial-state 'surveyor-diagram-mode 'normal)
+  (set-popup-rules! '(("^\\*surveyor" :size 82 :side right :select t :quit t)))
+  :config
+  ;; Keyboard keys → intercept map (beats evil-snipe's s/S).
+  (map! :map surveyor-diagram-mode-map
+        "r" #'surveyor-regenerate
+        "s" #'surveyor-show-source
+        "w" #'surveyor-copy-source
+        "S" #'surveyor-save-image
+        "E" #'surveyor-open-externally
+        "+" #'surveyor-zoom-in
+        "=" #'surveyor-zoom-in
+        "-" #'surveyor-zoom-out
+        "0" #'image-transform-fit-to-window
+        "q" #'quit-window)
+  (evil-make-intercept-map surveyor-diagram-mode-map 'normal)
+
+  ;; Wheel events must NOT go through the intercept map.
+  (map! :map surveyor-diagram-mode-map
+        :n "<wheel-down>"  #'surveyor-wheel-down
+        :n "<wheel-up>"    #'surveyor-wheel-up
+        :n "<wheel-right>" #'surveyor-wheel-right
+        :n "<wheel-left>"  #'surveyor-wheel-left)
+
+  (add-hook 'surveyor-diagram-mode-hook #'evil-normalize-keymaps 90))
 
 ;; Source - https://stackoverflow.com/a/14454756
 ;; Posted by PascalVKooten, modified by community. See post 'Timeline' for change history
