@@ -312,7 +312,7 @@ files, so this replace calls to `pp' with the much faster `prin1'."
       (process-send-eof    wl-copy-process))
     (defun wl-paste ()
       (unless (and wl-copy-process (process-live-p wl-copy-process))
-        (with-temp-buffer
+        (with-work-buffer
           (when (zerop (call-process wl-paste-exe nil t nil "-n"))
             (let ((s (string-trim-right (buffer-string) "[\r\n]+")))
               (unless (string-empty-p s) s))))))

@@ -53,7 +53,7 @@ Cached by file modification time."
               (cache-key (cons file-path mtime)))
     (or (gethash cache-key work--ini-cache)
         (condition-case err
-            (with-temp-buffer
+            (with-work-buffer
               (insert-file-contents file-path)
               (let (parsed)
                 (goto-char (point-min))
