@@ -74,8 +74,10 @@
 (setq user-full-name    "Ahmet Cemal Özgezer"
       user-mail-address "ozgezer@gmail.com"
       doom-theme        (if my/gui-init-p 'ef-eagle 'ef-dark)
+      abbrev-file-name (concat doom-private-dir "abbrevs.el")
       auth-source-cache-expiry nil ; default is 7200 (2h)
       delete-by-moving-to-trash t  ; Delete files to trash
+      elisp-fontify-semantically t
       save-interprogram-paste-before-kill t
       scroll-margin                       3
       scroll-preserve-screen-position     t
@@ -1440,7 +1442,8 @@ the sequences will be lost."
             (if (display-graphic-p)
                 (when (fboundp 'pixel-scroll-precision-mode)
                   (pixel-scroll-precision-mode 1))
-              (unless xterm-mouse-mode (xterm-mouse-mode 1)))))
+              (unless xterm-mouse-mode (xterm-mouse-mode 1))
+              (setq xterm-update-cursor t))))
 
 (when (>= emacs-major-version 28)
   (setq read-extended-command-predicate #'command-completion-default-include-p))
