@@ -829,6 +829,36 @@ the sequences will be lost."
   :init
   (map! (:leader :desc "Obvious (Toggle Comments)" :n "t o" #'obvious-mode)))
 
+(use-package! surveyor
+  :commands (surveyor surveyor-defun surveyor-file)
+  :init
+  (evil-set-initial-state 'surveyor-diagram-mode 'normal)
+  (set-popup-rules! '(("^\\*surveyor" :size 82 :side right :select t :quit t)))
+  (map! (:leader :desc "Generate diagram" :n "o g" #'surveyor))
+  :config
+  ;; Keyboard keys → intercept map (beats evil-snipe's s/S).
+  (map! :map surveyor-diagram-mode-map
+        "r" #'surveyor-regenerate
+        "s" #'surveyor-show-source
+        "w" #'surveyor-copy-source
+        "S" #'surveyor-save-image
+        "E" #'surveyor-open-externally
+        "+" #'surveyor-zoom-in
+        "=" #'surveyor-zoom-in
+        "-" #'surveyor-zoom-out
+        "0" #'image-transform-fit-to-window
+        "q" #'quit-window)
+  (evil-make-intercept-map surveyor-diagram-mode-map 'normal)
+
+  ;; Wheel events must NOT go through the intercept map.
+  (map! :map surveyor-diagram-mode-map
+        :n "<wheel-down>"  #'surveyor-wheel-down
+        :n "<wheel-up>"    #'surveyor-wheel-up
+        :n "<wheel-right>" #'surveyor-wheel-right
+        :n "<wheel-left>"  #'surveyor-wheel-left)
+
+  (add-hook 'surveyor-diagram-mode-hook #'evil-normalize-keymaps 90))
+
 (use-package! deft
   :commands (deft)
   :config
@@ -1308,35 +1338,6 @@ the sequences will be lost."
               (toggle-truncate-lines -1)
               (evil-define-key '(normal visual insert emacs) gt-buffer-render-local-map
                 "q" #'kill-buffer-and-window))))
-
-(use-package! surveyor
-  :commands (surveyor surveyor-defun surveyor-file)
-  :init
-  (evil-set-initial-state 'surveyor-diagram-mode 'normal)
-  (set-popup-rules! '(("^\\*surveyor" :size 82 :side right :select t :quit t)))
-  :config
-  ;; Keyboard keys → intercept map (beats evil-snipe's s/S).
-  (map! :map surveyor-diagram-mode-map
-        "r" #'surveyor-regenerate
-        "s" #'surveyor-show-source
-        "w" #'surveyor-copy-source
-        "S" #'surveyor-save-image
-        "E" #'surveyor-open-externally
-        "+" #'surveyor-zoom-in
-        "=" #'surveyor-zoom-in
-        "-" #'surveyor-zoom-out
-        "0" #'image-transform-fit-to-window
-        "q" #'quit-window)
-  (evil-make-intercept-map surveyor-diagram-mode-map 'normal)
-
-  ;; Wheel events must NOT go through the intercept map.
-  (map! :map surveyor-diagram-mode-map
-        :n "<wheel-down>"  #'surveyor-wheel-down
-        :n "<wheel-up>"    #'surveyor-wheel-up
-        :n "<wheel-right>" #'surveyor-wheel-right
-        :n "<wheel-left>"  #'surveyor-wheel-left)
-
-  (add-hook 'surveyor-diagram-mode-hook #'evil-normalize-keymaps 90))
 
 ;; Source - https://stackoverflow.com/a/14454756
 ;; Posted by PascalVKooten, modified by community. See post 'Timeline' for change history
