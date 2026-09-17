@@ -69,6 +69,16 @@
   (when (> (hash-table-count table) max)
     (clrhash table)))
 
+(defmacro my/run-idle-in-buffer! (secs &rest body)
+  "Run BODY after SECS idle, in the current buffer, if it's still live."
+  (declare (indent 1))
+  `(let ((buf (current-buffer)))
+     (run-with-idle-timer
+      ,secs nil
+      (lambda ()
+        (when (buffer-live-p buf)
+          (with-current-buffer buf ,@body))))))
+
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name    "Ahmet Cemal Özgezer"
@@ -804,13 +814,7 @@ the sequences will be lost."
 (add-hook! '(org-mode-hook LaTeX-mode-hook markdown-mode-hook
              gfm-mode-hook Info-mode-hook)
   (defun my/mixed-pitch-on ()
-    (let ((buf (current-buffer)))
-      (run-with-idle-timer
-       0.4 nil
-       (lambda ()
-         (when (buffer-live-p buf)
-           (with-current-buffer buf
-             (mixed-pitch-mode 1))))))))
+    (my/run-idle-in-buffer! 0.4 (mixed-pitch-mode 1))))
 
 ;; (add-hook! markdown-mode
 ;;   (add-hook! before-save :local #'markdown-toc-refresh-toc))
@@ -897,12 +901,7 @@ the sequences will be lost."
             (org-display-inline-images))))))
 
   (defun my/org-images-h ()
-    (let ((buf (current-buffer)))
-      (run-with-idle-timer
-       0.3 nil
-       (lambda ()
-         (when (buffer-live-p buf)
-           (with-current-buffer buf (my/--org-images-scan)))))))
+    (my/run-idle-in-buffer! 0.3 (my/--org-images-scan)))
 
   (add-hook 'org-mode-hook #'my/org-images-h)
   (add-to-list 'org-modules 'org-habit))
@@ -915,13 +914,8 @@ the sequences will be lost."
   :init
   (add-hook 'org-mode-hook
             (defun my/org-block-capf-maybe ()
-              (let ((buf (current-buffer)))
-                (run-with-idle-timer
-                 0.5 nil
-                 (lambda ()
-                   (when (buffer-live-p buf)
-                     (with-current-buffer buf
-                       (org-block-capf-add-to-completion-at-point-functions)))))))))
+              (my/run-idle-in-buffer! 0.5
+                (org-block-capf-add-to-completion-at-point-functions)))))
 
 (use-package! org-glossary
   :commands (org-glossary-mode org-glossary-insert-term-definition)
@@ -953,10 +947,22 @@ the sequences will be lost."
 (after! persp-mode
   (run-with-idle-timer 0.1 nil #'my/load-persp-config))
 
-;; (defun my/workspaces-switch-project (project-directory)
-;;   (dired project-directory))
+(defun my/workspaces-switch-project (project-directory)
+  (dired project-directory))
 
-;; (setq +workspaces-switch-project-function #'my/workspaces-switch-project)
+(setq +workspaces-switch-project-function #'my/workspaces-switch-project)
+
+(defadvice! my/envrc-global-mode--ignore-dead-a (fn &rest args)
+  "Tolerate a transient dead buffer during first project open.
+=dired-noselect' runs =doom-first-file-hook' mid-creation, so the
+globalized mode's buffer walk can select an already-killed dirvish
+buffer.  Buffers still get envrc via =envrc-mode' when visited."
+  :around #'envrc-global-mode
+  (condition-case err
+      (apply fn args)
+    (error
+     (unless (equal (cadr err) "Selecting deleted buffer")
+       (signal (car err) (cdr err))))))
 
 (map! :when (modulep! :ui workspaces)
       :map doom-leader-workspace-map
@@ -1169,7 +1175,7 @@ the sequences will be lost."
           z-ai/glm-4.5-air:free
           qwen/qwen3-coder:free
           moonshotai/kimi-k2:free
-          lphin-mistral-24b-venice-edition:free
+          cognitivecomputations/dolphin-mistral-24b-venice-edition:free
           google/gemma-3n-e2b-it:free
           tencent/hunyuan-a13b-instruct:free
           tngtech/deepseek-r1t2-chimera:free
