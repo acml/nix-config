@@ -1,11 +1,13 @@
 {
   config,
+  flake,
   pkgs,
   lib,
   ...
 }:
 let
   inherit (pkgs.stdenv.hostPlatform) isDarwin isLinux;
+  inherit (flake) inputs;
 
   DOOMDIR = "${config.xdg.configHome}/doom";
   DOOMLOCALDIR = "${config.xdg.dataHome}/doom";
@@ -54,7 +56,22 @@ let
       emacsql
       # ghostel
       tree-sitter-langs
-      treesit-grammars.with-all-grammars
+      # treesit-grammars.with-all-grammars
+      (inputs.emacs-treesit-grammars.lib.withGrammars {
+        inherit pkgs;
+        epkgs = pkgs.emacsPackagesFor emacsPackage;
+
+        # `languages` is optional
+        # By default, all pinned grammars are included.
+
+        # Or pins + stock nixpkgs grammars:
+        # languages = inputs.emacs-treesit-grammars.lib.languages ++ [
+        #   "tree-sitter-nix"
+        # ];
+
+        # Or a subset:
+        # languages = [ "tree-sitter-rust" ];
+      })
       vterm
     ]
     ++ [

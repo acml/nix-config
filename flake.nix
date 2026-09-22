@@ -132,6 +132,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    emacs-treesit-grammars = {
+      url = "github:judaew/emacs-treesit-grammars";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     neovim-nightly-overlay = {
       url = "github:nix-community/neovim-nightly-overlay";
       inputs = {
