@@ -65,9 +65,9 @@ let
         # By default, all pinned grammars are included.
 
         # Or pins + stock nixpkgs grammars:
-        # languages = inputs.emacs-treesit-grammars.lib.languages ++ [
-        #   "tree-sitter-nix"
-        # ];
+        languages = inputs.emacs-treesit-grammars.lib.languages ++ [
+          "tree-sitter-nix"
+        ];
 
         # Or a subset:
         # languages = [ "tree-sitter-rust" ];
