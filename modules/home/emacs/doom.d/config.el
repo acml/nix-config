@@ -1151,15 +1151,39 @@ buffer.  Buffers still get envrc via =envrc-mode' when visited."
       "<f8>"   #'projectile-repeat-last-command)
 ;; (map! "<f9>" #'acml-set-keyboard)
 
-(use-package! macher
-  :defer t
-  :commands (macher macher-discuss macher-action macher-install)
-  :custom (macher-action-buffer-ui 'org)
+(use-package! copilot
+  :commands (copilot-mode copilot-complete)
+  :init
+  (defun my/copilot-eligible-p ()
+    (and (not buffer-read-only)
+         buffer-file-name
+         (not (file-remote-p buffer-file-name))
+         (< (buffer-size) 200000)))
+  (defun my/copilot-arm-on-edit ()
+    "Activate copilot the first time the buffer is modified."
+    (when (and (derived-mode-p 'prog-mode) (my/copilot-eligible-p))
+      (add-hook 'first-change-hook
+                (lambda () (copilot-mode 1))
+                nil t)))
+  (add-hook 'doom-first-input-hook
+            (defun my/copilot-bootstrap-h ()
+              (add-hook 'prog-mode-hook #'my/copilot-arm-on-edit)))
   :config
-  (add-to-list 'display-buffer-alist
-               '("\\*macher-patch:.*\\*"
-                 (display-buffer-in-side-window)
-                 (side . right))))
+  (map! :map copilot-completion-map
+        "<tab>" #'copilot-accept-completion
+        "TAB"   #'copilot-accept-completion
+        "C-TAB" #'copilot-accept-completion-by-word
+        "C-<tab>" #'copilot-accept-completion-by-word
+        "C-n" #'copilot-next-completion
+        "C-p" #'copilot-previous-completion)
+  (setq copilot-indentation-alist
+        (append '((nix-ts-mode 2) (emacs-lisp-mode 2) (lisp-interaction-mode 2)
+                  (text-mode 2) (org-mode 2) (markdown-mode 2)
+                  (gfm-mode 2) (default 2))
+                copilot-indentation-alist)
+        copilot-max-char 1000000)
+  (if my/work-host-p
+      (setopt copilot-lsp-settings '(:github-enterprise (:uri "https://siemens.ghe.com")))))
 
 (defvar my/gptel-openrouter-models nil
   "OpenRouter free models; populated only on non-work hosts.")
@@ -1292,39 +1316,15 @@ buffer.  Buffers still get envrc via =envrc-mode' when visited."
   :init
   (map! "<f1>" #'gptel-quick))
 
-(use-package! copilot
-  :commands (copilot-mode copilot-complete)
-  :init
-  (defun my/copilot-eligible-p ()
-    (and (not buffer-read-only)
-         buffer-file-name
-         (not (file-remote-p buffer-file-name))
-         (< (buffer-size) 200000)))
-  (defun my/copilot-arm-on-edit ()
-    "Activate copilot the first time the buffer is modified."
-    (when (and (derived-mode-p 'prog-mode) (my/copilot-eligible-p))
-      (add-hook 'first-change-hook
-                (lambda () (copilot-mode 1))
-                nil t)))
-  (add-hook 'doom-first-input-hook
-            (defun my/copilot-bootstrap-h ()
-              (add-hook 'prog-mode-hook #'my/copilot-arm-on-edit)))
+(use-package! macher
+  :defer t
+  :commands (macher macher-discuss macher-action macher-install)
+  :custom (macher-action-buffer-ui 'org)
   :config
-  (map! :map copilot-completion-map
-        "<tab>" #'copilot-accept-completion
-        "TAB"   #'copilot-accept-completion
-        "C-TAB" #'copilot-accept-completion-by-word
-        "C-<tab>" #'copilot-accept-completion-by-word
-        "C-n" #'copilot-next-completion
-        "C-p" #'copilot-previous-completion)
-  (setq copilot-indentation-alist
-        (append '((nix-ts-mode 2) (emacs-lisp-mode 2) (lisp-interaction-mode 2)
-                  (text-mode 2) (org-mode 2) (markdown-mode 2)
-                  (gfm-mode 2) (default 2))
-                copilot-indentation-alist)
-        copilot-max-char 1000000)
-  (if my/work-host-p
-      (setopt copilot-lsp-settings '(:github-enterprise (:uri "https://siemens.ghe.com")))))
+  (add-to-list 'display-buffer-alist
+               '("\\*macher-patch:.*\\*"
+                 (display-buffer-in-side-window)
+                 (side . right))))
 
 (use-package! gt
   :defer t
