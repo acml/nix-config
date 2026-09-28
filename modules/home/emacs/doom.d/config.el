@@ -1303,6 +1303,25 @@ buffer.  Buffers still get envrc via =envrc-mode' when visited."
     :hook
     (gptel-post-stream-hook . gptel-auto-scroll)))
 
+(after! gptel
+  (setopt gptel-default-mode #'org-mode
+          gptel-prompt-prefix-alist '((markdown-mode . "# ") (org-mode . "* ") (text-mode . "# "))
+          gptel-response-prefix-alist '((markdown-mode . "## /n") (org-mode . "** \n") (text-mode . "## /n")))
+
+  (gptel-make-preset 'agent-context
+    :description "Add project-specific AGENTS.md to context."
+    :context '(:function
+               (lambda (ctx)
+                 (if-let* ((agent-md-path
+                            (cond
+                             ((and-let* ((dir (locate-dominating-file "." "AGENTS.md")))
+                                (expand-file-name "AGENTS.md" dir)))
+                             ((and-let* ((dir (locate-dominating-file "." "CLAUDE.md")))
+                                (expand-file-name "CLAUDE.md" dir)))))
+                           ((not (member agent-md-path ctx))))
+                     (cons agent-md-path ctx)
+                   ctx)))))
+
 (use-package! gptel-agent
   :defer t
   :init
