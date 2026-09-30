@@ -1144,9 +1144,12 @@ buffer.  Buffers still get envrc via =envrc-mode' when visited."
                 (map! "<f9>" #'acml-set-keyboard)
                 (acml-set-keyboard)))))
 
+(define-key key-translation-map (kbd "<f6>") (kbd "C-p"))
+(define-key key-translation-map (kbd "<f7>") (kbd "C-n"))
+
 (map! "<f5>"   #'projectile-run-project
-      "<f6>"   #'previous-error
-      "<f7>"   #'next-error
+      ;; "<f6>"   #'previous-error
+      ;; "<f7>"   #'next-error
       "<S-f8>" #'projectile-compile-project
       "<f8>"   #'projectile-repeat-last-command)
 ;; (map! "<f9>" #'acml-set-keyboard)
