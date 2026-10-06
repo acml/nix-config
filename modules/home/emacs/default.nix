@@ -41,7 +41,7 @@ let
         ];
       })
     else
-      pkgs.emacs-unstable.overrideAttrs (old: {
+      pkgs.emacs-git.overrideAttrs (old: {
         passthru = old.passthru // {
           treeSitter = true;
         };
@@ -141,13 +141,13 @@ let
       (melpaBuild {
         ename = "reader";
         pname = "emacs-reader";
-        version = "20260831";
+        version = "20260904";
         src = pkgs.fetchFromGitea {
           domain = "codeberg.org";
           owner = "MonadicSheep";
           repo = "emacs-reader";
-          rev = "a0e3615adb";
-          hash = "sha256-wLtTuNPVDVGVa0fhC57DJfXjTFp2itxXJfw/XqgZUQQ=";
+          rev = "90543f0419";
+          hash = "sha256-5qz4sxoO9xC4fVoXRpaaksegTfH+A9CugjSLDHZlrso=";
         };
         files = ''(:defaults "render-core.so")'';
         nativeBuildInputs = with pkgs; [ pkg-config ];
