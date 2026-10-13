@@ -84,8 +84,8 @@ let
           src = pkgs.fetchFromGitHub {
             owner = "dakra";
             repo = "ghostel";
-            rev = "bb27a13590eea3ece7fa43b037b43b05ad149b67";
-            hash = "sha256-bm0uahEYU917KdRkNxrauZH7MXrW+SsbSAnnAiC4RMc=";
+            rev = "74007dcb20872c51c7a9b948aef2cedf9a61ccaf";
+            hash = "sha256-GD7ShHuCHO0kFb7b/XdustPB8mziXW/mGieRiWwffeA=";
           };
 
           module = pkgs.stdenv.mkDerivation (finalAttrs: {
@@ -146,8 +146,8 @@ let
           domain = "codeberg.org";
           owner = "MonadicSheep";
           repo = "emacs-reader";
-          rev = "d99dbb4715258608cb60055e138190c7f97c3657";
-          hash = "sha256-Vt7pbYsQs8/vcsYVgrnzLw7zHrbDvaEoOAoWHuw15sE=";
+          rev = "86c7648af7399ec57b76eb9502cc45b6e8921fed";
+          hash = "sha256-IsSua684BYlBrHof0ypjljU7y1ThvOvgEnQkgR8ueB4=";
         };
         files = ''(:defaults "render-core.so")'';
         nativeBuildInputs = with pkgs; [ pkg-config ];
