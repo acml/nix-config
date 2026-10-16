@@ -79,13 +79,13 @@ let
         let
           zig = pkgs.zig_0_16;
           pname = "ghostel";
-          version = "20261013";
+          version = "20261015";
 
           src = pkgs.fetchFromGitHub {
             owner = "dakra";
             repo = "ghostel";
-            rev = "7de74d4ab208eb6f93b6bf79e02770e841bb4a53";
-            hash = "sha256-Nrb0pvdl/p9LSzb5T7elypYHyPswftR5fYkks14gbCw=";
+            rev = "d239a3c3b8cd9a7210169bb7dd50c94fccfb95c6";
+            hash = "sha256-+bQjR4pGbAaakfYuHu5c8ZmbmfnBuQDBpG27FFW5z1w=";
           };
 
           module = pkgs.stdenv.mkDerivation (finalAttrs: {
@@ -94,7 +94,7 @@ let
             deps = zig.fetchDeps {
               inherit (finalAttrs) src pname version;
               fetchAll = true;
-              hash = "sha256-87q0nSOkZaIHW8Ztgf5pR13sHNw7eQKJhu12QjRMTvA=";
+              hash = "sha256-BZzOCIY/3kkpYN115YLeu8snFqW77cJBXF+z+cpNYLk=";
             };
             nativeBuildInputs = [ zig ] ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ xcbuild ];
             env.EMACS_INCLUDE_DIR = "${emacs}/include";
@@ -141,13 +141,13 @@ let
       (melpaBuild {
         ename = "reader";
         pname = "emacs-reader";
-        version = "20261013";
+        version = "20261015";
         src = pkgs.fetchFromGitea {
           domain = "codeberg.org";
           owner = "MonadicSheep";
           repo = "emacs-reader";
-          rev = "b8c886346b9fea5492a21f6d94e8830fcea7359e";
-          hash = "sha256-QOH9n5fxKCaxrgT8/tproKiMGgJ6HoXM+nLulENPZzo=";
+          rev = "7487a2b7491c0c96ce52bd241a46260939413897";
+          hash = "sha256-XclkDidkldVshp0rCqOFER5SmKXlSX4zyEn7RrMmrSY=";
         };
         files = ''(:defaults "render-core.so")'';
         nativeBuildInputs = with pkgs; [ pkg-config ];
