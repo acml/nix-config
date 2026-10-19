@@ -79,13 +79,13 @@ let
         let
           zig = pkgs.zig_0_16;
           pname = "ghostel";
-          version = "20261015";
+          version = "20261018";
 
           src = pkgs.fetchFromGitHub {
             owner = "dakra";
             repo = "ghostel";
-            rev = "d239a3c3b8cd9a7210169bb7dd50c94fccfb95c6";
-            hash = "sha256-+bQjR4pGbAaakfYuHu5c8ZmbmfnBuQDBpG27FFW5z1w=";
+            rev = "3074dbe72c934524f43e25d2ae695b4a7d820551";
+            hash = "sha256-qpXnmlvymEwj0SArqfSBlMq1JDu5u4wqa6+nomDoZA0=";
           };
 
           module = pkgs.stdenv.mkDerivation (finalAttrs: {
@@ -141,13 +141,13 @@ let
       (melpaBuild {
         ename = "reader";
         pname = "emacs-reader";
-        version = "20261015";
+        version = "20261016";
         src = pkgs.fetchFromGitea {
           domain = "codeberg.org";
           owner = "MonadicSheep";
           repo = "emacs-reader";
-          rev = "7487a2b7491c0c96ce52bd241a46260939413897";
-          hash = "sha256-XclkDidkldVshp0rCqOFER5SmKXlSX4zyEn7RrMmrSY=";
+          rev = "3dddbef84e275d5e800641829d128c348b712a8d";
+          hash = "sha256-AzSlgHDTbc630G4f+CY3/nCSTLXQh1TGpJL0Ug+Q2nY=";
         };
         files = ''(:defaults "render-core.so")'';
         nativeBuildInputs = with pkgs; [ pkg-config ];
