@@ -146,8 +146,8 @@ let
           domain = "codeberg.org";
           owner = "MonadicSheep";
           repo = "emacs-reader";
-          rev = "d93a925b805807e42f3a2d115c8770e8fab7d7e3";
-          hash = "sha256-SttqwFV8u0O7NwIPdjAd9FYaxQI4BaMjUO36lT1CiSA=";
+          rev = "6563bf6098fc69f035a5f0e0b38cccbf4cd74369";
+          hash = "sha256-sosMbnSO4QOyQMh+TFQqjZZdfPPctaUiPMguyqEblxc=";
         };
         files = ''(:defaults "render-core.so")'';
         nativeBuildInputs = with pkgs; [ pkg-config ];
