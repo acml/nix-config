@@ -85,6 +85,7 @@
       user-mail-address "ozgezer@gmail.com"
       doom-theme        (if my/gui-init-p 'ef-eagle 'ef-dark)
       abbrev-file-name (concat doom-private-dir "abbrevs.el")
+      save-abbrevs nil
       auth-source-cache-expiry nil ; default is 7200 (2h)
       delete-by-moving-to-trash t  ; Delete files to trash
       elisp-fontify-semantically t
@@ -167,7 +168,8 @@
           (defun my/setup-global-modes-h ()
             (remove-hook 'doom-first-input-hook #'my/setup-global-modes-h)
             (repeat-mode 1)
-            (global-subword-mode 1)))
+            (global-subword-mode 1)
+            (setq-default abbrev-mode t)))
 
 (setq custom-file (expand-file-name "custom.el" doom-local-dir))
 (defun my/load-custom-h () (load custom-file 'noerror 'nomessage))
