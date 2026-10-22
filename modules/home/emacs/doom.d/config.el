@@ -89,6 +89,18 @@
       auth-source-cache-expiry nil ; default is 7200 (2h)
       delete-by-moving-to-trash t  ; Delete files to trash
       elisp-fontify-semantically t
+      hippie-expand-try-functions-list '(try-expand-list
+                                         try-expand-dabbrev-visible
+                                         try-expand-dabbrev
+                                         try-expand-all-abbrevs
+                                         try-expand-dabbrev-all-buffers
+                                         try-complete-file-name-partially
+                                         try-complete-file-name
+                                         try-expand-dabbrev-from-kill
+                                         try-expand-whole-kill
+                                         try-expand-line
+                                         try-complete-lisp-symbol-partially
+                                         try-complete-lisp-symbol)
       save-interprogram-paste-before-kill t
       scroll-margin                       3
       scroll-preserve-screen-position     t
@@ -294,7 +306,33 @@ files, so this replace calls to `pp' with the much faster `prin1'."
         gcmh-idle-delay               5
         gcmh-auto-idle-delay-factor   20))
 
+(defun +he-subst-suffix-overlap (ins rem)
+  "The longest suffix of the string INS that is a prefix of REM.
+This is intended to be used when INS is a newly inserted string and REM is the
+remainder of the line, to allow for handling potentially duplicated content."
+  (let ((len (min (length ins) (length rem))))
+    (while (and (> len 0)
+                (not (eq 't (compare-strings ins (- len) nil rem 0 len))))
+      (setq len (1- len)))
+    len))
+
+(defun +he-suffix-strip-a (args)
+  "Filter ARG list for `he-substitute-string', truncating duplicated suffix.
+ARGS is the raw argument list (STRING &optional TRANS-CASE)."
+  (pcase-let* ((`(,ins &optional ,trans-case) args)
+               (rem (save-excursion
+                      (goto-char (marker-position he-string-end))
+                      (buffer-substring-no-properties
+                       (point) (line-end-position))))
+               (ov (+he-subst-suffix-overlap ins rem)))
+    (when (>= ov 0)
+      (setq ins (substring ins 0 (- (length ins) ov))))
+    (list ins trans-case)))
+
+(advice-add #'he-substitute-string :filter-args #'+he-suffix-strip-a)
+
 (map! ;; [remap just-one-space]  #'cycle-spacing
+ [remap dabbrev-expand]  #'hippie-expand
  [remap upcase-word]     #'upcase-dwim
  [remap downcase-word]   #'downcase-dwim
  [remap capitalize-word] #'capitalize-dwim
