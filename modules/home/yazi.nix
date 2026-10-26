@@ -46,6 +46,12 @@
       keymap = {
         mgr.prepend_keymap = [
           {
+            on = [ "!" ];
+            for = "unix";
+            run = "shell $SHELL --block";
+            desc = "Open $SHELL here";
+          }
+          {
             on = [ "l" ];
             run = "plugin bypass smart-enter";
             desc = "Open a file, or recursively enter child directory, skipping children with only a single subdirectory";
