@@ -141,13 +141,13 @@ let
       (melpaBuild {
         ename = "reader";
         pname = "emacs-reader";
-        version = "20261021";
+        version = "20261101";
         src = pkgs.fetchFromGitea {
           domain = "codeberg.org";
           owner = "MonadicSheep";
           repo = "emacs-reader";
-          rev = "4fca3aaedddeea7f672ee97e5a91ef3002240260";
-          hash = "sha256-P1dFDtoioh6uPzUMvoDRVcr2Ph6UipXu2EkyOGvb3h0=";
+          rev = "105937a1e9f1a268269e747c0a2494ce9f6c0594";
+          hash = "sha256-8ZpkLFKAu0cEooVDO8qMc9ez0jJpjZOkktJY8Bz3128=";
         };
         files = ''(:defaults "render-core.so")'';
         nativeBuildInputs = with pkgs; [ pkg-config ];
