@@ -1134,38 +1134,38 @@ buffer.  Buffers still get envrc via =envrc-mode' when visited."
   (setq ztree-draw-unicode-lines t
         ztree-show-number-of-children t))
 
-(use-package! reader
+(use-package! emureader
   :unless my/macos-p
-  :mode (("\\.pdf\\'" . reader-mode)
-         ("\\.epub\\'" . reader-mode)
-         ("\\.mobi\\'" . reader-mode)
-         ("\\.fb2\\'" . reader-mode)
-         ("\\.xps\\'" . reader-mode)
-         ("\\.cbz\\'" . reader-mode)
-         ("\\.odt\\'" . reader-mode)
-         ("\\.docx\\'" . reader-mode)
-         ("\\.pptx\\'" . reader-mode)
-         ("\\.xlsx\\'" . reader-mode))
+  :mode (("\\.pdf\\'" . emureader-mode)
+         ("\\.epub\\'" . emureader-mode)
+         ("\\.mobi\\'" . emureader-mode)
+         ("\\.fb2\\'" . emureader-mode)
+         ("\\.xps\\'" . emureader-mode)
+         ("\\.cbz\\'" . emureader-mode)
+         ("\\.odt\\'" . emureader-mode)
+         ("\\.docx\\'" . emureader-mode)
+         ("\\.pptx\\'" . emureader-mode)
+         ("\\.xlsx\\'" . emureader-mode))
   :config
-  ;; Use evil keybindings in reader-mode
-  (evil-set-initial-state 'reader-mode 'normal)
+  ;; Use evil keybindings in emureader-mode
+  (evil-set-initial-state 'emureader-mode 'normal)
 
   ;; Evil-friendly navigation (package defaults: n/p for pages, H/W for fit)
-  (map! :map reader-mode-map
-        :n "j" #'reader-scroll-down-or-next-page
-        :n "k" #'reader-scroll-up-or-prev-page
-        :n "h" #'reader-scroll-left
-        :n "l" #'reader-scroll-right
-        :n "gg" #'reader-first-page
-        :n "G" #'reader-last-page
-        :n "+" #'reader-enlarge-size
-        :n "-" #'reader-shrink-size
-        :n "0" #'reader-reset-size
-        :n "W" #'reader-fit-to-width
-        :n "H" #'reader-fit-to-height
-        :n ":" #'reader-goto-page
+  (map! :map emureader-mode-map
+        :n "j" #'emureader-scroll-down-or-next-page
+        :n "k" #'emureader-scroll-up-or-prev-page
+        :n "h" #'emureader-scroll-left
+        :n "l" #'emureader-scroll-right
+        :n "gg" #'emureader-first-page
+        :n "G" #'emureader-last-page
+        :n "+" #'emureader-enlarge-size
+        :n "-" #'emureader-shrink-size
+        :n "0" #'emureader-reset-size
+        :n "W" #'emureader-fit-to-width
+        :n "H" #'emureader-fit-to-height
+        :n ":" #'emureader-goto-page
         :n "q" #'quit-window
-        :n "Q" #'reader-close-doc))
+        :n "Q" #'emureader-close-doc))
 
 ;; WSL specific setting
 (when my/wsl-p

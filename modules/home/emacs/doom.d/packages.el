@@ -92,4 +92,4 @@
 ;; defined in multiple locations. This will use pdf-tools installed by nix
 (if (featurep :system 'macos)
     (package! pdf-tools :built-in 'prefer)
-  (package! reader :built-in 'prefer))
+  (package! emureader :built-in 'prefer))
