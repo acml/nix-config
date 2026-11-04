@@ -146,8 +146,8 @@ let
           domain = "codeberg.org";
           owner = "MonadicSheep";
           repo = "emureader";
-          rev = "637d22447c7a41a9a38118105c51f173829ef5f6";
-          hash = "sha256-tuiZL8x9eQ1+7jYuksTEhNIpzFDqr/sA64xUJ8Eov0I=";
+          rev = "9964932444f267c2db99013adfe877f5d03f420a";
+          hash = "sha256-Qjsv1vpQ7NAXrLmMyWxUE9NDT8mnuaf6l5VoZZ7QNik=";
         };
         files = ''(:defaults "emureader-dyn.so")'';
         nativeBuildInputs = with pkgs; [ pkg-config ];
