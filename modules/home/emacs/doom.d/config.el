@@ -489,6 +489,7 @@ ARGS is the raw argument list (STRING &optional TRANS-CASE)."
 (use-package! page-break-lines
   :hook (dired-auto-readme-mode . page-break-lines-mode))
 
+;; https://github.com/zsxh/emacs.d/blob/master/lisp/init-dired.el
 (after! dirvish
   (defadvice! acml/dirvish-subtree-toggle (fn &rest args)
     :around #'dirvish-subtree-toggle (save-excursion (apply fn args)))
