@@ -78,6 +78,7 @@
 (package! org-pretty-table :recipe (:host github :repo "Fuco1/org-pretty-table")) ;; dired-auto-readme dependency
 (package! org-view-mode)                                                          ;; dired-auto-readme dependency
 (package! page-break-lines)
+(package! persp-mode-tab-bar :recipe (:host github :repo "Jotham-LEC/persp-mode-tab-bar"))
 (package! rainbow-mode)
 (package! scopeline)
 (package! surveyor :recipe (:host github :repo "mrcnski/surveyor.el"))
