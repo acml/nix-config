@@ -1132,7 +1132,8 @@ buffer.  Buffers still get envrc via =envrc-mode' when visited."
 
 ;; text mode directory tree
 (after! ztree
-  (setq ztree-draw-unicode-lines t
+  (setq ztree-diff-additional-options '("-w")
+        ztree-draw-unicode-lines t
         ztree-show-number-of-children t))
 
 (use-package! emureader
