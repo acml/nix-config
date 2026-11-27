@@ -141,13 +141,13 @@ let
       (melpaBuild {
         ename = "emureader";
         pname = "emureader";
-        version = "20261125";
+        version = "20261126";
         src = pkgs.fetchFromGitea {
           domain = "codeberg.org";
           owner = "MonadicSheep";
           repo = "emureader";
-          rev = "1a28db01658fb8ad9dd07351bf43059e182c653b";
-          hash = "sha256-0MoNJC/TjMArdYKrq6CChBU2focWFA9I/4wy+3ovB6Y=";
+          rev = "00da02285e7606d890e3ebaab3c3e2895703371b";
+          hash = "sha256-Jm7jbHU+WikvY9OiS8owelJnQRbOQQsV3NU0WdWm5nE=";
         };
         files = ''(:defaults "emureader-dyn.so")'';
         nativeBuildInputs = with pkgs; [ pkg-config ];
